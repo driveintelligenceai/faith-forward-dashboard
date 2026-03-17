@@ -26,7 +26,7 @@ function getScoreColor(score: number) {
 }
 
 export default function Index() {
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const navigate = useNavigate();
   const latestSnapshot = MOCK_SNAPSHOTS[0];
 
