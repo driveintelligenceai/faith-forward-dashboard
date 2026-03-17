@@ -28,8 +28,8 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
     return sessionStorage.getItem(getDismissKey()) === 'true';
   });
 
-  // Don't gate the snapshot page itself
-  if (location.pathname === '/snapshot') return <>{children}</>;
+  // Don't gate the snapshot page itself (now at /)
+  if (location.pathname === '/') return <>{children}</>;
 
   if (isLoading || !profile) return <>{children}</>;
 
