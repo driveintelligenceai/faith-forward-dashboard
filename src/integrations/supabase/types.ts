@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_history: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          mode: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          mode?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          mode?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -36,8 +63,10 @@ export type Database = {
           linkedin_location: string | null
           linkedin_title: string | null
           linkedin_url: string | null
+          onboarding_completed: boolean
           phone: string | null
           role: string
+          snapshot_type: string
           state: string | null
           updated_at: string
           user_id: string
@@ -63,8 +92,10 @@ export type Database = {
           linkedin_location?: string | null
           linkedin_title?: string | null
           linkedin_url?: string | null
+          onboarding_completed?: boolean
           phone?: string | null
           role?: string
+          snapshot_type?: string
           state?: string | null
           updated_at?: string
           user_id: string
@@ -90,8 +121,10 @@ export type Database = {
           linkedin_location?: string | null
           linkedin_title?: string | null
           linkedin_url?: string | null
+          onboarding_completed?: boolean
           phone?: string | null
           role?: string
+          snapshot_type?: string
           state?: string | null
           updated_at?: string
           user_id?: string
