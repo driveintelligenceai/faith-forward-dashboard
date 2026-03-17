@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Iron Forums App
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
