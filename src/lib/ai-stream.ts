@@ -5,12 +5,14 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 export async function streamChat({
   messages,
   mode,
+  model,
   onDelta,
   onDone,
   onError,
 }: {
   messages: Msg[];
   mode: "consultant" | "snapshot" | "snapshot_scoring" | "onboarding" | "insights";
+  model?: string;
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (error: string) => void;
@@ -22,7 +24,7 @@ export async function streamChat({
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ messages, mode }),
+      body: JSON.stringify({ messages, mode, ...(model && { model }) }),
     });
 
     if (!resp.ok) {

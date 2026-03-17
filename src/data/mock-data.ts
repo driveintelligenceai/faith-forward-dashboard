@@ -48,79 +48,80 @@ export const MOCK_MEMBERS: Member[] = [
   { id: '24', name: 'Robert Chen', role: 'member', chapter: 'Alpharetta Forum', joinedDate: '2025-05-10' },
 ];
 
-// ─── HAND-CRAFTED 12-MONTH DEMO PERSONA ───
-// Profile: Happily married, 2 daughters, travels a lot for work.
-// Highly successful business owner. Great at sales, weak at marketing.
-// Doesn't spend enough time with wife. Middle-of-the-road with Jesus.
+// ─── HAND-CRAFTED 12-MONTH DEMO PERSONA: Jonathan Almanzar ───
+// Profile: Happily married to Sarah, 2 daughters (Emma + younger).
+// Travels heavily for work. Highly successful business owner.
+// Great at sales, weak at marketing. Marriage hit crisis mid-year.
 // Physical/mental health declining from travel burnout.
+// Faith oscillates — retreats spike it, travel kills it.
 
 const DEMO_SNAPSHOT_DATA: {
   scores: Record<string, number[]>; // categoryId → 12 monthly scores (oldest → newest)
-  spouseScores: Record<string, number[]>;
-  childScores: Record<string, number[]>;
   lifeEvents: Record<string, Record<number, string>>; // categoryId → { monthIndex: note }
 } = {
   scores: {
-    //                     Apr  May  Jun  Jul  Aug  Sep  Oct  Nov  Dec  Jan  Feb  Mar
-    intimacy:             [ 5,   6,   5,   7,   5,   6,   5,   7,   6,   5,   6,   6 ],
-    marriage:             [ 7,   6,   5,   5,   4,   5,   4,   5,   6,   5,   4,   5 ],
-    parenting:            [ 8,   8,   9,   8,   8,   9,   8,   9,   8,   8,   9,   8 ],
-    staff:                [ 6,   6,   7,   6,   7,   7,   6,   7,   7,   7,   6,   7 ],
-    sales:                [ 7,   7,   8,   8,   8,   9,   8,   9,   9,   8,   9,   9 ],
-    marketing:            [ 4,   3,   4,   3,   4,   4,   3,   4,   3,   4,   4,   4 ],
-    operations:           [ 6,   6,   6,   7,   6,   7,   7,   6,   7,   7,   6,   7 ],
-    finances:             [ 7,   7,   7,   8,   7,   8,   8,   7,   8,   8,   7,   8 ],
-    leadership:           [ 7,   6,   7,   7,   7,   8,   7,   8,   7,   7,   8,   7 ],
-    mental_health:        [ 7,   6,   6,   5,   6,   5,   5,   6,   5,   5,   5,   5 ],
-    physical_health:      [ 7,   6,   6,   5,   5,   5,   4,   5,   4,   4,   5,   4 ],
-  },
-  spouseScores: {
-    //                     Apr  May  Jun  Jul  Aug  Sep  Oct  Nov  Dec  Jan  Feb  Mar
-    marriage:             [ 6,   5,   4,   4,   3,   4,   3,   4,   5,   3,   3,   4 ],
-  },
-  childScores: {
-    //                     Apr  May  Jun  Jul  Aug  Sep  Oct  Nov  Dec  Jan  Feb  Mar
-    parenting:            [ 9,   8,   9,   8,   9,   9,   8,   9,   9,   8,   9,   9 ],
+    //                          Apr  May  Jun  Jul  Aug  Sep  Oct  Nov  Dec  Jan  Feb  Mar
+    intimacyWithJesus:         [ 5,   3,   4,   7,   5,   3,   4,   7,   5,   3,   5,   6 ],
+    marriageSelf:              [ 8,   7,   5,   4,   3,   3,   4,   5,   5,   6,   6,   6 ],
+    marriageSpouse:            [ 6,   5,   3,   2,   2,   2,   3,   3,   3,   4,   4,   5 ],
+    parentingSelf:             [ 8,   8,   9,   8,   8,   7,   8,   8,   9,   8,   8,   8 ],
+    parentingChild:            [ 9,   9,   9,   8,   8,   7,   8,   8,   9,   9,   9,   9 ],
+    staff:                     [ 6,   6,   7,   6,   7,   7,   6,   7,   7,   7,   6,   7 ],
+    sales:                     [ 4,   4,   5,   6,   7,   7,   8,   8,   9,   9,   9,   9 ],
+    marketing:                 [ 3,   3,   4,   3,   3,   4,   3,   4,   3,   4,   4,   4 ],
+    operations:                [ 6,   6,   6,   7,   6,   7,   7,   6,   7,   7,   6,   7 ],
+    finances:                  [ 7,   7,   7,   8,   7,   8,   8,   7,   8,   8,   7,   8 ],
+    leadership:                [ 7,   7,   7,   8,   8,   8,   8,   8,   8,   8,   7,   7 ],
+    mentalHealth:              [ 7,   6,   5,   4,   4,   5,   4,   5,   6,   5,   4,   5 ],
+    physicalHealth:            [ 7,   7,   6,   5,   3,   3,   3,   4,   4,   5,   5,   4 ],
   },
   lifeEvents: {
-    intimacy: {
-      3: 'Started a men\'s Bible study group — felt closer to God for a few weeks.',
-      7: 'Attended the men\'s retreat — powerful time in the Word.',
-      10: 'Missed quiet time most of the month — traveling too much.',
+    intimacyWithJesus: {
+      2: 'Attended the men\'s retreat — God showed up in a real way.',
+      7: 'Started men\'s Bible study with 3 Forum brothers.',
+      9: 'Missed quiet time most of the month — traveling too much.',
     },
-    marriage: {
+    marriageSelf: {
       0: 'Things were good — took a weekend trip together.',
-      4: 'Missed our anniversary dinner — was in Dallas for a client pitch.',
-      8: 'Started weekly date night — Sarah noticed and it helped.',
+      3: 'Missed our anniversary for a client dinner.',
+      4: 'Sarah told me she feels lonely. That wrecked me.',
+      8: 'Started weekly date nights again. She noticed.',
       10: 'Canceled date night 3 weeks in a row for work travel.',
-      11: 'Sarah told me she feels lonely. That hit hard.',
     },
-    parenting: {
+    marriageSpouse: {
+      4: 'Sarah said she feels like a single mom.',
+      8: 'She said the date nights make her feel seen again.',
+    },
+    parentingSelf: {
       2: 'Coached Emma\'s soccer team — she was so proud.',
       5: 'FaceTimed the girls every night from the road — they love it.',
       8: 'Took both girls on a daddy-daughter day. Best day of the month.',
     },
+    parentingChild: {
+      5: 'The girls said they miss me. That broke my heart.',
+      8: 'Emma told Sarah "Daddy is the best." Made my whole month.',
+    },
     sales: {
-      5: 'Closed the biggest deal of the year — $1.2M contract.',
+      6: 'Closed the $1.2M deal — biggest of my career.',
       7: 'Pipeline is overflowing. Hired a junior rep to help.',
       10: 'Back-to-back record months. Referral engine is working.',
     },
     marketing: {
       1: 'Tried running Facebook ads — wasted $2K.',
       4: 'Still no marketing hire. I keep putting it off.',
-      8: 'A Forum brother offered to introduce me to his marketing person.',
+      7: 'A Forum brother offered to introduce me to his marketing person.',
       11: 'Finally started interviewing for a marketing director.',
     },
-    mental_health: {
+    mentalHealth: {
       3: 'Anxious about a cash flow crunch. Couldn\'t sleep well.',
       6: 'Burnout symptoms. Headaches, short temper.',
       9: 'Told my Forum brothers I\'m struggling. They prayed over me.',
     },
-    physical_health: {
+    physicalHealth: {
       0: 'Was going to the gym 3x/week. Felt great.',
-      4: 'Travel schedule killed my gym routine.',
+      4: 'Doctor flagged blood pressure. Put on 20 lbs this year.',
       6: 'Put on 15 lbs since summer. Doctor flagged my blood pressure.',
-      10: 'Joined a gym near the office but only went twice.',
+      11: 'Fell off the workout routine again. Travel killed it.',
     },
   },
 };
@@ -162,6 +163,10 @@ const DEMO_MAJOR_ISSUES = [
   'Struggling with pride. Business success is making me self-reliant instead of God-reliant.',
 ];
 
+// Cross-reference map: which categories hold perception scores for another category
+const SPOUSE_SCORE_MAP: Record<string, string> = { marriageSelf: 'marriageSpouse' };
+const CHILD_SCORE_MAP: Record<string, string> = { parentingSelf: 'parentingChild' };
+
 function buildDemoSnapshots(): Snapshot[] {
   const snapshots: Snapshot[] = [];
   const catIds = Object.keys(DEMO_SNAPSHOT_DATA.scores);
@@ -175,12 +180,16 @@ function buildDemoSnapshots(): Snapshot[] {
       const score = DEMO_SNAPSHOT_DATA.scores[catId][monthIdx];
       const rating: any = { categoryId: catId, score };
 
-      if (DEMO_SNAPSHOT_DATA.spouseScores[catId]) {
-        rating.spouseScore = DEMO_SNAPSHOT_DATA.spouseScores[catId][monthIdx];
+      // Cross-link spouse/child perception scores onto the self-rating
+      const spouseKey = SPOUSE_SCORE_MAP[catId];
+      if (spouseKey && DEMO_SNAPSHOT_DATA.scores[spouseKey]) {
+        rating.spouseScore = DEMO_SNAPSHOT_DATA.scores[spouseKey][monthIdx];
       }
-      if (DEMO_SNAPSHOT_DATA.childScores[catId]) {
-        rating.childScore = DEMO_SNAPSHOT_DATA.childScores[catId][monthIdx];
+      const childKey = CHILD_SCORE_MAP[catId];
+      if (childKey && DEMO_SNAPSHOT_DATA.scores[childKey]) {
+        rating.childScore = DEMO_SNAPSHOT_DATA.scores[childKey][monthIdx];
       }
+
       if (DEMO_SNAPSHOT_DATA.lifeEvents[catId]?.[monthIdx]) {
         rating.lifeEvent = DEMO_SNAPSHOT_DATA.lifeEvents[catId][monthIdx];
       }

@@ -153,7 +153,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, mode } = await req.json();
+    const { messages, mode, model: requestedModel } = await req.json();
 
     const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
     if (!ANTHROPIC_API_KEY) {
@@ -161,6 +161,16 @@ serve(async (req) => {
     }
 
     let systemPrompt: string;
+    // Default model per mode: Haiku for fast chat, Sonnet for deep insights
+    const MODEL_DEFAULTS: Record<string, string> = {
+      consultant: "claude-3-5-haiku-20241022",
+      snapshot: "claude-3-5-haiku-20241022",
+      snapshot_scoring: "claude-3-5-haiku-20241022",
+      onboarding: "claude-3-5-haiku-20241022",
+      insights: "claude-sonnet-4-20250514",
+      community: "claude-3-5-haiku-20241022",
+    };
+
     switch (mode) {
       case "snapshot":
         systemPrompt = SNAPSHOT_SYSTEM_PROMPT;
@@ -181,6 +191,8 @@ serve(async (req) => {
         systemPrompt = CONSULTANT_SYSTEM_PROMPT;
     }
 
+    const resolvedModel = requestedModel || MODEL_DEFAULTS[mode] || "claude-3-5-haiku-20241022";
+
     // Convert OpenAI-style messages to Anthropic format (filter out system role)
     const anthropicMessages = messages
       .filter((m: { role: string }) => m.role !== "system")
@@ -197,7 +209,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: resolvedModel,
         max_tokens: 1024,
         system: systemPrompt,
         messages: anthropicMessages,

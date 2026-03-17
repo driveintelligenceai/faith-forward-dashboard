@@ -1,6 +1,6 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -14,18 +14,16 @@ import { useSnapshots } from '@/hooks/use-snapshots';
 import { useReminders } from '@/hooks/use-reminders';
 import { getRoleSnapshotType, SNAPSHOT_TYPE_LABELS } from '@/types';
 import type { SnapshotRating, SnapshotType, SnapshotCategory, UserRole } from '@/types';
-import { Save, History, Activity, Eye, Pencil, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Share2, Bell, BookOpen, MessageSquare, Play, Pause, Compass } from 'lucide-react';
-import {
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  ResponsiveContainer,
-} from 'recharts';
+import { Save, History, Activity, Eye, Pencil, ArrowLeft, ArrowRight, Bell, BookOpen, MessageSquare, Compass } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AIInsights } from '@/components/snapshot/AIInsights';
 import { CategoryTimeline } from '@/components/snapshot/CategoryTimeline';
 import { TrendLineChart } from '@/components/snapshot/TrendLineChart';
 import { SnapshotPlayback } from '@/components/snapshot/SnapshotPlayback';
 import { TrendChart } from '@/components/snapshot/TrendChart';
-import { SnapshotSummary } from '@/components/snapshot/SnapshotSummary';
+import { NarrativeCards } from '@/components/snapshot/NarrativeCards';
+import { JourneyChat } from '@/components/snapshot/JourneyChat';
+import { MobileCompanionSheet } from '@/components/snapshot/MobileCompanionSheet';
 import { SetReminderSheet } from '@/components/dashboard/SetReminderSheet';
 import { streamChat } from '@/lib/ai-stream';
 import ReactMarkdown from 'react-markdown';
@@ -77,10 +75,8 @@ export default function Snapshot() {
   const [aiSuggestions, setAiSuggestions] = useState<{text: string; categoryId: string}[]>([]);
   const [reminderSheet, setReminderSheet] = useState(false);
   const [reminderDefaults, setReminderDefaults] = useState({ text: '', categoryId: '' });
-  const [viewingIdx, setViewingIdx] = useState(0); // 0 = latest snapshot
   const [activeTab, setActiveTab] = useState('journey');
-  const [isPlaying, setIsPlaying] = useState(false);
-  const playIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
 
   const [ratings, setRatings] = useState<Record<string, SnapshotRating>>(() => {
     const initial: Record<string, SnapshotRating> = {};
@@ -147,69 +143,6 @@ export default function Snapshot() {
   const avgScore = categories.length > 0
     ? (categories.reduce((sum, c) => sum + (ratings[c.id]?.score ?? 5), 0) / categories.length).toFixed(1)
     : '5.0';
-
-  const radarData = categories.map(cat => ({
-    category: cat.name.length > 10 ? cat.name.slice(0, 10) + '…' : cat.name,
-    score: ratings[cat.id]?.score ?? 5,
-    fullMark: 10,
-  }));
-
-  // Viewing snapshot for Results tab navigation
-  const viewingSnapshot = allSnapshots[viewingIdx];
-  const viewingRatings = useMemo(() => {
-    if (!viewingSnapshot) return ratings;
-    const map: Record<string, SnapshotRating> = {};
-    viewingSnapshot.ratings.forEach(r => { map[r.categoryId] = r; });
-    return map;
-  }, [viewingSnapshot, ratings]);
-
-  const viewingPrevRatings = useMemo(() => {
-    const prevIdx = viewingIdx + 1;
-    if (prevIdx >= allSnapshots.length) return undefined;
-    const map: Record<string, SnapshotRating> = {};
-    allSnapshots[prevIdx].ratings.forEach(r => { map[r.categoryId] = r; });
-    return map;
-  }, [viewingIdx, allSnapshots]);
-
-  const viewingAvg = useMemo(() => {
-    if (!viewingSnapshot) return avgScore;
-    const scores = categories.map(c => viewingRatings[c.id]?.score ?? 5);
-    return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
-  }, [viewingSnapshot, viewingRatings, categories, avgScore]);
-
-  const viewingRadarData = useMemo(() => {
-    return categories.map(cat => ({
-      category: cat.name.length > 10 ? cat.name.slice(0, 10) + '…' : cat.name,
-      score: viewingRatings[cat.id]?.score ?? 5,
-      fullMark: 10,
-    }));
-  }, [categories, viewingRatings]);
-
-  const viewingMonthLabel = viewingSnapshot
-    ? new Date(viewingSnapshot.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-    : 'Current';
-
-  // Radar playback
-  useEffect(() => {
-    if (isPlaying) {
-      const maxIdx = allSnapshots.length - 1;
-      // Start from oldest
-      setViewingIdx(maxIdx);
-      playIntervalRef.current = setInterval(() => {
-        setViewingIdx(prev => {
-          if (prev <= 0) {
-            setIsPlaying(false);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1200);
-    } else if (playIntervalRef.current) {
-      clearInterval(playIntervalRef.current);
-      playIntervalRef.current = null;
-    }
-    return () => { if (playIntervalRef.current) clearInterval(playIntervalRef.current); };
-  }, [isPlaying, allSnapshots.length]);
 
   const personalCategories = categories.filter(c => c.group === 'personal');
   const professionalCategories = categories.filter(c => c.group === 'professional');
@@ -484,9 +417,6 @@ export default function Snapshot() {
                 <TabsTrigger value="journey" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
                   <Compass className="h-4 w-4" /> Journey
                 </TabsTrigger>
-                <TabsTrigger value="results" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
-                  <Eye className="h-4 w-4" /> Results
-                </TabsTrigger>
                 <TabsTrigger value="insights" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
                   <Activity className="h-4 w-4" /> Insights
                 </TabsTrigger>
@@ -495,131 +425,43 @@ export default function Snapshot() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* JOURNEY TAB — the hero experience */}
+              {/* JOURNEY TAB — hero: radar + chat side-by-side */}
               <TabsContent value="journey">
                 <div className="space-y-4">
-                  <SnapshotPlayback snapshots={allSnapshots} categories={categories} onNavigateToInsights={() => setActiveTab('insights')} />
-                  <TrendChart snapshots={allSnapshots} categories={categories} />
-                  <SnapshotSummary snapshots={allSnapshots} categories={categories} />
-                </div>
-              </TabsContent>
-
-              {/* RESULTS TAB — with month navigation */}
-              <TabsContent value="results">
-                <div className="space-y-6">
-                  {/* Month navigation bar */}
-                  <div className="flex items-center justify-between">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setViewingIdx(i => Math.min(i + 1, allSnapshots.length - 1))}
-                      disabled={viewingIdx >= allSnapshots.length - 1 || isPlaying}
-                      className="font-body gap-1 min-h-[40px]"
-                    >
-                      <ChevronLeft className="h-4 w-4" /> Older
-                    </Button>
-                    <div className="text-center">
-                      <p className="text-sm font-heading font-bold text-foreground">{viewingMonthLabel}</p>
-                      <p className="text-xs font-body text-muted-foreground">
-                        {viewingIdx === 0 ? 'Latest snapshot' : `${viewingIdx + 1} of ${allSnapshots.length}`}
-                      </p>
+                  {/* Hero: Radar + AI Chat */}
+                  <div className="flex flex-col lg:flex-row gap-4">
+                    {/* Radar chart */}
+                    <div className="lg:flex-1 lg:min-w-0">
+                      <SnapshotPlayback snapshots={allSnapshots} categories={categories} />
                     </div>
+                    {/* AI Chat — desktop only (mobile uses bottom sheet) */}
+                    <div className="hidden lg:block lg:w-[380px] xl:w-[420px] lg:shrink-0">
+                      <div className="h-[580px] sticky top-4">
+                        <JourneyChat
+                          snapshots={allSnapshots}
+                          categories={categories}
+                          userName={profile?.full_name ?? 'Brother'}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Mobile: Talk to James button */}
+                  <div className="lg:hidden">
                     <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setViewingIdx(i => Math.max(i - 1, 0))}
-                      disabled={viewingIdx <= 0 || isPlaying}
-                      className="font-body gap-1 min-h-[40px]"
+                      onClick={() => setMobileChatOpen(true)}
+                      className="w-full h-12 font-heading font-bold text-base gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground"
                     >
-                      Newer <ChevronRight className="h-4 w-4" />
+                      <MessageSquare className="h-5 w-5" /> Talk to James
                     </Button>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                    {/* Score card */}
-                    <Card className="border-secondary/20 bg-secondary/5">
-                      <CardContent className="p-6 sm:p-8 text-center">
-                        <p className="text-6xl sm:text-7xl font-heading font-bold text-secondary transition-all duration-300" key={viewingAvg}>{viewingAvg}</p>
-                        <p className="text-sm font-body text-muted-foreground mt-2">Overall Score · {categories.length} categories</p>
-                        {viewingPrevRatings && (
-                          <p className="text-xs font-body text-muted-foreground mt-1">
-                            {(() => {
-                              const prevAvg = categories.reduce((s, c) => s + (viewingPrevRatings[c.id]?.score ?? 5), 0) / categories.length;
-                              const delta = parseFloat(viewingAvg) - prevAvg;
-                              return delta > 0 ? `↑ Up ${delta.toFixed(1)} from previous month` : delta < 0 ? `↓ Down ${Math.abs(delta).toFixed(1)} from previous month` : 'Same as previous month';
-                            })()}
-                          </p>
-                        )}
-                        {viewingIdx === 0 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="mt-4 font-body text-sm gap-1.5"
-                            onClick={() => toast({ title: 'Coming Soon', description: 'Sharing with your Snapshot Group is on the way.' })}
-                          >
-                            <Share2 className="h-4 w-4" /> Share with my Group
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-
-                    {/* Radar chart with play button */}
-                    <Card>
-                      <CardContent className="p-4 sm:p-6">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-xs font-body text-muted-foreground">{viewingMonthLabel}</p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setIsPlaying(p => !p)}
-                            className="font-body text-xs gap-1 min-h-[32px] text-secondary hover:text-secondary"
-                          >
-                            {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-                            {isPlaying ? 'Pause' : 'Play 12 months'}
-                          </Button>
-                        </div>
-                        <div className="h-[250px] sm:h-[280px] w-full">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <RadarChart data={viewingRadarData} cx="50%" cy="50%" outerRadius="70%">
-                              <PolarGrid stroke="hsl(213 15% 82%)" />
-                              <PolarAngleAxis dataKey="category" tick={{ fontSize: 11, fontFamily: 'Quicksand' }} />
-                              <PolarRadiusAxis angle={90} domain={[0, 10]} tick={{ fontSize: 10, fontFamily: 'Quicksand' }} />
-                              <Radar name="Score" dataKey="score" stroke="hsl(39 78% 48%)" fill="hsl(39 78% 48%)" fillOpacity={0.25} strokeWidth={2.5} />
-                            </RadarChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* Category breakdown — updates with viewing month */}
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg font-heading">Category Breakdown</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {categories.map(cat => {
-                          const score = viewingRatings[cat.id]?.score ?? 5;
-                          const prevScore = viewingPrevRatings?.[cat.id]?.score;
-                          const delta = prevScore !== undefined ? score - prevScore : null;
-                          return (
-                            <div key={cat.id} className={`flex items-center justify-between p-3 rounded-lg transition-all duration-300 ${getScoreBorder(score)}`}>
-                              <span className="text-sm font-heading font-bold truncate mr-2">{cat.name}</span>
-                              <div className="flex items-center gap-1.5 shrink-0">
-                                {delta !== null && delta !== 0 && (
-                                  <span className={`text-xs font-body font-bold ${delta > 0 ? 'text-primary' : 'text-destructive'}`}>
-                                    {delta > 0 ? '+' : ''}{delta}
-                                  </span>
-                                )}
-                                <span className={`text-xl font-heading font-bold ${getScoreColor(score)}`}>{score}</span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <TrendChart snapshots={allSnapshots} categories={categories} />
+                  <NarrativeCards
+                    snapshots={allSnapshots}
+                    categories={categories}
+                    userName={profile?.full_name ?? 'Brother'}
+                  />
                 </div>
               </TabsContent>
 
@@ -692,6 +534,19 @@ export default function Snapshot() {
               onOpenChange={setReminderSheet}
               defaultText={reminderDefaults.text}
               defaultCategoryId={reminderDefaults.categoryId}
+            />
+
+            {/* Mobile journey chat sheet */}
+            <MobileCompanionSheet
+              open={mobileChatOpen}
+              onOpenChange={setMobileChatOpen}
+              currentCategory={null}
+              ratings={ratings}
+              previousRatings={previousRatings}
+              userName={profile?.full_name ?? 'Brother'}
+              allSnapshots={allSnapshots}
+              categories={categories}
+              mode="journey"
             />
           </>
         )}
