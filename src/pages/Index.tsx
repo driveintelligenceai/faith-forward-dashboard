@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MOCK_SNAPSHOTS, MOCK_ANNOUNCEMENTS } from '@/data/mock-data';
 import { SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
+import { useSnapshots } from '@/hooks/use-snapshots';
 import { ROLE_LABELS, ROLE_COLORS } from '@/types';
 import type { UserRole } from '@/types';
 import { useNavigate } from 'react-router-dom';
