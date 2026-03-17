@@ -668,10 +668,10 @@ function CategoryScoringCard({
           )}
         </div>
 
-        {/* Score display */}
+        {/* Score display — animates on change */}
         <div className="text-center">
-          <div className={`inline-flex items-center justify-center h-24 w-24 rounded-2xl ${getScoreBg(score)} transition-colors`}>
-            <span className={`text-5xl font-heading font-bold ${getScoreColor(score)} transition-colors`}>{score}</span>
+          <div className={`inline-flex items-center justify-center h-24 w-24 rounded-2xl ${getScoreBg(score)} transition-all duration-300`}>
+            <span className={`text-5xl font-heading font-bold ${getScoreColor(score)} score-transition`} key={score}>{score}</span>
           </div>
         </div>
 
