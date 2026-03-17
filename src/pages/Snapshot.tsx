@@ -23,15 +23,15 @@ import { useToast } from '@/hooks/use-toast';
 import { SnapshotCompanion } from '@/components/snapshot/SnapshotCompanion';
 
 function getScoreColor(score: number) {
-  if (score >= 7) return 'text-score-high';
-  if (score >= 4) return 'text-score-mid';
-  return 'text-score-low';
+  if (score >= 7) return 'text-primary';
+  if (score >= 4) return 'text-muted-foreground';
+  return 'text-destructive';
 }
 
 function getScoreBg(score: number) {
-  if (score >= 7) return 'border-l-4 border-l-score-high';
-  if (score >= 4) return 'border-l-4 border-l-score-mid';
-  return 'border-l-4 border-l-score-low';
+  if (score >= 7) return 'border-l-4 border-l-primary';
+  if (score >= 4) return 'border-l-4 border-l-muted';
+  return 'border-l-4 border-l-destructive/40';
 }
 
 function getScoreLabel(score: number) {
