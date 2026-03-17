@@ -11,7 +11,7 @@ import { SNAPSHOT_CONFIGS } from '@/data/snapshot-categories';
 import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import { useAuth } from '@/contexts/AuthContext';
 import { getRoleSnapshotType, SNAPSHOT_TYPE_LABELS } from '@/types';
-import type { SnapshotRating, SnapshotType, SnapshotCategory } from '@/types';
+import type { SnapshotRating, SnapshotType, SnapshotCategory, UserRole } from '@/types';
 import { Save, History, BarChart3, BookOpen, MessageCircle, X, Bookmark } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -42,8 +42,8 @@ function getScoreLabel(score: number) {
 
 export default function Snapshot() {
   const { toast } = useToast();
-  const { user } = useAuth();
-  const defaultType = user ? getRoleSnapshotType(user.role) : 'member';
+  const { profile } = useAuth();
+  const defaultType = profile ? getRoleSnapshotType((profile.role || 'member') as UserRole) : 'member';
   const [snapshotType, setSnapshotType] = useState<SnapshotType>(defaultType);
   const categories = SNAPSHOT_CONFIGS[snapshotType];
 
@@ -385,7 +385,7 @@ export default function Snapshot() {
                       currentCategory={activeCategory}
                       ratings={ratings}
                       previousRatings={previousRatings}
-                      userName={user?.name ?? 'Brother'}
+                    userName={profile?.full_name ?? 'Brother'}
                     />
                   </div>
                 </div>
@@ -421,7 +421,7 @@ export default function Snapshot() {
                     currentCategory={activeCategory}
                     ratings={ratings}
                     previousRatings={previousRatings}
-                    userName={user?.name ?? 'Brother'}
+                    userName={profile?.full_name ?? 'Brother'}
                   />
                 </div>
               </div>

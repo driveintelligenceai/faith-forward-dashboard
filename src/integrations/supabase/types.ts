@@ -14,7 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          chapter: string | null
+          city: string | null
+          company_name: string | null
+          company_title: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          joined_date: string
+          linkedin_bio: string | null
+          linkedin_company: string | null
+          linkedin_connected_at: string | null
+          linkedin_headline: string | null
+          linkedin_id: string | null
+          linkedin_industry: string | null
+          linkedin_location: string | null
+          linkedin_title: string | null
+          linkedin_url: string | null
+          phone: string | null
+          role: string
+          state: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          chapter?: string | null
+          city?: string | null
+          company_name?: string | null
+          company_title?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          joined_date?: string
+          linkedin_bio?: string | null
+          linkedin_company?: string | null
+          linkedin_connected_at?: string | null
+          linkedin_headline?: string | null
+          linkedin_id?: string | null
+          linkedin_industry?: string | null
+          linkedin_location?: string | null
+          linkedin_title?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          role?: string
+          state?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          chapter?: string | null
+          city?: string | null
+          company_name?: string | null
+          company_title?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          joined_date?: string
+          linkedin_bio?: string | null
+          linkedin_company?: string | null
+          linkedin_connected_at?: string | null
+          linkedin_headline?: string | null
+          linkedin_id?: string | null
+          linkedin_industry?: string | null
+          linkedin_location?: string | null
+          linkedin_title?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          role?: string
+          state?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

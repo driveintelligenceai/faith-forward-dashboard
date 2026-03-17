@@ -2,6 +2,7 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROLE_LABELS, ROLE_COLORS } from '@/types';
+import type { UserRole } from '@/types';
 import { Badge } from '@/components/ui/badge';
 
 interface DashboardLayoutProps {
@@ -9,7 +10,7 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { user } = useAuth();
+  const { profile } = useAuth();
 
   return (
     <SidebarProvider>
@@ -24,9 +25,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 Iron Forums Dashboard
               </span>
             </div>
-            {user && (
-              <Badge className={`${ROLE_COLORS[user.role]} font-body text-sm font-semibold border-0 px-3 py-1`}>
-                {ROLE_LABELS[user.role]}
+            {profile && (
+              <Badge className={`${ROLE_COLORS[(profile.role || 'member') as UserRole]} font-body text-sm font-semibold border-0 px-3 py-1`}>
+                {ROLE_LABELS[(profile.role || 'member') as UserRole]}
               </Badge>
             )}
           </header>

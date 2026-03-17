@@ -2,3 +2,6 @@ project_id = "ilfhxsjovbiqfzjgyfsz"
 
 [functions.ai-chat]
 verify_jwt = false
+
+[functions.linkedin-profile]
+verify_jwt = true

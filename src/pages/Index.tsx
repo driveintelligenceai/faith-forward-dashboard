@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { MOCK_SNAPSHOTS, MOCK_ANNOUNCEMENTS } from '@/data/mock-data';
 import { SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
 import { ROLE_LABELS, ROLE_COLORS } from '@/types';
+import type { UserRole } from '@/types';
 import { useNavigate } from 'react-router-dom';
 import {
   ClipboardCheck,
@@ -25,7 +26,7 @@ function getScoreColor(score: number) {
 }
 
 export default function Index() {
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const navigate = useNavigate();
   const latestSnapshot = MOCK_SNAPSHOTS[0];
 
@@ -58,7 +59,7 @@ export default function Index() {
         {/* Welcome */}
         <div>
           <h1 className="text-4xl sm:text-5xl font-heading font-bold tracking-tight text-primary">
-            Welcome back, {user?.name?.split(' ')[0]}
+            Welcome back, {(profile?.full_name || 'Brother')?.split(' ')[0]}
           </h1>
           <p className="text-lg font-body text-muted-foreground mt-3">
             Your Iron Forums dashboard — <span className="text-secondary font-semibold">Connect</span> · <span className="text-secondary font-semibold">Sharpen</span> · <span className="text-secondary font-semibold">Grow</span>
@@ -101,9 +102,9 @@ export default function Index() {
             <CardContent className="p-6">
               <p className="text-base font-body font-medium text-muted-foreground">Your Role</p>
               <p className="text-xl font-heading font-bold mt-2">
-                {user ? ROLE_LABELS[user.role] : '—'}
+                {profile ? ROLE_LABELS[(profile.role || 'member') as UserRole] : '—'}
               </p>
-              <p className="text-base font-body text-muted-foreground mt-1">{user?.chapter}</p>
+              <p className="text-base font-body text-muted-foreground mt-1">{profile?.chapter}</p>
             </CardContent>
           </Card>
         </div>

@@ -1,48 +1,146 @@
-import React, { createContext, useContext, useState } from 'react';
-import type { User, UserRole } from '@/types';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import type { UserRole } from '@/types';
+
+interface Profile {
+  id: string;
+  user_id: string;
+  full_name: string | null;
+  email: string | null;
+  avatar_url: string | null;
+  chapter: string | null;
+  role: string;
+  linkedin_id: string | null;
+  linkedin_url: string | null;
+  linkedin_headline: string | null;
+  linkedin_company: string | null;
+  linkedin_title: string | null;
+  linkedin_bio: string | null;
+  linkedin_connected_at: string | null;
+  company_name: string | null;
+  company_title: string | null;
+  city: string | null;
+  state: string | null;
+  bio: string | null;
+  phone: string | null;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: SupabaseUser | null;
+  profile: Profile | null;
+  session: Session | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => void;
-  logout: () => void;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<{ error: string | null }>;
+  signup: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
+  loginWithGoogle: () => Promise<{ error: string | null }>;
+  logout: () => Promise<void>;
   hasRole: (role: UserRole) => boolean;
   hasMinRole: (role: UserRole) => boolean;
+  refreshProfile: () => Promise<void>;
 }
 
 const ROLE_HIERARCHY: UserRole[] = ['member', 'facilitator', 'executive', 'ceo'];
 
-const MOCK_USER: User = {
-  id: '1',
-  name: 'David Mitchell',
-  email: 'david@ironforums.org',
-  role: 'ceo',
-  chapter: 'Nashville Chapter',
-  joinedDate: '2023-06-15',
-};
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(MOCK_USER);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = (_email: string, _password: string) => {
-    setUser(MOCK_USER);
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    setProfile(data as Profile | null);
   };
 
-  const logout = () => {
-    setUser(null);
+  const refreshProfile = async () => {
+    if (user) await fetchProfile(user.id);
   };
 
-  const hasRole = (role: UserRole) => user?.role === role;
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      setSession(s);
+      setUser(s?.user ?? null);
+      if (s?.user) fetchProfile(s.user.id);
+      setIsLoading(false);
+    });
 
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s);
+      setUser(s?.user ?? null);
+      if (s?.user) {
+        fetchProfile(s.user.id);
+      } else {
+        setProfile(null);
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return { error: error?.message ?? null };
+  };
+
+  const signup = async (email: string, password: string, fullName: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName } },
+    });
+    return { error: error?.message ?? null };
+  };
+
+  const loginWithGoogle = async () => {
+    try {
+      const { lovable } = await import('@/integrations/lovable/index');
+      const result = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) return { error: String(result.error) };
+      return { error: null };
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : 'Google sign-in failed' };
+    }
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setProfile(null);
+  };
+
+  const userRole = (profile?.role ?? 'member') as UserRole;
+  const hasRole = (role: UserRole) => userRole === role;
   const hasMinRole = (role: UserRole) => {
-    if (!user) return false;
-    return ROLE_HIERARCHY.indexOf(user.role) >= ROLE_HIERARCHY.indexOf(role);
+    return ROLE_HIERARCHY.indexOf(userRole) >= ROLE_HIERARCHY.indexOf(role);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, hasRole, hasMinRole }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        profile,
+        session,
+        isAuthenticated: !!session,
+        isLoading,
+        login,
+        signup,
+        loginWithGoogle,
+        logout,
+        hasRole,
+        hasMinRole,
+        refreshProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
