@@ -150,6 +150,63 @@ export default function Snapshot() {
     fullMark: 10,
   }));
 
+  // Viewing snapshot for Results tab navigation
+  const viewingSnapshot = allSnapshots[viewingIdx];
+  const viewingRatings = useMemo(() => {
+    if (!viewingSnapshot) return ratings;
+    const map: Record<string, SnapshotRating> = {};
+    viewingSnapshot.ratings.forEach(r => { map[r.categoryId] = r; });
+    return map;
+  }, [viewingSnapshot, ratings]);
+
+  const viewingPrevRatings = useMemo(() => {
+    const prevIdx = viewingIdx + 1;
+    if (prevIdx >= allSnapshots.length) return undefined;
+    const map: Record<string, SnapshotRating> = {};
+    allSnapshots[prevIdx].ratings.forEach(r => { map[r.categoryId] = r; });
+    return map;
+  }, [viewingIdx, allSnapshots]);
+
+  const viewingAvg = useMemo(() => {
+    if (!viewingSnapshot) return avgScore;
+    const scores = categories.map(c => viewingRatings[c.id]?.score ?? 5);
+    return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+  }, [viewingSnapshot, viewingRatings, categories, avgScore]);
+
+  const viewingRadarData = useMemo(() => {
+    return categories.map(cat => ({
+      category: cat.name.length > 10 ? cat.name.slice(0, 10) + '…' : cat.name,
+      score: viewingRatings[cat.id]?.score ?? 5,
+      fullMark: 10,
+    }));
+  }, [categories, viewingRatings]);
+
+  const viewingMonthLabel = viewingSnapshot
+    ? new Date(viewingSnapshot.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    : 'Current';
+
+  // Radar playback
+  useEffect(() => {
+    if (isPlaying) {
+      const maxIdx = allSnapshots.length - 1;
+      // Start from oldest
+      setViewingIdx(maxIdx);
+      playIntervalRef.current = setInterval(() => {
+        setViewingIdx(prev => {
+          if (prev <= 0) {
+            setIsPlaying(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1200);
+    } else if (playIntervalRef.current) {
+      clearInterval(playIntervalRef.current);
+      playIntervalRef.current = null;
+    }
+    return () => { if (playIntervalRef.current) clearInterval(playIntervalRef.current); };
+  }, [isPlaying, allSnapshots.length]);
+
   const personalCategories = categories.filter(c => c.group === 'personal');
   const professionalCategories = categories.filter(c => c.group === 'professional');
   const spiritualCategories = categories.filter(c => c.group === 'spiritual');
