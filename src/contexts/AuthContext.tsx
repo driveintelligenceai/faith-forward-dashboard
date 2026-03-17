@@ -34,7 +34,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ error: string | null }>;
   signup: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
-  loginWithGoogle: () => Promise<{ error: string | null }>;
+  loginAsDemo: () => void;
   logout: () => Promise<void>;
   hasRole: (role: UserRole) => boolean;
   hasMinRole: (role: UserRole) => boolean;
