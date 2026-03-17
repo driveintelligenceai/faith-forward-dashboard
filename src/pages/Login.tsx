@@ -55,16 +55,16 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center space-y-4 pb-2">
-          <div className="flex justify-center">
-            <img src={ironForumsLogo} alt="Iron Forums" className="h-20 w-auto" />
+        <CardHeader className="text-center space-y-3 pb-2">
+          <div className="flex justify-center pt-2">
+            <img src={ironForumsLogo} alt="Iron Forums" className="h-28 sm:h-32 w-auto" />
           </div>
-          <div>
+          <div className="space-y-1">
             <CardTitle className="text-3xl font-heading font-bold text-primary">Welcome</CardTitle>
-            <CardDescription className="text-base font-body mt-2">
+            <CardDescription className="text-base font-body">
               Sign in to your Iron Forums dashboard
             </CardDescription>
-            <p className="text-xs font-body text-secondary font-semibold tracking-wide mt-1">
+            <p className="text-xs font-body text-secondary font-semibold tracking-[0.15em] mt-0.5">
               Connect · Sharpen · Grow
             </p>
           </div>
