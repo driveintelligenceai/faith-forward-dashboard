@@ -40,12 +40,20 @@ function AppRoutes() {
     );
   }
 
+  // Login route should be outside the SnapshotGate
+  if (location.pathname === '/login') {
+    return (
+      <Routes>
+        <Route path="/login" element={<Auth />} />
+      </Routes>
+    );
+  }
+
   return (
     <SnapshotGate>
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/snapshot" element={<Snapshot />} />
-        <Route path="/login" element={<Auth />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </SnapshotGate>
