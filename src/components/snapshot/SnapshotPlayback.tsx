@@ -183,20 +183,20 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
 
   return (
     <Card className="border-secondary/20">
-      <CardContent className="p-3 sm:p-4 lg:p-5">
+      <CardContent className="p-2 sm:p-3 lg:p-4">
         {/* Title */}
-        <div className="text-center mb-1 sm:mb-2">
-          <h2 className="text-lg sm:text-xl font-heading font-bold text-primary">Your Year in Motion</h2>
-          <p className="text-xs font-body text-muted-foreground mt-0.5">
+        <div className="text-center mb-0.5 sm:mb-1">
+          <h2 className="text-base sm:text-lg font-heading font-bold text-primary">Your Year in Motion</h2>
+          <p className="text-[11px] font-body text-muted-foreground">
             Watch how your priorities have shifted over the last {total} months
           </p>
         </div>
 
         {/* Main layout: radar + stat cards */}
-        <div className="flex flex-col lg:flex-row lg:items-start gap-3 sm:gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-2 sm:gap-3">
           {/* Left stat cards — desktop only */}
           {!isMobile && stats && (
-            <div className="hidden lg:flex flex-col gap-3 w-48 shrink-0 pt-12">
+            <div className="hidden lg:flex flex-col gap-3 w-44 shrink-0 justify-center">
               <StatMini
                 icon={<TrendingUp className="h-4 w-4 text-primary" />}
                 label="Strongest"
@@ -216,9 +216,9 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
 
           {/* Radar chart */}
           <div className="flex-1 flex flex-col items-center">
-            <div className={`w-full ${isMobile ? 'h-[260px]' : 'h-[300px] lg:h-[330px]'}`}>
+            <div className={`w-full ${isMobile ? 'h-[260px]' : 'h-[420px] lg:h-[420px]'}`}>
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={mergedData} cx="50%" cy="50%" outerRadius={isMobile ? '70%' : '76%'}>
+                <RadarChart data={mergedData} cx="50%" cy="50%" outerRadius={isMobile ? '70%' : '82%'}>
                   <PolarGrid stroke="hsl(213, 15%, 82%)" strokeDasharray="3 3" />
                   <PolarAngleAxis
                     dataKey="category"
@@ -256,24 +256,34 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
 
             {/* "You are here" badge */}
             {isAtEnd && !isPlaying && (
-              <Badge className="bg-secondary/15 text-secondary border-secondary/30 font-body text-[11px] -mt-3 mb-1">
+              <Badge className="bg-secondary/15 text-secondary border-secondary/30 font-body text-[11px] -mt-4 mb-0.5">
                 ✦ You are here — {monthLabel}
               </Badge>
             )}
           </div>
 
-          {/* Right stat card — desktop only */}
-          {!isMobile && stats?.biggestChange && (
-            <div className="hidden lg:flex flex-col gap-3 w-48 shrink-0 pt-12">
-              <StatMini
-                icon={<Zap className="h-4 w-4 text-secondary" />}
-                label="Biggest Change"
-                value={stats.biggestChange.cat.name}
-                score={stats.biggestChange.delta}
-                scoreColor={stats.biggestChange.delta > 0 ? 'text-primary' : 'text-destructive'}
-                showDelta
-              />
-              <div className="text-center mt-2 p-3 rounded-lg bg-muted/40">
+          {/* Right stat cards — desktop only, always rendered */}
+          {!isMobile && stats && (
+            <div className="hidden lg:flex flex-col gap-3 w-44 shrink-0 justify-center">
+              {stats.biggestChange ? (
+                <StatMini
+                  icon={<Zap className="h-4 w-4 text-secondary" />}
+                  label="Biggest Change"
+                  value={stats.biggestChange.cat.name}
+                  score={stats.biggestChange.delta}
+                  scoreColor={stats.biggestChange.delta > 0 ? 'text-primary' : 'text-destructive'}
+                  showDelta
+                />
+              ) : (
+                <div className="p-3 rounded-lg border border-border/60 bg-card">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Zap className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-xs font-body text-muted-foreground">Biggest Change</span>
+                  </div>
+                  <p className="text-sm font-heading text-muted-foreground">First month</p>
+                </div>
+              )}
+              <div className="text-center mt-1 p-3 rounded-lg bg-muted/40">
                 <p className="text-3xl font-heading font-bold text-secondary">{stats.avg.toFixed(1)}</p>
                 <p className="text-xs font-body text-muted-foreground mt-0.5">Month Average</p>
               </div>
