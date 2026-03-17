@@ -17,9 +17,13 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function Consultant() {
   const { profile } = useAuth();
+  const { snapshots: dbSnapshots } = useSnapshots();
   const userName = profile?.full_name || 'Brother';
   const chapter = profile?.chapter || '';
   const role = profile?.role || 'member';
+
+  // Use DB data if available, otherwise fall back to mock
+  const allSnapshots = dbSnapshots.length > 0 ? dbSnapshots : MOCK_SNAPSHOTS;
 
   // Build comprehensive profile context from all snapshot data
   const profileContext = buildSnapshotProfileContext(
