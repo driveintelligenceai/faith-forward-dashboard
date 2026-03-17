@@ -104,7 +104,7 @@ export default function Index() {
         <JourneyTimeline snapshots={allSnapshots} />
 
         {/* ── 4. Quick Stats Row ── */}
-        <div className="grid grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <Card className="cursor-pointer hover:shadow-sm transition-shadow" onClick={() => navigate('/snapshot')}>
             <CardContent className="p-4">
               <p className="text-xs font-body text-muted-foreground uppercase tracking-wider">Overall</p>
