@@ -14,6 +14,7 @@ import { useSnapshots } from '@/hooks/use-snapshots';
 import { getRoleSnapshotType, SNAPSHOT_TYPE_LABELS } from '@/types';
 import type { SnapshotRating, SnapshotType, SnapshotCategory, UserRole } from '@/types';
 import { Save, History, BarChart3, BookOpen, MessageCircle, X, Bookmark, Loader2 } from 'lucide-react';
+import { CategorySparkline } from '@/components/snapshot/CategorySparkline';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
@@ -151,6 +152,7 @@ export default function Snapshot() {
                   {trend > 0 ? '↑' : '↓'} {Math.abs(trend)} from last
                 </p>
               )}
+              <CategorySparkline categoryId={cat.id} snapshots={allSnapshots} />
             </div>
           </div>
         </CardHeader>
