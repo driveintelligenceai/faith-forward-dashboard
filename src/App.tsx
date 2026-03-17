@@ -11,6 +11,7 @@ import Consultant from "./pages/Consultant";
 import Community from "./pages/Community";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
+import Membership from "./pages/Membership";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
