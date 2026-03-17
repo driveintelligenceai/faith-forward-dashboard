@@ -269,7 +269,7 @@ export const MOCK_ANNOUNCEMENTS: Announcement[] = [
   {
     id: '1',
     title: "Annual Men's Retreat — Registration Open",
-    content: "Registration for our 2026 Men's Retreat at Amicalola Falls is now open. Early bird pricing available through April 15th. Connect · Sharpen · Grow.",
+    content: "Registration for our 2026 Men's Retreat at Amicalola Falls is now open. Early bird pricing available through April 15th. Connect » Sharpen » Grow.",
     date: '2026-03-12',
     authorName: 'Jonathan Almanzar',
   },

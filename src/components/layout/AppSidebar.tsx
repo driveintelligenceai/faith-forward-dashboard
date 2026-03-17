@@ -61,7 +61,7 @@ export function AppSidebar() {
           />
           {!collapsed && (
             <span className="text-[10px] font-body tracking-[0.2em] uppercase text-sidebar-primary mt-2.5 opacity-80">
-              Connect · Sharpen · Grow
+              Connect » Sharpen » Grow
             </span>
           )}
         </div>
