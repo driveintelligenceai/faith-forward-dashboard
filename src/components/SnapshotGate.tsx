@@ -49,8 +49,6 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
     return <>{children}</>;
   }
 
-  }
-
   const role = (profile.role || 'member') as UserRole;
   const snapshotType = getRoleSnapshotType(role);
   const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
