@@ -185,9 +185,9 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
     <Card className="border-secondary/20">
       <CardContent className="p-3 sm:p-4 lg:p-5">
         {/* Title */}
-        <div className="text-center mb-2 sm:mb-3">
-          <h2 className="text-xl sm:text-2xl font-heading font-bold text-primary">Your Year in Motion</h2>
-          <p className="text-sm font-body text-muted-foreground mt-1">
+        <div className="text-center mb-1 sm:mb-2">
+          <h2 className="text-lg sm:text-xl font-heading font-bold text-primary">Your Year in Motion</h2>
+          <p className="text-xs font-body text-muted-foreground mt-0.5">
             Watch how your priorities have shifted over the last {total} months
           </p>
         </div>
