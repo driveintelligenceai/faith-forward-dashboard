@@ -70,8 +70,8 @@ function generateDemoInsights(): InsightBlock[] {
     {
       id: 'parenting',
       emoji: '⭐',
-      title: 'You're a great dad. Protect that fiercely.',
-      body: `Parenting is consistently your strongest area at 8-9, and your girls' scores confirm it. The coaching, the FaceTime calls from the road, the daddy-daughter days — Emma was proud when you coached her soccer team.\n\nThis is a gift, Jonathan. But here's what I want you to hear: **they won't always want to FaceTime.** The window is open right now. Be there while they still want you there.\n\nYou don't need to fix this one. You just need to keep doing what you're doing — and maybe do a little less of everything else so you can do more of this.`,
+      title: "You're a great dad. Protect that fiercely.",
+      body: "Parenting is consistently your strongest area at 8-9, and your girls' scores confirm it. The coaching, the FaceTime calls from the road, the daddy-daughter days — Emma was proud when you coached her soccer team.\n\nThis is a gift, Jonathan. But here's what I want you to hear: **they won't always want to FaceTime.** The window is open right now. Be there while they still want you there.\n\nYou don't need to fix this one. You just need to keep doing what you're doing — and maybe do a little less of everything else so you can do more of this.",
     },
     {
       id: 'marketing',
