@@ -115,7 +115,7 @@ export default function Snapshot() {
         setShowSaveSuccess(false);
         setMode('review');
       }, 1600);
-      // Generate AI-suggested reminders for declining categories
+      // Generate mentor-suggested reminders for declining categories
       const suggestions: {text: string; categoryId: string}[] = [];
       if (previousRatings) {
         categories.forEach(cat => {
