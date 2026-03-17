@@ -15,6 +15,7 @@ const queryClient = new QueryClient();
 
 function AppRoutes() {
   const { profile, isLoading, session } = useAuth();
+  const location = useLocation();
 
   if (isLoading) return null;
 
