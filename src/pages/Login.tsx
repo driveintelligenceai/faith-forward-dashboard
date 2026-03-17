@@ -9,9 +9,11 @@ import { Mail, Linkedin, Loader2, CheckCircle2 } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const { loginWithGoogle, sendMagicLink, loginAsDemo } = useAuth();
+  const [showPasswordLogin, setShowPasswordLogin] = useState(false);
+  const { login, signup, loginWithGoogle, sendMagicLink, loginAsDemo } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -35,6 +37,21 @@ export default function Login() {
     } else {
       setMagicLinkSent(true);
     }
+  };
+
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password.trim()) return;
+    setLoading(true);
+    const { error } = await login(email, password);
+    if (error) {
+      // If login fails, try signup
+      const { error: signupError } = await signup(email, password, 'Test User');
+      if (signupError) {
+        toast({ title: 'Login failed', description: signupError, variant: 'destructive' });
+      }
+    }
+    setLoading(false);
   };
 
   return (
@@ -133,6 +150,45 @@ export default function Login() {
                 <Mail className="h-5 w-5 sm:h-6 sm:w-6" />
               )}
               Email me a sign-in link
+            </Button>
+          </form>
+        )}
+
+        {/* Password login toggle */}
+        <div className="pt-1">
+          <button
+            onClick={() => setShowPasswordLogin(!showPasswordLogin)}
+            className="w-full text-sm font-body text-primary-foreground/50 hover:text-secondary transition-colors py-2"
+          >
+            {showPasswordLogin ? 'Hide' : 'Sign in with password'}
+          </button>
+        </div>
+
+        {showPasswordLogin && (
+          <form onSubmit={handlePasswordLogin} className="space-y-3">
+            <Input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="h-14 text-base font-body rounded-xl bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 focus:border-secondary"
+              required
+            />
+            <Input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="h-14 text-base font-body rounded-xl bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 focus:border-secondary"
+              required
+            />
+            <Button
+              type="submit"
+              variant="outline"
+              className="w-full h-14 text-base font-heading font-semibold rounded-xl bg-transparent border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
+              disabled={loading}
+            >
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Sign in / Sign up'}
             </Button>
           </form>
         )}
