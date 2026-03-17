@@ -10,7 +10,7 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { user } = useAuth();
+  const { profile } = useAuth();
 
   return (
     <SidebarProvider>
