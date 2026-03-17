@@ -156,21 +156,18 @@ export default function Snapshot() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4 pt-0">
-          <div className="space-y-3">
+        <CardContent className="space-y-3 pt-0">
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-body font-semibold text-muted-foreground">Your Rating</Label>
-              <span className="text-sm font-body text-muted-foreground">1 – 10 scale</span>
+              <Label className="text-sm font-body text-muted-foreground">Your Rating</Label>
+              <span className="text-sm font-body text-muted-foreground">{score}/10</span>
             </div>
             <Slider
               value={[score]}
               onValueChange={([v]) => updateRating(cat.id, 'score', v)}
               min={1} max={10} step={1}
-              className="py-2"
+              className="py-1"
             />
-            <div className="flex justify-between text-xs font-body text-muted-foreground">
-              <span>1 poor</span><span>5 average</span><span>10 best ever</span>
-            </div>
           </div>
 
           {cat.hasSpouseRating && (
