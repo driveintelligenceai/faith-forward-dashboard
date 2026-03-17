@@ -214,7 +214,7 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
           <div>
             <p className="text-sm font-heading font-bold text-primary">Snapshot Companion</p>
             <p className="text-xs font-body text-muted-foreground">
-              {currentCategory ? `Discussing: ${currentCategory.name}` : 'Ready to walk with you'} · GPT-5
+              {currentCategory ? `Discussing: ${currentCategory.name}` : 'Ready to walk with you'} · AI-Powered
             </p>
           </div>
           {currentCategory && (
