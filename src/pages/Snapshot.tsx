@@ -7,13 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SNAPSHOT_CONFIGS } from '@/data/snapshot-categories';
+import { SNAPSHOT_CONFIGS, SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
 import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSnapshots } from '@/hooks/use-snapshots';
+import { useReminders } from '@/hooks/use-reminders';
 import { getRoleSnapshotType, SNAPSHOT_TYPE_LABELS } from '@/types';
 import type { SnapshotRating, SnapshotType, SnapshotCategory, UserRole } from '@/types';
-import { Save, History, Loader2, Activity, Eye, Pencil, ArrowLeft, ArrowRight, ChevronRight, Share2, Bell, BookOpen } from 'lucide-react';
+import { Save, History, Loader2, Activity, Eye, Pencil, ArrowLeft, ArrowRight, ChevronRight, Share2, Bell, BookOpen, MessageSquare } from 'lucide-react';
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer,
@@ -21,6 +22,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { AIInsights } from '@/components/snapshot/AIInsights';
 import { CategoryTimeline } from '@/components/snapshot/CategoryTimeline';
+import { SetReminderSheet } from '@/components/dashboard/SetReminderSheet';
 import { streamChat } from '@/lib/ai-stream';
 import ReactMarkdown from 'react-markdown';
 
