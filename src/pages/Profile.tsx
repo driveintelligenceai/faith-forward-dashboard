@@ -242,7 +242,7 @@ export default function Profile() {
               <div>
                 <p className="font-heading font-bold text-xl">Active Member</p>
                 <p className="text-base font-body text-muted-foreground mt-1">
-                  Member since {profile?.joined_date ? new Date(profile.joined_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—'}
+                  Member since {(profile as any)?.joined_date ? new Date((profile as any).joined_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—'}
                 </p>
               </div>
               <Badge className="bg-score-high/20 text-score-high font-body font-semibold text-base border-0 px-4 py-1.5">Active</Badge>

@@ -155,8 +155,8 @@ export function AppSidebar() {
                 <UserCircle className="h-6 w-6 shrink-0" />
                 {!collapsed && (
                   <div className="flex flex-col flex-1">
-                    <span className="text-base font-body font-semibold leading-tight">{user?.name}</span>
-                    <span className="text-xs font-body text-sidebar-foreground/50 leading-tight">{user?.chapter}</span>
+                    <span className="text-base font-body font-semibold leading-tight">{profile?.full_name || 'My Profile'}</span>
+                    <span className="text-xs font-body text-sidebar-foreground/50 leading-tight">{profile?.chapter}</span>
                   </div>
                 )}
               </NavLink>

@@ -421,7 +421,7 @@ export default function Snapshot() {
                     currentCategory={activeCategory}
                     ratings={ratings}
                     previousRatings={previousRatings}
-                    userName={user?.name ?? 'Brother'}
+                    userName={profile?.full_name ?? 'Brother'}
                   />
                 </div>
               </div>

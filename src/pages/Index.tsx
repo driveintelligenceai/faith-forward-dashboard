@@ -101,9 +101,9 @@ export default function Index() {
             <CardContent className="p-6">
               <p className="text-base font-body font-medium text-muted-foreground">Your Role</p>
               <p className="text-xl font-heading font-bold mt-2">
-                {user ? ROLE_LABELS[user.role] : '—'}
+                {profile ? ROLE_LABELS[(profile.role || 'member') as UserRole] : '—'}
               </p>
-              <p className="text-base font-body text-muted-foreground mt-1">{user?.chapter}</p>
+              <p className="text-base font-body text-muted-foreground mt-1">{profile?.chapter}</p>
             </CardContent>
           </Card>
         </div>
