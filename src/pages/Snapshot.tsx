@@ -102,7 +102,32 @@ export default function Snapshot() {
     const result = await saveSnapshot(snapshotType, purposeStatement, quarterlyGoal, majorIssue, ratings);
     if (result) {
       setMode('review');
+      // Generate AI-suggested reminders for declining categories
+      const suggestions: {text: string; categoryId: string}[] = [];
+      if (previousRatings) {
+        categories.forEach(cat => {
+          const score = ratings[cat.id]?.score ?? 5;
+          const prev = previousRatings[cat.id]?.score;
+          if (prev && score < prev && score <= 5) {
+            suggestions.push({
+              text: `Take action on ${cat.name} — dropped from ${prev} to ${score}`,
+              categoryId: cat.id,
+            });
+          }
+        });
+      }
+      if (suggestions.length > 0) {
+        setAiSuggestions(suggestions.slice(0, 2));
+      }
     }
+  };
+
+  const acceptSuggestion = (s: {text: string; categoryId: string}) => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    addReminder({ text: s.text, categoryId: s.categoryId, dueDate: d.toISOString().split('T')[0], source: 'ai' });
+    setAiSuggestions(prev => prev.filter(x => x.text !== s.text));
+    toast({ title: 'Reminder added', description: 'Added to your action items.' });
   };
 
   const avgScore = categories.length > 0
