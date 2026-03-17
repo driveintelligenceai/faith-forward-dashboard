@@ -5,27 +5,60 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import { SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
-import type { ChatMessage } from '@/types';
-import { Send, Bot, User, Sparkles, AlertCircle } from 'lucide-react';
+import { buildSnapshotProfileContext } from '@/lib/snapshot-context';
+import { useAuth } from '@/contexts/AuthContext';
+import type { ChatMessage, UserRole } from '@/types';
+import { ROLE_LABELS } from '@/types';
+import { Send, Bot, User, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { streamChat } from '@/lib/ai-stream';
 import { useToast } from '@/hooks/use-toast';
 
-const CONSULTANT_PROMPTS = [
-  "Help me with my marriage",
-  "How can I grow spiritually?",
-  "I need leadership guidance",
-  "Help with work-life balance",
-  "What does Scripture say about finances?",
-  "How do I become a better father?",
-];
-
 export default function Consultant() {
+  const { profile } = useAuth();
+  const userName = profile?.full_name || 'Brother';
+  const chapter = profile?.chapter || '';
+  const role = profile?.role || 'member';
+
+  // Build comprehensive profile context from all snapshot data
+  const profileContext = buildSnapshotProfileContext(
+    MOCK_SNAPSHOTS,
+    SNAPSHOT_CATEGORIES,
+    userName,
+    chapter,
+    ROLE_LABELS[role as UserRole] || role
+  );
+
+  const latestSnapshot = MOCK_SNAPSHOTS[0];
+  const weakAreas = latestSnapshot
+    ? latestSnapshot.ratings
+        .filter((r) => r.score <= 5)
+        .map((r) => SNAPSHOT_CATEGORIES.find((c) => c.id === r.categoryId)?.name)
+        .filter(Boolean)
+    : [];
+
+  const strongAreas = latestSnapshot
+    ? latestSnapshot.ratings
+        .filter((r) => r.score >= 8)
+        .map((r) => SNAPSHOT_CATEGORIES.find((c) => c.id === r.categoryId)?.name)
+        .filter(Boolean)
+    : [];
+
+  // Dynamic quick prompts based on actual data
+  const dynamicPrompts = [
+    weakAreas.length > 0 ? `Why is my ${weakAreas[0]} score so low?` : 'Where should I focus?',
+    'What trends concern you in my data?',
+    strongAreas.length > 0 ? `How do I maintain my strength in ${strongAreas[0]}?` : 'How can I grow spiritually?',
+    latestSnapshot ? `Challenge me on my major issue` : 'Help with work-life balance',
+    'What perception gaps do you see?',
+    'Help me set better quarterly goals',
+  ];
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '0',
       role: 'assistant',
-      content: `**Welcome, brother.** I'm The Consultant — your AI-powered guide rooted in Christian leadership principles.\n\nI'm here to challenge you, encourage you, and point you back to Scripture. Whether it's your marriage, your business, your walk with God, or something weighing on your heart — let's talk.\n\n> *"As iron sharpens iron, so one man sharpens another." — Proverbs 27:17*\n\nWhat's on your mind today?`,
+      content: `**Welcome back, ${userName.split(' ')[0]}.** I'm The Consultant — your AI-powered guide rooted in Christian leadership principles.\n\nI've reviewed your last **${MOCK_SNAPSHOTS.length} months** of Snapshot data. I can see your trends, your wins, and the areas that need honest attention.\n\n${weakAreas.length > 0 ? `Right now, your areas needing the most attention are **${weakAreas.join(', ')}**. ` : ''}${strongAreas.length > 0 ? `You're strong in **${strongAreas.join(', ')}** — let's protect that. ` : ''}\n\n${latestSnapshot ? `Your current major issue: *"${latestSnapshot.majorIssue}"*\n\n` : ''}> *"As iron sharpens iron, so one man sharpens another." — Proverbs 27:17*\n\nWhat's on your mind today? I can dig into any area of your Snapshot, challenge your thinking, or help you strategize.`,
       timestamp: new Date().toISOString(),
     },
   ]);
@@ -37,14 +70,6 @@ export default function Consultant() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
-
-  const latestSnapshot = MOCK_SNAPSHOTS[0];
-  const weakAreas = latestSnapshot
-    ? latestSnapshot.ratings
-        .filter((r) => r.score <= 5)
-        .map((r) => SNAPSHOT_CATEGORIES.find((c) => c.id === r.categoryId)?.name)
-        .filter(Boolean)
-    : [];
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isStreaming) return;
@@ -58,18 +83,18 @@ export default function Consultant() {
     setInput('');
     setIsStreaming(true);
 
-    // Build context-aware messages for the AI
-    const contextPrefix = weakAreas.length > 0
-      ? `[Context: User's weak Snapshot areas are: ${weakAreas.join(', ')}]\n\n`
-      : '';
-
-    const aiMessages = [
-      ...messages.filter(m => m.role === 'user' || m.role === 'assistant').map(m => ({
+    // Build messages with full snapshot profile context injected in the first user turn
+    const aiMessages = messages
+      .filter(m => m.role === 'user' || m.role === 'assistant')
+      .map((m, i) => ({
         role: m.role as 'user' | 'assistant',
         content: m.content,
-      })),
-      { role: 'user' as const, content: contextPrefix + text },
-    ];
+      }));
+
+    // Inject profile context with every message so AI always has full picture
+    const contextualMessage = `[SNAPSHOT DATA — USE THIS TO PERSONALIZE YOUR RESPONSE]\n${profileContext}\n[END SNAPSHOT DATA]\n\nUser message: ${text}`;
+
+    aiMessages.push({ role: 'user' as const, content: contextualMessage });
 
     let assistantSoFar = '';
     const assistantId = (Date.now() + 1).toString();
@@ -104,7 +129,7 @@ export default function Consultant() {
             The Consultant
           </h1>
           <p className="text-lg font-body text-muted-foreground mt-2">
-            AI-powered guidance from a Christian leadership perspective · Powered by OpenAI GPT-5
+            Personalized AI guidance based on your Snapshot history · {MOCK_SNAPSHOTS.length} months of data
           </p>
         </div>
 
@@ -170,7 +195,7 @@ export default function Consultant() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {CONSULTANT_PROMPTS.slice(0, 4).map((prompt) => (
+          {dynamicPrompts.slice(0, 4).map((prompt) => (
             <Button
               key={prompt}
               variant="outline"
