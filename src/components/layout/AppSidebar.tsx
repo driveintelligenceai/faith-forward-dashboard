@@ -4,7 +4,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useReminders } from '@/hooks/use-reminders';
 import { MOCK_SNAPSHOTS } from '@/data/mock-data';
@@ -27,6 +27,7 @@ export function AppSidebar() {
   const { state, isMobile } = useSidebar();
   const collapsed = state === 'collapsed' && !isMobile;
   const location = useLocation();
+  const navigate = useNavigate();
   const { profile, logout } = useAuth();
   const { getOverdue } = useReminders();
 
@@ -115,7 +116,7 @@ export function AppSidebar() {
             </SidebarMenuItem>
           )}
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Sign Out" onClick={logout} className="min-h-[44px] hover:bg-sidebar-accent/60 transition-all duration-200 rounded-xl">
+            <SidebarMenuButton tooltip="Sign Out" onClick={() => { logout(); navigate('/login'); }} className="min-h-[44px] hover:bg-sidebar-accent/60 transition-all duration-200 rounded-xl">
               <LogOut className="h-5 w-5 shrink-0 opacity-60" />
               {!collapsed && <span className="font-body text-base opacity-80">Sign Out</span>}
             </SidebarMenuButton>
