@@ -26,6 +26,7 @@ export function MobileCompanionSheet({
       <SheetContent side="bottom" className="h-[70vh] p-0 rounded-t-2xl">
         <SheetHeader className="sr-only">
           <SheetTitle>AI Companion</SheetTitle>
+          <SheetDescription>Your AI-powered snapshot scoring assistant</SheetDescription>
         </SheetHeader>
         <div className="h-full">
           <SnapshotCompanion
