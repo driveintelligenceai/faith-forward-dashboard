@@ -34,7 +34,9 @@ interface AuthContextType {
   session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isDemo: boolean;
   logout: () => void;
+  enterDemoMode: () => void;
   hasRole: (role: UserRole) => boolean;
   hasMinRole: (role: UserRole) => boolean;
   refreshProfile: () => Promise<void>;
@@ -94,11 +96,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
-          // Use setTimeout to avoid Supabase client deadlock
           setTimeout(() => fetchProfile(currentSession.user.id), 0);
         } else {
-          // No session — fall back to demo for now
-          setProfile(DEMO_PROFILE);
+          // No session — leave profile null (don't auto-load demo)
+          setProfile(null);
         }
         setIsLoading(false);
       }
@@ -111,8 +112,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(existingSession.user);
         fetchProfile(existingSession.user.id);
       } else {
-        // No session — demo fallback
-        setProfile(DEMO_PROFILE);
+        // No session — check if demo mode was previously active
+        const demoActive = sessionStorage.getItem('iron-forums-demo') === 'true';
+        if (demoActive) {
+          setProfile(DEMO_PROFILE);
+        }
+        // Otherwise leave profile null → Auth page will show
       }
       setIsLoading(false);
     });
@@ -120,11 +125,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  const enterDemoMode = () => {
+    sessionStorage.setItem('iron-forums-demo', 'true');
+    setProfile(DEMO_PROFILE);
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
+    sessionStorage.removeItem('iron-forums-demo');
     setSession(null);
     setUser(null);
-    setProfile(DEMO_PROFILE);
+    setProfile(null);
   };
 
   const refreshProfile = async () => {
@@ -137,6 +148,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return ROLE_HIERARCHY.indexOf(userRole) >= ROLE_HIERARCHY.indexOf(role);
   };
 
+  const isDemo = profile?.user_id === 'demo';
+
   return (
     <AuthContext.Provider
       value={{
@@ -145,7 +158,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         session,
         isAuthenticated: !!profile,
         isLoading,
+        isDemo,
         logout,
+        enterDemoMode,
         hasRole,
         hasMinRole,
         refreshProfile,

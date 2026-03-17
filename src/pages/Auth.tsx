@@ -1,16 +1,20 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import ironForumsLogo from '@/assets/iron-forums-logo.svg';
-import { Mail, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Mail, ArrowRight, CheckCircle2, Eye } from 'lucide-react';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const { toast } = useToast();
+  const { enterDemoMode } = useAuth();
+  const navigate = useNavigate();
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
@@ -99,6 +103,23 @@ export default function Auth() {
             </div>
           ) : (
             <div className="space-y-6">
+              {/* Explore Demo */}
+              <Button
+                size="lg"
+                className="w-full h-13 text-base font-heading font-bold gap-3 bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                onClick={() => { enterDemoMode(); navigate('/hub'); }}
+              >
+                <Eye className="h-5 w-5" />
+                Explore the Demo
+              </Button>
+
+              {/* Divider */}
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-xs font-body text-muted-foreground uppercase tracking-wider">or sign in</span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+
               {/* Google Sign In */}
               <Button
                 variant="outline"

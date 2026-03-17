@@ -15,17 +15,22 @@ import { DashboardLayout } from "./components/layout/DashboardLayout";
 const queryClient = new QueryClient();
 
 function AppRoutes() {
-  const { profile, isLoading, session } = useAuth();
+  const { profile, isLoading, isDemo } = useAuth();
   const location = useLocation();
 
   if (isLoading) return null;
 
-  // If no real session and using demo profile, show auth page
-  // For now, demo users bypass auth. Real auth users go through the full flow.
-  const isDemo = profile?.user_id === 'demo';
+  // No profile at all → show Auth page (login / create account / demo)
+  if (!profile) {
+    return (
+      <Routes>
+        <Route path="*" element={<Auth />} />
+      </Routes>
+    );
+  }
 
-  // If onboarding not completed (real user), show onboarding
-  if (profile && !isDemo && !profile.onboarding_completed) {
+  // Onboarding not completed → force onboarding (skip for demo users)
+  if (!isDemo && !profile.onboarding_completed) {
     return (
       <Routes>
         <Route path="*" element={<Onboarding />} />
@@ -33,16 +38,7 @@ function AppRoutes() {
     );
   }
 
-  // Demo users also see onboarding check
-  if (profile && isDemo && !profile.onboarding_completed) {
-    return (
-      <Routes>
-        <Route path="*" element={<Onboarding />} />
-      </Routes>
-    );
-  }
-
-  // Login route should be outside the SnapshotGate
+  // Login route accessible even when authenticated (for switching accounts)
   if (location.pathname === '/login') {
     return (
       <Routes>
