@@ -229,7 +229,7 @@ export default function Snapshot() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-5 sm:space-y-8">
+      <div className="space-y-3 sm:space-y-4">
         {/* Header */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-5">
           <div>
@@ -478,7 +478,7 @@ export default function Snapshot() {
               </Card>
             )}
 
-            <Tabs defaultValue="journey" className="space-y-4 sm:space-y-6">
+            <Tabs defaultValue="journey" className="space-y-3 sm:space-y-4">
               <TabsList className="p-1.5 sm:p-2 gap-1 sm:gap-2 font-body w-full flex">
                 <TabsTrigger value="journey" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
                   <Compass className="h-4 w-4" /> Journey
@@ -496,7 +496,7 @@ export default function Snapshot() {
 
               {/* JOURNEY TAB — the hero experience */}
               <TabsContent value="journey">
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <SnapshotPlayback snapshots={allSnapshots} categories={categories} />
                   <TrendChart snapshots={allSnapshots} categories={categories} />
                   <SnapshotSummary snapshots={allSnapshots} categories={categories} />

@@ -183,9 +183,9 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
 
   return (
     <Card className="border-secondary/20">
-      <CardContent className="p-4 sm:p-6 lg:p-8">
+      <CardContent className="p-3 sm:p-4 lg:p-5">
         {/* Title */}
-        <div className="text-center mb-4 sm:mb-6">
+        <div className="text-center mb-2 sm:mb-3">
           <h2 className="text-xl sm:text-2xl font-heading font-bold text-primary">Your Year in Motion</h2>
           <p className="text-sm font-body text-muted-foreground mt-1">
             Watch how your priorities have shifted over the last {total} months
@@ -193,7 +193,7 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
         </div>
 
         {/* Main layout: radar + stat cards */}
-        <div className="flex flex-col lg:flex-row lg:items-start gap-4 sm:gap-6">
+        <div className="flex flex-col lg:flex-row lg:items-start gap-3 sm:gap-4">
           {/* Left stat cards — desktop only */}
           {!isMobile && stats && (
             <div className="hidden lg:flex flex-col gap-3 w-48 shrink-0 pt-12">
@@ -216,7 +216,7 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
 
           {/* Radar chart */}
           <div className="flex-1 flex flex-col items-center">
-            <div className={`w-full ${isMobile ? 'h-[300px]' : 'h-[400px] lg:h-[450px]'}`}>
+            <div className={`w-full ${isMobile ? 'h-[260px]' : 'h-[300px] lg:h-[320px]'}`}>
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={mergedData} cx="50%" cy="50%" outerRadius={isMobile ? '62%' : '68%'}>
                   <PolarGrid stroke="hsl(213, 15%, 82%)" strokeDasharray="3 3" />
@@ -303,7 +303,7 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
         )}
 
         {/* Playback controls */}
-        <div className="mt-4 sm:mt-6 space-y-3">
+        <div className="mt-2 sm:mt-3 space-y-2">
           {/* Timeline dots */}
           <div className="flex items-center gap-1 justify-center">
             {chronological.map((snap, i) => (
