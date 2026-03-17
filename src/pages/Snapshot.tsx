@@ -10,9 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SNAPSHOT_CONFIGS } from '@/data/snapshot-categories';
 import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSnapshots } from '@/hooks/use-snapshots';
 import { getRoleSnapshotType, SNAPSHOT_TYPE_LABELS } from '@/types';
 import type { SnapshotRating, SnapshotType, SnapshotCategory, UserRole } from '@/types';
-import { Save, History, BarChart3, BookOpen, MessageCircle, X, Bookmark } from 'lucide-react';
+import { Save, History, BarChart3, BookOpen, MessageCircle, X, Bookmark, Loader2 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
@@ -43,13 +44,18 @@ function getScoreLabel(score: number) {
 export default function Snapshot() {
   const { toast } = useToast();
   const { profile } = useAuth();
+  const { snapshots: dbSnapshots, isLoading, isSaving, saveSnapshot } = useSnapshots();
   const defaultType = profile ? getRoleSnapshotType((profile.role || 'member') as UserRole) : 'member';
   const [snapshotType, setSnapshotType] = useState<SnapshotType>(defaultType);
   const categories = SNAPSHOT_CONFIGS[snapshotType];
 
-  const [purposeStatement, setPurposeStatement] = useState(MOCK_SNAPSHOTS[0]?.purposeStatement ?? '');
-  const [quarterlyGoal, setQuarterlyGoal] = useState(MOCK_SNAPSHOTS[0]?.quarterlyGoal ?? '');
-  const [majorIssue, setMajorIssue] = useState(MOCK_SNAPSHOTS[0]?.majorIssue ?? '');
+  // Use DB data if available, otherwise fall back to mock data for demo
+  const allSnapshots = dbSnapshots.length > 0 ? dbSnapshots : MOCK_SNAPSHOTS;
+  const latestSaved = allSnapshots[0];
+
+  const [purposeStatement, setPurposeStatement] = useState(latestSaved?.purposeStatement ?? '');
+  const [quarterlyGoal, setQuarterlyGoal] = useState(latestSaved?.quarterlyGoal ?? '');
+  const [majorIssue, setMajorIssue] = useState(latestSaved?.majorIssue ?? '');
   const [activeCategory, setActiveCategory] = useState<SnapshotCategory | null>(null);
   const [showCompanion, setShowCompanion] = useState(true);
   const [annotations, setAnnotations] = useState<Record<string, string>>({});
@@ -57,18 +63,18 @@ export default function Snapshot() {
   const [ratings, setRatings] = useState<Record<string, SnapshotRating>>(() => {
     const initial: Record<string, SnapshotRating> = {};
     Object.values(SNAPSHOT_CONFIGS).flat().forEach((cat) => {
-      const existing = MOCK_SNAPSHOTS[0]?.ratings.find((r) => r.categoryId === cat.id);
+      const existing = latestSaved?.ratings.find((r) => r.categoryId === cat.id);
       initial[cat.id] = existing ?? { categoryId: cat.id, score: 5, spouseScore: 5, childScore: 5 };
     });
     return initial;
   });
 
   const previousRatings = useMemo(() => {
-    if (MOCK_SNAPSHOTS.length < 2) return undefined;
+    if (allSnapshots.length < 2) return undefined;
     const prev: Record<string, SnapshotRating> = {};
-    MOCK_SNAPSHOTS[1].ratings.forEach((r) => { prev[r.categoryId] = r; });
+    allSnapshots[1].ratings.forEach((r) => { prev[r.categoryId] = r; });
     return prev;
-  }, []);
+  }, [allSnapshots]);
 
   const updateRating = (catId: string, field: keyof SnapshotRating, value: number) => {
     setRatings((prev) => ({ ...prev, [catId]: { ...prev[catId], [field]: value } }));
@@ -79,15 +85,23 @@ export default function Snapshot() {
     if (!showCompanion) setShowCompanion(true);
   };
 
-  const handleSave = () => {
-    toast({ title: 'Snapshot Saved', description: `Your ${SNAPSHOT_TYPE_LABELS[snapshotType]} has been saved successfully.` });
+  const handleSave = async () => {
+    // Include annotations as life events / notes
+    const enrichedRatings = { ...ratings };
+    Object.entries(annotations).forEach(([catId, note]) => {
+      if (enrichedRatings[catId]) {
+        enrichedRatings[catId] = { ...enrichedRatings[catId], lifeEvent: note };
+      }
+    });
+
+    await saveSnapshot(snapshotType, purposeStatement, quarterlyGoal, majorIssue, enrichedRatings);
   };
 
   const personalCategories = categories.filter((c) => c.group === 'personal');
   const professionalCategories = categories.filter((c) => c.group === 'professional');
   const spiritualCategories = categories.filter((c) => c.group === 'spiritual');
 
-  const historyData = MOCK_SNAPSHOTS.slice().reverse().map((s) => {
+  const historyData = allSnapshots.slice().reverse().map((s) => {
     const row: Record<string, string | number> = {
       date: new Date(s.date).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
     };
@@ -235,6 +249,19 @@ export default function Snapshot() {
     );
   };
 
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-[60vh]">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+            <p className="font-body text-muted-foreground">Loading your Snapshot history...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-8">
@@ -246,6 +273,9 @@ export default function Snapshot() {
             </h1>
             <p className="text-lg font-body text-muted-foreground mt-2 max-w-xl">
               Rate your last 30 days honestly. Take 20–30 minutes to pause, pray, and reflect.
+              {allSnapshots.length > 0 && (
+                <span className="text-secondary font-semibold"> · {allSnapshots.length} snapshots on record</span>
+              )}
             </p>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
@@ -298,9 +328,14 @@ export default function Snapshot() {
                 })}
               </div>
               <div className="ml-auto shrink-0">
-                <Button size="lg" onClick={handleSave} className="font-heading font-semibold h-12 px-6 gap-2 text-base">
-                  <Save className="h-5 w-5" />
-                  Save Snapshot
+                <Button
+                  size="lg"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="font-heading font-semibold h-12 px-6 gap-2 text-base"
+                >
+                  {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
+                  {isSaving ? 'Saving...' : 'Save Snapshot'}
                 </Button>
               </div>
             </div>
@@ -313,7 +348,7 @@ export default function Snapshot() {
               <Save className="h-5 w-5" /> My Snapshot
             </TabsTrigger>
             <TabsTrigger value="history" className="gap-2 font-body font-semibold text-base px-5 py-2.5 min-h-[44px]">
-              <History className="h-5 w-5" /> History
+              <History className="h-5 w-5" /> History ({allSnapshots.length})
             </TabsTrigger>
             <TabsTrigger value="radar" className="gap-2 font-body font-semibold text-base px-5 py-2.5 min-h-[44px]">
               <BarChart3 className="h-5 w-5" /> Overview
@@ -370,9 +405,14 @@ export default function Snapshot() {
                 </Card>
 
                 <div className="flex justify-end pb-10">
-                  <Button size="lg" onClick={handleSave} className="font-heading font-semibold px-10 h-14 gap-2 text-lg">
-                    <Save className="h-6 w-6" />
-                    Save Snapshot
+                  <Button
+                    size="lg"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="font-heading font-semibold px-10 h-14 gap-2 text-lg"
+                  >
+                    {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : <Save className="h-6 w-6" />}
+                    {isSaving ? 'Saving...' : 'Save Snapshot'}
                   </Button>
                 </div>
               </div>
@@ -385,7 +425,7 @@ export default function Snapshot() {
                       currentCategory={activeCategory}
                       ratings={ratings}
                       previousRatings={previousRatings}
-                    userName={profile?.full_name ?? 'Brother'}
+                      userName={profile?.full_name ?? 'Brother'}
                     />
                   </div>
                 </div>
@@ -432,31 +472,46 @@ export default function Snapshot() {
             <Card>
               <CardHeader>
                 <CardTitle className="font-heading text-2xl">Score Trends Over Time</CardTitle>
-                <p className="text-base font-body text-muted-foreground mt-1">Track your growth. Look for patterns and celebrate progress.</p>
+                <p className="text-base font-body text-muted-foreground mt-1">
+                  {allSnapshots.length > 0
+                    ? `Tracking ${allSnapshots.length} snapshots. Look for patterns and celebrate progress.`
+                    : 'Save your first Snapshot to start tracking your growth over time.'
+                  }
+                </p>
               </CardHeader>
               <CardContent>
-                <div className="h-[450px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={historyData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(213 15% 82%)" />
-                      <XAxis dataKey="date" tick={{ fontSize: 14, fontFamily: 'Quicksand' }} />
-                      <YAxis domain={[0, 10]} tick={{ fontSize: 14, fontFamily: 'Quicksand' }} />
-                      <Tooltip contentStyle={{ fontFamily: 'Quicksand', borderRadius: '8px', fontSize: 14 }} />
-                      {categories.map((cat, i) => (
-                        <Line
-                          key={cat.id}
-                          type="monotone"
-                          dataKey={cat.id}
-                          name={cat.name}
-                          stroke={`hsl(${(i * 33) % 360} 60% 45%)`}
-                          strokeWidth={2.5}
-                          dot={{ r: 5 }}
-                          connectNulls
-                        />
-                      ))}
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                {allSnapshots.length > 0 ? (
+                  <div className="h-[450px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={historyData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(213 15% 82%)" />
+                        <XAxis dataKey="date" tick={{ fontSize: 14, fontFamily: 'Quicksand' }} />
+                        <YAxis domain={[0, 10]} tick={{ fontSize: 14, fontFamily: 'Quicksand' }} />
+                        <Tooltip contentStyle={{ fontFamily: 'Quicksand', borderRadius: '8px', fontSize: 14 }} />
+                        {categories.map((cat, i) => (
+                          <Line
+                            key={cat.id}
+                            type="monotone"
+                            dataKey={cat.id}
+                            name={cat.name}
+                            stroke={`hsl(${(i * 33) % 360} 60% 45%)`}
+                            strokeWidth={2.5}
+                            dot={{ r: 5 }}
+                            connectNulls
+                          />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-center">
+                    <div>
+                      <History className="h-16 w-16 text-muted-foreground/20 mx-auto mb-4" />
+                      <p className="text-lg font-heading font-bold text-muted-foreground">No history yet</p>
+                      <p className="text-base font-body text-muted-foreground mt-1">Save your first Snapshot to begin tracking progress.</p>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
