@@ -479,7 +479,7 @@ export default function Snapshot() {
             )}
 
             <Tabs defaultValue="journey" className="space-y-2 sm:space-y-3">
-              <TabsList className="p-1.5 sm:p-2 gap-1 sm:gap-2 font-body w-full flex">
+              <TabsList className="p-1 sm:p-1.5 gap-0 font-body w-full flex">
                 <TabsTrigger value="journey" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
                   <Compass className="h-4 w-4" /> Journey
                 </TabsTrigger>
