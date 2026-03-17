@@ -293,13 +293,31 @@ export default function Snapshot() {
               </div>
             )}
 
+            {/* Save success overlay */}
+            {showSaveSuccess && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-slide-up-fade">
+                <div className="text-center space-y-4">
+                  <div className="relative mx-auto w-20 h-20">
+                    <div className="absolute inset-0 rounded-full bg-secondary/20 animate-confetti-burst" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <svg viewBox="0 0 24 24" className="h-12 w-12 text-secondary" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" className="animate-check-draw" style={{ strokeDasharray: 24, strokeDashoffset: 0 }} />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="text-xl font-heading font-bold text-primary">Snapshot Saved</p>
+                  <p className="text-sm font-body text-muted-foreground">Well done, brother. Keep showing up.</p>
+                </div>
+              </div>
+            )}
+
             {/* Final Step: Summary */}
             {step === totalSteps - 1 && (
-              <Card className="border-secondary/20">
+              <Card className="border-secondary/20 animate-slide-up-fade">
                 <CardContent className="p-6 sm:p-8 space-y-6">
                   <div className="text-center space-y-2">
                     <h2 className="text-xl sm:text-2xl font-heading font-bold text-primary">Your Snapshot Summary</h2>
-                    <p className="text-5xl font-heading font-bold text-secondary">{avgScore}</p>
+                    <p className="text-5xl font-heading font-bold text-secondary score-transition">{avgScore}</p>
                     <p className="text-sm font-body text-muted-foreground">Overall Average · {categories.length} categories</p>
                   </div>
 
@@ -327,11 +345,14 @@ export default function Snapshot() {
                   <Button
                     size="lg"
                     onClick={handleSave}
-                    disabled={isSaving}
+                    disabled={isSaving || showSaveSuccess}
                     className="w-full h-14 text-base font-heading font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground gap-2"
                   >
-                    {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
-                    {isSaving ? 'Saving...' : 'Save My Snapshot'}
+                    {isSaving ? (
+                      <><div className="h-5 w-5 rounded-full shimmer-gold" /> Saving...</>
+                    ) : (
+                      <><Save className="h-5 w-5" /> Save My Snapshot</>
+                    )}
                   </Button>
                 </CardContent>
               </Card>
