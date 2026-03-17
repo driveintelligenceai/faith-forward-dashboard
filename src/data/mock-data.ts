@@ -163,7 +163,7 @@ export const MOCK_EVENTS: ForumEvent[] = [
     title: "Men's Retreat Weekend",
     date: '2026-05-15',
     location: 'Amicalola Falls State Park, Dawsonville, GA',
-    description: 'Annual retreat focused on spiritual growth, brotherhood, strategic planning, and renewal. Connect · Sharpen · Grow.',
+    description: 'Annual retreat focused on spiritual growth, brotherhood, strategic planning, and renewal. Connect » Sharpen » Grow.',
     chapterId: '1',
     attendees: ['1', '2', '3', '4', '5', '6'],
     maxAttendees: 60,
