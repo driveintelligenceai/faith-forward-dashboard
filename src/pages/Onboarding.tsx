@@ -12,10 +12,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
 const SNAPSHOT_TYPE_DESCRIPTIONS: Record<SnapshotType, string> = {
-  member: 'Covers 11 areas of life and business — from faith and marriage to sales and leadership.',
-  leader: 'Focused on 9 areas including team management, goal progress, and spiritual growth.',
-  advisor: 'Tailored for mentors and advisors — 9 areas including mentoring and life lessons.',
-  nonprofit: 'Built for nonprofit leaders — 11 areas including growth, impact, and donor relationships.',
+  member: 'Iron Core covers 11 areas of life and business — from faith and marriage to sales and leadership.',
+  leader: 'Iron Edge focuses on 9 areas including team management, goal progress, and spiritual growth.',
+  advisor: 'Iron Pulse is tailored for mentors and advisors — 9 areas including mentoring and life lessons.',
+  nonprofit: 'Iron Mission is built for nonprofit leaders — 11 areas including growth, impact, and donor relationships.',
 };
 
 export default function Onboarding() {
