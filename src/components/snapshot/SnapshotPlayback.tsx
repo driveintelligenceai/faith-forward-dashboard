@@ -216,9 +216,9 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
 
           {/* Radar chart */}
           <div className="flex-1 flex flex-col items-center">
-            <div className={`w-full ${isMobile ? 'h-[260px]' : 'h-[300px] lg:h-[320px]'}`}>
+            <div className={`w-full ${isMobile ? 'h-[280px]' : 'h-[340px] lg:h-[380px]'}`}>
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={mergedData} cx="50%" cy="50%" outerRadius={isMobile ? '62%' : '68%'}>
+                <RadarChart data={mergedData} cx="50%" cy="50%" outerRadius={isMobile ? '70%' : '76%'}>
                   <PolarGrid stroke="hsl(213, 15%, 82%)" strokeDasharray="3 3" />
                   <PolarAngleAxis
                     dataKey="category"
@@ -303,43 +303,43 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
         )}
 
         {/* Playback controls */}
-        <div className="mt-2 sm:mt-3 space-y-2">
-          {/* Timeline dots */}
-          <div className="flex items-center gap-1 justify-center">
+        <div className="mt-1 space-y-1">
+          {/* Timeline dots — smaller and tighter */}
+          <div className="flex items-center gap-0.5 justify-center">
             {chronological.map((snap, i) => (
               <button
                 key={snap.id}
                 onClick={() => { setIsPlaying(false); setCurrentIdx(i); }}
                 className={`rounded-full transition-all duration-200 ${
                   i === currentIdx
-                    ? 'h-3.5 w-3.5 bg-secondary shadow-md'
+                    ? 'h-2.5 w-2.5 bg-secondary shadow-sm'
                     : i < currentIdx
-                    ? 'h-2 w-2 bg-secondary/40'
-                    : 'h-2 w-2 bg-border'
+                    ? 'h-1.5 w-1.5 bg-secondary/40'
+                    : 'h-1.5 w-1.5 bg-border'
                 }`}
                 aria-label={new Date(snap.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
               />
             ))}
           </div>
 
-          {/* Controls row */}
-          <div className="flex items-center justify-center gap-3">
+          {/* Controls row — compact */}
+          <div className="flex items-center justify-center gap-2">
             <Button
               variant="ghost" size="icon"
               onClick={() => handleStep(-1)}
               disabled={currentIdx <= 0}
-              className="h-10 w-10"
+              className="h-8 w-8"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4" />
             </Button>
 
             <Button
               variant="outline"
               size="sm"
               onClick={handlePlay}
-              className="font-body text-sm gap-2 min-h-[44px] px-5 border-secondary/30 hover:bg-secondary/10"
+              className="font-body text-xs gap-1.5 min-h-[36px] px-4 border-secondary/30 hover:bg-secondary/10"
             >
-              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
               {isPlaying ? 'Pause' : 'Play'}
             </Button>
 
@@ -347,23 +347,23 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
               variant="ghost" size="icon"
               onClick={() => handleStep(1)}
               disabled={currentIdx >= total - 1}
-              className="h-10 w-10"
+              className="h-8 w-8"
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
 
-          {/* Month label + speed */}
-          <div className="flex items-center justify-center gap-4">
-            <p className="text-sm font-heading font-bold text-foreground">{monthLabel}</p>
-            <span className="text-xs text-muted-foreground">·</span>
-            <p className="text-sm font-body text-muted-foreground">Avg: {stats?.avg.toFixed(1)}</p>
+          {/* Month label + speed — single compact line */}
+          <div className="flex items-center justify-center gap-3">
+            <p className="text-xs font-heading font-bold text-foreground">{monthLabel}</p>
+            <span className="text-[10px] text-muted-foreground">·</span>
+            <p className="text-xs font-body text-muted-foreground">Avg: {stats?.avg.toFixed(1)}</p>
             {!isMobile && (
               <>
-                <span className="text-xs text-muted-foreground">·</span>
+                <span className="text-[10px] text-muted-foreground">·</span>
                 <button
                   onClick={() => setSpeed(s => s === 1 ? 2 : 1)}
-                  className="text-xs font-body text-secondary hover:text-secondary/80 font-semibold min-h-[32px]"
+                  className="text-[11px] font-body text-secondary hover:text-secondary/80 font-semibold min-h-[28px]"
                 >
                   {speed}x speed
                 </button>
