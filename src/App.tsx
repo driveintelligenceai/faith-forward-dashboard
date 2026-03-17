@@ -13,6 +13,7 @@ import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import Membership from "./pages/Membership";
 import Login from "./pages/Login";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/snapshot" element={<ProtectedRoute><Snapshot /></ProtectedRoute>} />
             <Route path="/consultant" element={<ProtectedRoute><Consultant /></ProtectedRoute>} />

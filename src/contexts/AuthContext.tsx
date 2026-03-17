@@ -24,6 +24,8 @@ interface Profile {
   state: string | null;
   bio: string | null;
   phone: string | null;
+  onboarding_completed: boolean;
+  snapshot_type: string;
 }
 
 interface AuthContextType {
@@ -151,6 +153,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     state: 'Georgia',
     bio: null,
     phone: null,
+    onboarding_completed: true,
+    snapshot_type: 'advisor',
   };
 
   const loginAsDemo = () => {
