@@ -206,7 +206,7 @@ export default function Index() {
               <CardDescription className="text-sm sm:text-base font-body">Your progress over time</CardDescription>
             </CardHeader>
             <CardContent className="space-y-0">
-              {MOCK_SNAPSHOTS.map((s, i) => {
+              {allSnapshots.slice(0, 5).map((s, i) => {
                 const avg =
                   Math.round(
                     (s.ratings.reduce((sum, r) => sum + r.score, 0) / s.ratings.length) * 10
@@ -215,7 +215,7 @@ export default function Index() {
                   <div
                     key={s.id}
                     className={`flex items-center justify-between py-3.5 cursor-pointer hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-colors ${
-                      i < MOCK_SNAPSHOTS.length - 1 ? 'border-b border-border/30' : ''
+                      i < Math.min(allSnapshots.length, 5) - 1 ? 'border-b border-border/30' : ''
                     }`}
                     onClick={() => navigate('/snapshot')}
                   >
