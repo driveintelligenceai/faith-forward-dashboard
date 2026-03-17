@@ -675,13 +675,14 @@ function CategoryScoringCard({
           </div>
         </div>
 
-        {/* Main slider */}
+        {/* Main slider — extra-large thumb for touch */}
         <div className="space-y-3 px-2">
           <Slider
             value={[score]}
             onValueChange={([v]) => onUpdateRating('score', v)}
             min={1} max={10} step={1}
-            className="py-2 [&_[role=slider]]:h-7 [&_[role=slider]]:w-7"
+            aria-label={`Rate ${category.name} from 1 to 10`}
+            className="py-2 [&_[role=slider]]:h-8 [&_[role=slider]]:w-8 [&_[role=slider]]:border-secondary [&_[role=slider]]:shadow-md"
           />
           <div className="flex justify-between text-xs font-body text-muted-foreground">
             <span>1 = worst it's been</span>
