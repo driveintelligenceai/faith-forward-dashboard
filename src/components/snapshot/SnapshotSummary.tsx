@@ -101,8 +101,9 @@ export function SnapshotSummary({ snapshots, categories }: SnapshotSummaryProps)
 
     // Insight: spouse perception gap
     const marriageRatings = chronological.map(s => {
-      const r = s.ratings.find(r => r.categoryId === 'marriage');
-      return { self: r?.score ?? null, spouse: r?.spouseScore ?? null };
+      const selfR = s.ratings.find(r => r.categoryId === 'marriageSelf');
+      const spouseR = s.ratings.find(r => r.categoryId === 'marriageSpouse');
+      return { self: selfR?.score ?? null, spouse: spouseR?.score ?? null };
     }).filter(r => r.self !== null && r.spouse !== null);
     if (marriageRatings.length >= 3) {
       const avgGap = marriageRatings.reduce((s, r) => s + ((r.self ?? 0) - (r.spouse ?? 0)), 0) / marriageRatings.length;
@@ -114,9 +115,9 @@ export function SnapshotSummary({ snapshots, categories }: SnapshotSummaryProps)
     }
 
     // Insight: health decline
-    const healthCat = categories.find(c => c.id === 'physical_health');
+    const healthCat = categories.find(c => c.id === 'physicalHealth');
     if (healthCat) {
-      const healthScores = chronological.map(s => s.ratings.find(r => r.categoryId === 'physical_health')?.score ?? 5);
+      const healthScores = chronological.map(s => s.ratings.find(r => r.categoryId === 'physicalHealth')?.score ?? 5);
       const recentLow = healthScores.slice(-3).some(s => s <= 4);
       if (recentLow) {
         stories.push(

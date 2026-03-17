@@ -22,7 +22,7 @@ const SEED_REMINDERS: Reminder[] = [
   {
     id: 'demo-2',
     text: 'Schedule weekly date night with Sarah',
-    categoryId: 'marriage',
+    categoryId: 'marriageSelf',
     dueDate: isoDate(1),
     completed: false,
     createdAt: new Date().toISOString(),
@@ -31,7 +31,7 @@ const SEED_REMINDERS: Reminder[] = [
   {
     id: 'demo-3',
     text: 'Book a physical exam — blood pressure was flagged',
-    categoryId: 'physical_health',
+    categoryId: 'physicalHealth',
     dueDate: isoDate(5),
     completed: false,
     createdAt: new Date().toISOString(),
@@ -40,7 +40,7 @@ const SEED_REMINDERS: Reminder[] = [
   {
     id: 'demo-4',
     text: "Attend men's Bible study Wednesday",
-    categoryId: 'intimacy',
+    categoryId: 'intimacyWithJesus',
     dueDate: isoDate(2),
     completed: false,
     createdAt: new Date().toISOString(),

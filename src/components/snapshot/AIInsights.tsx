@@ -38,12 +38,12 @@ function getCachedInsights(): { content: InsightBlock[]; timestamp: number } | n
 function generateDemoInsights(): InsightBlock[] {
   return [
     {
-      id: 'marriage',
+      id: 'marriageSelf',
       emoji: '💛',
       title: 'Jonathan, Sarah needs you.',
       body: `Brother, I want to say this with love because I know your heart: your marriage has gone from a 7 to a 5 this year, and Sarah scored it at 3 last month. She told you she feels lonely — and that took real courage from her.\n\nYou missed your anniversary for a client pitch. You canceled date nights three weeks in a row. I know the business demands feel urgent, but *she* is the mission God gave you first.\n\n> *"What God has joined together, let no one separate." — Mark 10:9*\n\nThe good news? You started date nights again in December and the score moved. That tells me when you show up, she notices. You just have to keep showing up.`,
       actionText: 'Schedule weekly date night for the next month',
-      categoryId: 'marriage',
+      categoryId: 'marriageSelf',
     },
     {
       id: 'sales',
@@ -52,12 +52,12 @@ function generateDemoInsights(): InsightBlock[] {
       body: `Sales went from 7 to 9. The $1.2M deal, the overflowing pipeline, back-to-back records — God has clearly gifted you here. I'm proud of you.\n\nBut here's what I want you to sit with: **is this success costing you the things that matter most?** Your sales don't need you on the road every week. Your marriage, your health, your walk with Jesus — they need you *present*.\n\nSuccess without presence is just a highlight reel. And you're building a life, not a highlight reel.`,
     },
     {
-      id: 'intimacy',
+      id: 'intimacyWithJesus',
       emoji: '✝️',
       title: 'Your faith is reactive, not rooted.',
       body: `I notice a pattern: your walk with Jesus jumps to 7 when you attend a retreat or men's group, then drops to 5 when travel picks up. That tells me your spiritual life responds to *events* rather than being anchored in daily discipline.\n\nThe men's Bible study in July helped. The retreat in November helped. What if you committed to something that small but consistent — even 10 minutes in the Word before your first meeting?\n\n> *"Abide in me, and I in you. As the branch cannot bear fruit by itself, unless it abides in the vine." — John 15:4*\n\nYou don't need another mountaintop experience, brother. You need a daily rhythm.`,
       actionText: 'Commit to 10 min daily devotional before first meeting',
-      categoryId: 'intimacy',
+      categoryId: 'intimacyWithJesus',
     },
     {
       id: 'health',
@@ -65,10 +65,10 @@ function generateDemoInsights(): InsightBlock[] {
       title: 'Your body is telling you something. Please listen.',
       body: `Physical health dropped from 7 to 4. Mental health is at 5. Your doctor flagged your blood pressure. You put on 15 lbs. You joined a gym and went twice.\n\nI'm not here to shame you — I'm here because I care about you. Your family needs you healthy and present, not just successful. You can't pour from an empty cup, and right now you're running on fumes.\n\nWhat would it look like to protect just three mornings a week for your body? Not for vanity — for your daughters, for Sarah, for the decades ahead.`,
       actionText: 'Block 3 mornings this week for exercise',
-      categoryId: 'physical_health',
+      categoryId: 'physicalHealth',
     },
     {
-      id: 'parenting',
+      id: 'parentingSelf',
       emoji: '⭐',
       title: "You're a great dad. Protect that fiercely.",
       body: "Parenting is consistently your strongest area at 8-9, and your girls' scores confirm it. The coaching, the FaceTime calls from the road, the daddy-daughter days — Emma was proud when you coached her soccer team.\n\nThis is a gift, Jonathan. But here's what I want you to hear: **they won't always want to FaceTime.** The window is open right now. Be there while they still want you there.\n\nYou don't need to fix this one. You just need to keep doing what you're doing — and maybe do a little less of everything else so you can do more of this.",
