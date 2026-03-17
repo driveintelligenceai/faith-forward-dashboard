@@ -55,8 +55,8 @@ export function ActionItems() {
       </div>
 
       {upcoming.length === 0 ? (
-        <p className="text-sm font-body text-muted-foreground py-4 text-center">
-          No upcoming reminders. You're all caught up! ✓
+        <p className="text-sm font-body text-muted-foreground py-6 text-center">
+          No upcoming action items this week. Rest well, brother — you've earned it. ✓
         </p>
       ) : (
         <div className="space-y-1.5">
