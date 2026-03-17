@@ -149,8 +149,8 @@ export default function Snapshot() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-            <p className="font-body text-muted-foreground">Loading your Snapshot history...</p>
+            <div className="h-16 w-16 mx-auto rounded-2xl shimmer-gold" />
+            <p className="font-body text-muted-foreground">Preparing your Snapshot experience...</p>
           </div>
         </div>
       </DashboardLayout>
