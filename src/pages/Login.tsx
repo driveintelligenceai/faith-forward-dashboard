@@ -9,9 +9,11 @@ import { Mail, Linkedin, Loader2, CheckCircle2 } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const { loginWithGoogle, sendMagicLink, loginAsDemo } = useAuth();
+  const [showPasswordLogin, setShowPasswordLogin] = useState(false);
+  const { login, signup, loginWithGoogle, sendMagicLink, loginAsDemo } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
