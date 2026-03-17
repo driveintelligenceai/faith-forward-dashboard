@@ -453,7 +453,7 @@ export default function Snapshot() {
         {/* ═══════════════════════════════════════════════════════ */}
         {mode === 'review' && (
           <>
-            {/* AI Suggestion cards after save */}
+            {/* Mentor suggestion cards after save */}
             {aiSuggestions.length > 0 && (
               <Card className="border-secondary/30 bg-secondary/5">
                 <CardContent className="p-4 sm:p-5 space-y-3">
