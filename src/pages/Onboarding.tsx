@@ -310,7 +310,7 @@ export default function Onboarding() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-body font-semibold text-foreground mb-1.5 block">Company</label>
                     <div className="relative">
@@ -324,7 +324,7 @@ export default function Onboarding() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-body font-semibold text-foreground mb-1.5 block">City</label>
                     <div className="relative">
@@ -428,7 +428,7 @@ export default function Onboarding() {
                   <span className="text-3xl font-heading font-bold text-primary">{currentScore}</span>
                 </div>
 
-                <div className="grid grid-cols-10 gap-1.5">
+                <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
                     <button
                       key={n}
@@ -612,7 +612,7 @@ export default function Onboarding() {
       </div>
 
       {/* ──── RIGHT: AI COMPANION ──── */}
-      <div className="w-full lg:w-[400px] xl:w-[440px] border-t lg:border-t-0 lg:border-l bg-card flex flex-col h-[50vh] lg:h-screen">
+      <div className="w-full lg:w-[400px] xl:w-[440px] border-t lg:border-t-0 lg:border-l bg-card flex flex-col h-[40vh] sm:h-[45vh] lg:h-screen">
         {/* Header */}
         <div className="px-4 py-3 border-b bg-primary/5">
           <div className="flex items-center gap-2">
