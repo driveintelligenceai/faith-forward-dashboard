@@ -256,7 +256,7 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
 
             {/* "You are here" badge */}
             {isAtEnd && !isPlaying && (
-              <Badge className="bg-secondary/15 text-secondary border-secondary/30 font-body text-xs -mt-2 mb-2">
+              <Badge className="bg-secondary/15 text-secondary border-secondary/30 font-body text-[11px] -mt-3 mb-1">
                 ✦ You are here — {monthLabel}
               </Badge>
             )}
