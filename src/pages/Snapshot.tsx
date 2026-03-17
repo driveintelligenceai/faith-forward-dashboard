@@ -478,8 +478,11 @@ export default function Snapshot() {
               </Card>
             )}
 
-            <Tabs defaultValue="results" className="space-y-4 sm:space-y-6">
+            <Tabs defaultValue="journey" className="space-y-4 sm:space-y-6">
               <TabsList className="p-1.5 sm:p-2 gap-1 sm:gap-2 font-body w-full flex">
+                <TabsTrigger value="journey" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
+                  <Compass className="h-4 w-4" /> Journey
+                </TabsTrigger>
                 <TabsTrigger value="results" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
                   <Eye className="h-4 w-4" /> Results
                 </TabsTrigger>
@@ -490,6 +493,15 @@ export default function Snapshot() {
                   <History className="h-4 w-4" /> History
                 </TabsTrigger>
               </TabsList>
+
+              {/* JOURNEY TAB — the hero experience */}
+              <TabsContent value="journey">
+                <div className="space-y-6">
+                  <SnapshotPlayback snapshots={allSnapshots} categories={categories} />
+                  <TrendChart snapshots={allSnapshots} categories={categories} />
+                  <SnapshotSummary snapshots={allSnapshots} categories={categories} />
+                </div>
+              </TabsContent>
 
               {/* RESULTS TAB — with month navigation */}
               <TabsContent value="results">
