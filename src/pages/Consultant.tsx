@@ -3,11 +3,13 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MOCK_CHAT_MESSAGES, MOCK_SNAPSHOTS } from '@/data/mock-data';
+import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import { SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
 import type { ChatMessage } from '@/types';
-import { Send, Bot, User, Sparkles } from 'lucide-react';
+import { Send, Bot, User, Sparkles, AlertCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { streamChat } from '@/lib/ai-stream';
+import { useToast } from '@/hooks/use-toast';
 
 const CONSULTANT_PROMPTS = [
   "Help me with my marriage",
@@ -18,29 +20,19 @@ const CONSULTANT_PROMPTS = [
   "How do I become a better father?",
 ];
 
-function generateMockResponse(input: string): string {
-  const lower = input.toLowerCase();
-
-  if (lower.includes('marriage') || lower.includes('spouse')) {
-    return `**Marriage: A Covenant Worth Fighting For**\n\nBrother, I see your marriage score is an area you want to strengthen. Here's what I'd encourage:\n\n1. **Date your wife intentionally** — Schedule a weekly date night. No phones. No business talk.\n2. **Ask her tonight:** "What's one thing I could do this week that would make you feel truly loved?"\n3. **Pray together daily** — Even 5 minutes of shared prayer transforms a marriage.\n\n> *"The two shall become one flesh." — Mark 10:8*\n\nWhat specific challenge are you facing right now?`;
-  }
-
-  if (lower.includes('leadership') || lower.includes('business') || lower.includes('staff')) {
-    return `**Leading Like Christ in Business**\n\nStrong leadership starts with servant leadership:\n\n1. **Vision clarity** — Can every team member articulate where you're headed?\n2. **Weekly 1-on-1s** — 15 minutes per direct report. Ask: "What's blocking you?"\n3. **Delegate outcomes, not tasks** — Trust your team with the 'what'.\n\n> *"Be shepherds of God's flock that is under your care." — 1 Peter 5:2*\n\nWhat area of leadership feels most pressing right now?`;
-  }
-
-  if (lower.includes('faith') || lower.includes('spiritual') || lower.includes('jesus') || lower.includes('pray') || lower.includes('grow')) {
-    return `**Deepening Your Walk with Christ**\n\nIntimacy with Jesus isn't about perfection — it's about consistency:\n\n1. **Morning anchor** — Before email, spend 15 minutes in the Word.\n2. **Scripture memory** — Pick one verse per week. Carry it with you.\n3. **Find an accountability brother** — Iron sharpens iron.\n\n> *"You shall love the Lord your God with all your heart." — Matt. 22:37*\n\nWhere do you feel most distant from God right now?`;
-  }
-
-  return `**I'm Here to Help You Grow**\n\nBased on your Snapshot, here are some areas to consider:\n\n1. **Identify your lowest score** — That's where the biggest opportunity lies.\n2. **Set one micro-goal** — Just one. Make it specific for this week.\n3. **Find accountability** — Share your goal with one brother.\n\n> *"As iron sharpens iron, so one man sharpens another." — Proverbs 27:17*\n\nWhat area of your life feels most stuck right now?`;
-}
-
 export default function Consultant() {
-  const [messages, setMessages] = useState<ChatMessage[]>(MOCK_CHAT_MESSAGES);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: '0',
+      role: 'assistant',
+      content: `**Welcome, brother.** I'm The Consultant — your AI-powered guide rooted in Christian leadership principles.\n\nI'm here to challenge you, encourage you, and point you back to Scripture. Whether it's your marriage, your business, your walk with God, or something weighing on your heart — let's talk.\n\n> *"As iron sharpens iron, so one man sharpens another." — Proverbs 27:17*\n\nWhat's on your mind today?`,
+      timestamp: new Date().toISOString(),
+    },
+  ]);
   const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
@@ -54,8 +46,8 @@ export default function Consultant() {
         .filter(Boolean)
     : [];
 
-  const sendMessage = (text: string) => {
-    if (!text.trim()) return;
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || isStreaming) return;
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       role: 'user',
@@ -64,17 +56,44 @@ export default function Consultant() {
     };
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
-    setIsTyping(true);
-    setTimeout(() => {
-      const reply: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: generateMockResponse(text),
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, reply]);
-      setIsTyping(false);
-    }, 1200);
+    setIsStreaming(true);
+
+    // Build context-aware messages for the AI
+    const contextPrefix = weakAreas.length > 0
+      ? `[Context: User's weak Snapshot areas are: ${weakAreas.join(', ')}]\n\n`
+      : '';
+
+    const aiMessages = [
+      ...messages.filter(m => m.role === 'user' || m.role === 'assistant').map(m => ({
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+      })),
+      { role: 'user' as const, content: contextPrefix + text },
+    ];
+
+    let assistantSoFar = '';
+    const assistantId = (Date.now() + 1).toString();
+
+    await streamChat({
+      messages: aiMessages,
+      mode: 'consultant',
+      onDelta: (chunk) => {
+        assistantSoFar += chunk;
+        const currentContent = assistantSoFar;
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last?.id === assistantId) {
+            return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: currentContent } : m);
+          }
+          return [...prev, { id: assistantId, role: 'assistant', content: currentContent, timestamp: new Date().toISOString() }];
+        });
+      },
+      onDone: () => setIsStreaming(false),
+      onError: (error) => {
+        setIsStreaming(false);
+        toast({ title: 'Connection Issue', description: error, variant: 'destructive' });
+      },
+    });
   };
 
   return (
@@ -85,7 +104,7 @@ export default function Consultant() {
             The Consultant
           </h1>
           <p className="text-lg font-body text-muted-foreground mt-2">
-            AI-powered guidance from a Christian leadership perspective
+            AI-powered guidance from a Christian leadership perspective · Powered by OpenAI GPT-5
           </p>
         </div>
 
@@ -134,7 +153,7 @@ export default function Consultant() {
               )}
             </div>
           ))}
-          {isTyping && (
+          {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
             <div className="flex gap-3">
               <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center shrink-0">
                 <Bot className="h-6 w-6 text-primary-foreground" />
@@ -158,6 +177,7 @@ export default function Consultant() {
               size="lg"
               className="text-base font-body font-semibold hover:bg-secondary/10 hover:border-secondary/40 h-12 px-5"
               onClick={() => sendMessage(prompt)}
+              disabled={isStreaming}
             >
               {prompt}
             </Button>
@@ -171,8 +191,9 @@ export default function Consultant() {
             placeholder="Ask The Consultant for guidance..."
             className="text-lg font-body h-14 rounded-xl"
             onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
+            disabled={isStreaming}
           />
-          <Button size="lg" className="h-14 px-7 font-heading font-semibold text-base rounded-xl" onClick={() => sendMessage(input)} disabled={!input.trim()}>
+          <Button size="lg" className="h-14 px-7 font-heading font-semibold text-base rounded-xl" onClick={() => sendMessage(input)} disabled={!input.trim() || isStreaming}>
             <Send className="h-5 w-5 mr-2" />
             Send
           </Button>
