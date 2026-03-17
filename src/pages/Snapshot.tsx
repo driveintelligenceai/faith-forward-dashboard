@@ -70,6 +70,9 @@ export default function Snapshot() {
   const [purposeStatement, setPurposeStatement] = useState(latestSaved?.purposeStatement ?? '');
   const [quarterlyGoal, setQuarterlyGoal] = useState(latestSaved?.quarterlyGoal ?? '');
   const [majorIssue, setMajorIssue] = useState(latestSaved?.majorIssue ?? '');
+  const [aiSuggestions, setAiSuggestions] = useState<{text: string; categoryId: string}[]>([]);
+  const [reminderSheet, setReminderSheet] = useState(false);
+  const [reminderDefaults, setReminderDefaults] = useState({ text: '', categoryId: '' });
 
   const [ratings, setRatings] = useState<Record<string, SnapshotRating>>(() => {
     const initial: Record<string, SnapshotRating> = {};
