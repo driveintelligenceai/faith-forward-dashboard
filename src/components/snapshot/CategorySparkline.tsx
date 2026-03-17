@@ -62,7 +62,7 @@ export function CategorySparkline({ categoryId, snapshots, width = 100, height =
           fill={strokeColor}
         />
       </svg>
-      <span className={`text-xs font-body font-bold ${points.trend > 0 ? 'text-score-high' : points.trend < 0 ? 'text-score-low' : 'text-muted-foreground'}`}>
+      <span className={`text-xs font-body font-bold ${points.trend > 0 ? 'text-primary' : points.trend < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
         {points.trend > 0 ? '↑' : points.trend < 0 ? '↓' : '—'}{Math.abs(points.trend)}
       </span>
     </div>
