@@ -51,17 +51,17 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      {/* Logo Area — generous, centered, prominent */}
+      {/* Logo Area — large, prominent, unmissable */}
       <SidebarHeader className="border-b border-sidebar-border">
-        <div className={`flex flex-col items-center justify-center transition-all duration-300 ${collapsed ? 'py-4 px-2' : 'py-6 px-5'}`}>
+        <div className={`flex flex-col items-center justify-center transition-all duration-300 ${collapsed ? 'py-4 px-2' : 'py-8 px-6'}`}>
           <img
             src={ironForumsLogo}
             alt="Iron Forums"
-            className={`brightness-0 invert transition-all duration-300 ${collapsed ? 'h-8 w-8' : 'h-14 w-auto max-w-[180px]'}`}
+            className={`brightness-0 invert transition-all duration-300 ${collapsed ? 'h-9 w-9' : 'h-20 w-auto max-w-[200px]'}`}
           />
           {!collapsed && (
-            <span className="text-[10px] font-body tracking-[0.2em] uppercase text-sidebar-primary mt-2.5 opacity-80">
-              Connect » Sharpen » Grow
+            <span className="text-xs font-body tracking-[0.22em] uppercase text-sidebar-primary mt-3 font-semibold">
+              Connect &nbsp;»&nbsp; Sharpen &nbsp;»&nbsp; Grow
             </span>
           )}
         </div>
@@ -89,8 +89,8 @@ export function AppSidebar() {
                       <item.icon className="h-5 w-5 shrink-0 opacity-80" />
                       {!collapsed && (
                         <div className="flex flex-col ml-0.5">
-                          <span className="font-body text-[15px] font-semibold leading-tight">{item.title}</span>
-                          <span className="font-body text-[11px] text-sidebar-foreground/40 leading-tight">{item.desc}</span>
+                          <span className="font-body text-base font-semibold leading-tight">{item.title}</span>
+                          <span className="font-body text-xs text-sidebar-foreground/50 leading-tight">{item.desc}</span>
                         </div>
                       )}
                     </NavLink>
@@ -105,7 +105,7 @@ export function AppSidebar() {
           <SidebarGroup className="mt-6">
             <div className="px-3 mb-1.5">
               {!collapsed && (
-                <span className="text-[10px] font-body font-semibold uppercase tracking-[0.18em] text-sidebar-foreground/30">
+                <span className="text-xs font-body font-semibold uppercase tracking-[0.18em] text-sidebar-foreground/30">
                   Management
                 </span>
               )}
@@ -128,8 +128,8 @@ export function AppSidebar() {
                         <item.icon className="h-5 w-5 shrink-0 opacity-80" />
                         {!collapsed && (
                           <div className="flex flex-col ml-0.5">
-                            <span className="font-body text-[15px] font-semibold leading-tight">{item.title}</span>
-                            <span className="font-body text-[11px] text-sidebar-foreground/40 leading-tight">{item.desc}</span>
+                            <span className="font-body text-base font-semibold leading-tight">{item.title}</span>
+                            <span className="font-body text-xs text-sidebar-foreground/50 leading-tight">{item.desc}</span>
                           </div>
                         )}
                       </NavLink>
@@ -142,7 +142,7 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      {/* Footer — user profile & sign out */}
+      {/* Footer */}
       <SidebarFooter className="p-2.5 border-t border-sidebar-border space-y-0.5">
         <SidebarMenu>
           <SidebarMenuItem>
@@ -159,8 +159,8 @@ export function AppSidebar() {
                 )}
                 {!collapsed && (
                   <div className="flex flex-col flex-1 ml-0.5">
-                    <span className="text-[15px] font-body font-semibold leading-tight truncate">{profile?.full_name || 'My Profile'}</span>
-                    <span className="text-[11px] font-body text-sidebar-foreground/40 leading-tight truncate">{profile?.chapter || profile?.company_name || ''}</span>
+                    <span className="text-base font-body font-semibold leading-tight truncate">{profile?.full_name || 'My Profile'}</span>
+                    <span className="text-xs font-body text-sidebar-foreground/50 leading-tight truncate">{profile?.chapter || profile?.company_name || ''}</span>
                   </div>
                 )}
               </NavLink>
@@ -169,7 +169,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton tooltip="Sign Out" onClick={logout} className="min-h-[44px] hover:bg-sidebar-accent/60 transition-all duration-200 rounded-xl">
               <LogOut className="h-5 w-5 shrink-0 opacity-60" />
-              {!collapsed && <span className="font-body text-[15px] opacity-80">Sign Out</span>}
+              {!collapsed && <span className="font-body text-base opacity-80">Sign Out</span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
