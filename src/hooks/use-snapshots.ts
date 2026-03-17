@@ -32,8 +32,10 @@ export function useSnapshots() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
+  const isValidUuid = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
   const fetchSnapshots = useCallback(async () => {
-    if (!user) { setIsLoading(false); return; }
+    if (!user || !isValidUuid(user.id)) { setIsLoading(false); return; }
 
     try {
       // Fetch snapshots with ratings
