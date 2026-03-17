@@ -216,7 +216,7 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
 
           {/* Radar chart */}
           <div className="flex-1 flex flex-col items-center">
-            <div className={`w-full ${isMobile ? 'h-[280px]' : 'h-[340px] lg:h-[380px]'}`}>
+            <div className={`w-full ${isMobile ? 'h-[260px]' : 'h-[300px] lg:h-[330px]'}`}>
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={mergedData} cx="50%" cy="50%" outerRadius={isMobile ? '70%' : '76%'}>
                   <PolarGrid stroke="hsl(213, 15%, 82%)" strokeDasharray="3 3" />
