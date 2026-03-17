@@ -10,18 +10,8 @@ import Snapshot from "./pages/Snapshot";
 import Onboarding from "./pages/Onboarding";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import ComingSoon from "./pages/ComingSoon";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
-
-function ComingSoon({ title }: { title: string }) {
-  return (
-    <DashboardLayout>
-      <div className="flex flex-col items-center justify-center py-20 text-center space-y-3">
-        <h1 className="text-2xl font-heading font-bold text-primary">{title}</h1>
-        <p className="text-base font-body text-muted-foreground">Coming soon — this feature is under development.</p>
-      </div>
-    </DashboardLayout>
-  );
-}
 const queryClient = new QueryClient();
 
 function AppRoutes() {
