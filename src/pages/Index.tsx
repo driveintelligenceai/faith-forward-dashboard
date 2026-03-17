@@ -73,9 +73,9 @@ export default function Index() {
           </h1>
           <p className="text-base sm:text-lg font-body text-muted-foreground">
             <span className="text-secondary font-semibold">Connect</span>
-            <span className="mx-1.5 text-muted-foreground/40">·</span>
+            <span className="mx-1.5 text-muted-foreground/40">»</span>
             <span className="text-secondary font-semibold">Sharpen</span>
-            <span className="mx-1.5 text-muted-foreground/40">·</span>
+            <span className="mx-1.5 text-muted-foreground/40">»</span>
             <span className="text-secondary font-semibold">Grow</span>
           </p>
         </div>
