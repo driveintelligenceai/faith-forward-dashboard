@@ -98,10 +98,16 @@ export default function Snapshot() {
     setRatings((prev) => ({ ...prev, [catId]: { ...prev[catId], [field]: value } }));
   };
 
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+
   const handleSave = async () => {
     const result = await saveSnapshot(snapshotType, purposeStatement, quarterlyGoal, majorIssue, ratings);
     if (result) {
-      setMode('review');
+      setShowSaveSuccess(true);
+      setTimeout(() => {
+        setShowSaveSuccess(false);
+        setMode('review');
+      }, 1600);
       // Generate AI-suggested reminders for declining categories
       const suggestions: {text: string; categoryId: string}[] = [];
       if (previousRatings) {
