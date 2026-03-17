@@ -100,7 +100,7 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
           <Button
             size="lg"
             className="w-full sm:w-auto h-14 px-10 text-base font-heading font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground gap-2.5"
-            onClick={() => navigate('/snapshot')}>
+            onClick={() => navigate('/')}>
             
             Begin My Snapshot
             <ArrowRight className="h-5 w-5" />

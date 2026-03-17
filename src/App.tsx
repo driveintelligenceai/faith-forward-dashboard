@@ -64,8 +64,8 @@ function AppRoutes() {
   return (
     <SnapshotGate>
       <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/snapshot" element={<Snapshot />} />
+        <Route path="/" element={<Snapshot />} />
+        <Route path="/hub" element={<Hub />} />
         <Route path="/community" element={<ComingSoon title="Community" />} />
         <Route path="/leadership" element={<ComingSoon title="Leadership" />} />
         <Route path="/events" element={<ComingSoon title="Events" />} />

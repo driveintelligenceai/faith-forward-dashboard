@@ -1,6 +1,6 @@
 import {
-  LayoutDashboard,
   ClipboardCheck,
+  Newspaper,
   Users,
   Award,
   CalendarDays,
@@ -48,8 +48,8 @@ export function AppSidebar() {
   };
 
   const mainNav = [
-    { title: 'Dashboard', url: '/', icon: LayoutDashboard, desc: 'Your overview', badge: false },
-    { title: 'My Snapshot', url: '/snapshot', icon: ClipboardCheck, desc: 'Rate your 30 days', badge: showSnapshotBadge },
+    { title: 'My Snapshot', url: '/', icon: ClipboardCheck, desc: 'Rate your 30 days', badge: showSnapshotBadge },
+    { title: 'Hub', url: '/hub', icon: Newspaper, desc: 'News & action items', badge: false },
     { title: 'Community', url: '/community', icon: Users, desc: 'Your forum brothers', badge: false },
     { title: 'Leadership', url: '/leadership', icon: Award, desc: 'Growth & mentoring', badge: false },
     { title: 'Events', url: '/events', icon: CalendarDays, desc: 'Meetings & gatherings', badge: false },
