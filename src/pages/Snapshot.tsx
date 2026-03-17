@@ -359,141 +359,186 @@ export default function Snapshot() {
         {/* REVIEW MODE                                             */}
         {/* ═══════════════════════════════════════════════════════ */}
         {mode === 'review' && (
-          <Tabs defaultValue="results" className="space-y-4 sm:space-y-6">
-            <TabsList className="p-1.5 sm:p-2 gap-1 sm:gap-2 font-body w-full flex">
-              <TabsTrigger value="results" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
-                <Eye className="h-4 w-4" /> Results
-              </TabsTrigger>
-              <TabsTrigger value="insights" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
-                <Activity className="h-4 w-4" /> Insights
-              </TabsTrigger>
-              <TabsTrigger value="history" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
-                <History className="h-4 w-4" /> History
-              </TabsTrigger>
-            </TabsList>
+          <>
+            {/* AI Suggestion cards after save */}
+            {aiSuggestions.length > 0 && (
+              <Card className="border-secondary/30 bg-secondary/5">
+                <CardContent className="p-4 sm:p-5 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-secondary" />
+                    <p className="font-heading font-bold text-sm text-foreground">James noticed some trends</p>
+                  </div>
+                  {aiSuggestions.map((s, i) => (
+                    <div key={i} className="flex items-center justify-between gap-3 py-2 border-t border-border/30">
+                      <p className="font-body text-sm text-foreground">{s.text}</p>
+                      <div className="flex gap-2 shrink-0">
+                        <Button size="sm" variant="outline" className="text-xs font-body min-h-[36px]" onClick={() => setAiSuggestions(prev => prev.filter(x => x.text !== s.text))}>
+                          Not now
+                        </Button>
+                        <Button size="sm" className="text-xs font-body min-h-[36px] bg-secondary hover:bg-secondary/90 text-secondary-foreground" onClick={() => acceptSuggestion(s)}>
+                          Add reminder
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
-            {/* RESULTS TAB */}
-            <TabsContent value="results">
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                  <Card className="border-secondary/20 bg-secondary/5">
-                    <CardContent className="p-6 sm:p-8 text-center">
-                      <p className="text-6xl sm:text-7xl font-heading font-bold text-secondary">{avgScore}</p>
-                      <p className="text-sm font-body text-muted-foreground mt-2">Overall Score · {categories.length} categories</p>
-                      {previousRatings && (
-                        <p className="text-xs font-body text-muted-foreground mt-1">
-                          {(() => {
-                            const prevAvg = categories.reduce((s, c) => s + (previousRatings[c.id]?.score ?? 5), 0) / categories.length;
-                            const delta = parseFloat(avgScore) - prevAvg;
-                            return delta > 0 ? `↑ Up ${delta.toFixed(1)} from last month` : delta < 0 ? `↓ Down ${Math.abs(delta).toFixed(1)} from last month` : 'Same as last month';
-                          })()}
-                        </p>
-                      )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-4 font-body text-sm gap-1.5"
-                        onClick={() => toast({ title: 'Coming Soon', description: 'Sharing with your Snapshot Group is on the way.' })}
-                      >
-                        <Share2 className="h-4 w-4" /> Share with my Group
-                      </Button>
-                    </CardContent>
-                  </Card>
+            <Tabs defaultValue="results" className="space-y-4 sm:space-y-6">
+              <TabsList className="p-1.5 sm:p-2 gap-1 sm:gap-2 font-body w-full flex">
+                <TabsTrigger value="results" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
+                  <Eye className="h-4 w-4" /> Results
+                </TabsTrigger>
+                <TabsTrigger value="insights" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
+                  <Activity className="h-4 w-4" /> Insights
+                </TabsTrigger>
+                <TabsTrigger value="history" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
+                  <History className="h-4 w-4" /> History
+                </TabsTrigger>
+              </TabsList>
+
+              {/* RESULTS TAB */}
+              <TabsContent value="results">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    <Card className="border-secondary/20 bg-secondary/5">
+                      <CardContent className="p-6 sm:p-8 text-center">
+                        <p className="text-6xl sm:text-7xl font-heading font-bold text-secondary">{avgScore}</p>
+                        <p className="text-sm font-body text-muted-foreground mt-2">Overall Score · {categories.length} categories</p>
+                        {previousRatings && (
+                          <p className="text-xs font-body text-muted-foreground mt-1">
+                            {(() => {
+                              const prevAvg = categories.reduce((s, c) => s + (previousRatings[c.id]?.score ?? 5), 0) / categories.length;
+                              const delta = parseFloat(avgScore) - prevAvg;
+                              return delta > 0 ? `↑ Up ${delta.toFixed(1)} from last month` : delta < 0 ? `↓ Down ${Math.abs(delta).toFixed(1)} from last month` : 'Same as last month';
+                            })()}
+                          </p>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-4 font-body text-sm gap-1.5"
+                          onClick={() => toast({ title: 'Coming Soon', description: 'Sharing with your Snapshot Group is on the way.' })}
+                        >
+                          <Share2 className="h-4 w-4" /> Share with my Group
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardContent className="p-4 sm:p-6">
+                        <div className="h-[250px] sm:h-[280px] w-full">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
+                              <PolarGrid stroke="hsl(213 15% 82%)" />
+                              <PolarAngleAxis dataKey="category" tick={{ fontSize: 11, fontFamily: 'Quicksand' }} />
+                              <PolarRadiusAxis angle={90} domain={[0, 10]} tick={{ fontSize: 10, fontFamily: 'Quicksand' }} />
+                              <Radar name="Score" dataKey="score" stroke="hsl(39 78% 48%)" fill="hsl(39 78% 48%)" fillOpacity={0.25} strokeWidth={2.5} />
+                            </RadarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
 
                   <Card>
-                    <CardContent className="p-4 sm:p-6">
-                      <div className="h-[250px] sm:h-[280px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
-                            <PolarGrid stroke="hsl(213 15% 82%)" />
-                            <PolarAngleAxis dataKey="category" tick={{ fontSize: 11, fontFamily: 'Quicksand' }} />
-                            <PolarRadiusAxis angle={90} domain={[0, 10]} tick={{ fontSize: 10, fontFamily: 'Quicksand' }} />
-                            <Radar name="Score" dataKey="score" stroke="hsl(39 78% 48%)" fill="hsl(39 78% 48%)" fillOpacity={0.25} strokeWidth={2.5} />
-                          </RadarChart>
-                        </ResponsiveContainer>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg font-heading">Category Breakdown</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {categories.map(cat => {
+                          const score = ratings[cat.id]?.score ?? 5;
+                          const prevScore = previousRatings?.[cat.id]?.score;
+                          const delta = prevScore !== undefined ? score - prevScore : null;
+                          return (
+                            <div key={cat.id} className={`flex items-center justify-between p-3 rounded-lg ${getScoreBorder(score)}`}>
+                              <span className="text-sm font-heading font-bold truncate mr-2">{cat.name}</span>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {delta !== null && delta !== 0 && (
+                                  <span className={`text-xs font-body font-bold ${delta > 0 ? 'text-primary' : 'text-destructive'}`}>
+                                    {delta > 0 ? '+' : ''}{delta}
+                                  </span>
+                                )}
+                                <span className={`text-xl font-heading font-bold ${getScoreColor(score)}`}>{score}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </CardContent>
                   </Card>
                 </div>
+              </TabsContent>
 
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg font-heading">Category Breakdown</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {categories.map(cat => {
-                        const score = ratings[cat.id]?.score ?? 5;
-                        const prevScore = previousRatings?.[cat.id]?.score;
-                        const delta = prevScore !== undefined ? score - prevScore : null;
-                        return (
-                          <div key={cat.id} className={`flex items-center justify-between p-3 rounded-lg ${getScoreBorder(score)}`}>
-                            <span className="text-sm font-heading font-bold truncate mr-2">{cat.name}</span>
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              {delta !== null && delta !== 0 && (
-                                <span className={`text-xs font-body font-bold ${delta > 0 ? 'text-primary' : 'text-destructive'}`}>
-                                  {delta > 0 ? '+' : ''}{delta}
-                                </span>
-                              )}
-                              <span className={`text-xl font-heading font-bold ${getScoreColor(score)}`}>{score}</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
+              {/* INSIGHTS TAB */}
+              <TabsContent value="insights">
+                <AIInsights
+                  snapshots={allSnapshots}
+                  categories={categories}
+                  userName={profile?.full_name ?? 'Brother'}
+                />
+              </TabsContent>
 
-            {/* INSIGHTS TAB */}
-            <TabsContent value="insights">
-              <AIInsights
-                snapshots={allSnapshots}
-                categories={categories}
-                userName={profile?.full_name ?? 'Brother'}
-              />
-            </TabsContent>
-
-            {/* HISTORY TAB */}
-            <TabsContent value="history">
-              <div className="space-y-6">
-                <Card className="border-secondary/20">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-lg font-heading font-bold">12-Month Journey</p>
-                        <p className="text-sm font-body text-muted-foreground mt-0.5">
-                          Tap any month to see what happened. Look for your <span className="text-secondary font-semibold">life notes</span>.
+              {/* HISTORY TAB */}
+              <TabsContent value="history">
+                <div className="space-y-6">
+                  <Card className="border-secondary/20">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-lg font-heading font-bold">12-Month Journey</p>
+                          <p className="text-sm font-body text-muted-foreground mt-0.5">
+                            Tap any month to see what happened. Look for your <span className="text-secondary font-semibold">life notes</span>.
+                          </p>
+                        </div>
+                        <p className="text-sm font-body text-muted-foreground shrink-0">
+                          {allSnapshots.length} snapshots
                         </p>
                       </div>
-                      <p className="text-sm font-body text-muted-foreground shrink-0">
-                        {allSnapshots.length} snapshots
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
-                {[
-                  { title: 'Spiritual Life', cats: spiritualCategories, color: 'bg-secondary' },
-                  { title: 'Personal Life', cats: personalCategories, color: 'bg-primary' },
-                  { title: 'Professional Life', cats: professionalCategories, color: 'bg-primary/60' },
-                ].map(({ title, cats, color }) => cats.length > 0 && (
-                  <div key={title}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`h-6 w-1.5 rounded-full ${color}`} />
-                      <h2 className="text-lg font-heading font-bold text-primary">{title}</h2>
+                  {[
+                    { title: 'Spiritual Life', cats: spiritualCategories, color: 'bg-secondary' },
+                    { title: 'Personal Life', cats: personalCategories, color: 'bg-primary' },
+                    { title: 'Professional Life', cats: professionalCategories, color: 'bg-primary/60' },
+                  ].map(({ title, cats, color }) => cats.length > 0 && (
+                    <div key={title}>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className={`h-6 w-1.5 rounded-full ${color}`} />
+                        <h2 className="text-lg font-heading font-bold text-primary">{title}</h2>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {cats.map(cat => (
+                          <div key={cat.id} className="space-y-1">
+                            <CategoryTimeline category={cat} snapshots={allSnapshots} />
+                            <button
+                              onClick={() => {
+                                setReminderDefaults({ text: `Improve ${cat.name} this month`, categoryId: cat.id });
+                                setReminderSheet(true);
+                              }}
+                              className="inline-flex items-center gap-1 text-xs font-body text-muted-foreground hover:text-primary transition-colors ml-1 min-h-[32px]"
+                            >
+                              <Bell className="h-3 w-3" /> Set reminder
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {cats.map(cat => (
-                        <CategoryTimeline key={cat.id} category={cat} snapshots={allSnapshots} />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <SetReminderSheet
+              open={reminderSheet}
+              onOpenChange={setReminderSheet}
+              defaultText={reminderDefaults.text}
+              defaultCategoryId={reminderDefaults.categoryId}
+            />
+          </>
         )}
       </div>
     </DashboardLayout>
