@@ -134,7 +134,7 @@ export default function Consultant() {
             The Consultant
           </h1>
           <p className="text-lg font-body text-muted-foreground mt-2">
-            Personalized AI guidance based on your Snapshot history · {MOCK_SNAPSHOTS.length} months of data
+            Personalized AI guidance based on your Snapshot history · {allSnapshots.length} months of data
           </p>
         </div>
 
