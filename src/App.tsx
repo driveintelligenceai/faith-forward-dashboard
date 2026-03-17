@@ -8,17 +8,31 @@ import { SnapshotGate } from "@/components/SnapshotGate";
 import Index from "./pages/Index";
 import Snapshot from "./pages/Snapshot";
 import Onboarding from "./pages/Onboarding";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 function AppRoutes() {
-  const { profile, isLoading } = useAuth();
+  const { profile, isLoading, session } = useAuth();
 
   if (isLoading) return null;
 
-  // If onboarding not completed, show onboarding
-  if (profile && !profile.onboarding_completed) {
+  // If no real session and using demo profile, show auth page
+  // For now, demo users bypass auth. Real auth users go through the full flow.
+  const isDemo = profile?.user_id === 'demo';
+
+  // If onboarding not completed (real user), show onboarding
+  if (profile && !isDemo && !profile.onboarding_completed) {
+    return (
+      <Routes>
+        <Route path="*" element={<Onboarding />} />
+      </Routes>
+    );
+  }
+
+  // Demo users also see onboarding check
+  if (profile && isDemo && !profile.onboarding_completed) {
     return (
       <Routes>
         <Route path="*" element={<Onboarding />} />
@@ -31,6 +45,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/snapshot" element={<Snapshot />} />
+        <Route path="/login" element={<Auth />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </SnapshotGate>
