@@ -28,8 +28,8 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
     return sessionStorage.getItem(getDismissKey()) === 'true';
   });
 
-  // Don't gate the snapshot page itself
-  if (location.pathname === '/snapshot') return <>{children}</>;
+  // Don't gate the snapshot page itself (now at /)
+  if (location.pathname === '/') return <>{children}</>;
 
   if (isLoading || !profile) return <>{children}</>;
 
@@ -100,7 +100,7 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
           <Button
             size="lg"
             className="w-full sm:w-auto h-14 px-10 text-base font-heading font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground gap-2.5"
-            onClick={() => navigate('/snapshot')}>
+            onClick={() => navigate('/')}>
             
             Begin My Snapshot
             <ArrowRight className="h-5 w-5" />
@@ -114,7 +114,7 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
               }}
               className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2">
               
-              I'll do it later — take me to the dashboard
+              I'll do it later — take me to the Hub
             </button>
           </div>
         </div>
