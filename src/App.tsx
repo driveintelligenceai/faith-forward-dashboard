@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Snapshot from "./pages/Snapshot";
 import Consultant from "./pages/Consultant";
@@ -23,13 +24,13 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/snapshot" element={<Snapshot />} />
-            <Route path="/consultant" element={<Consultant />} />
-            <Route path="/community" element={<Community />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/profile" element={<Profile />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/snapshot" element={<ProtectedRoute><Snapshot /></ProtectedRoute>} />
+            <Route path="/consultant" element={<ProtectedRoute><Consultant /></ProtectedRoute>} />
+            <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
