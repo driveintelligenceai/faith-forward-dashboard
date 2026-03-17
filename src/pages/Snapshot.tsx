@@ -229,11 +229,11 @@ export default function Snapshot() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-2 sm:space-y-3">
         {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-5">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
           <div>
-            <h1 className="text-2xl sm:text-4xl font-heading font-bold tracking-tight text-primary">
+            <h1 className="text-xl sm:text-3xl font-heading font-bold tracking-tight text-primary">
               {SNAPSHOT_TYPE_LABELS[snapshotType]}
             </h1>
             <p className="text-sm sm:text-base font-body text-muted-foreground mt-1">
@@ -478,7 +478,7 @@ export default function Snapshot() {
               </Card>
             )}
 
-            <Tabs defaultValue="journey" className="space-y-3 sm:space-y-4">
+            <Tabs defaultValue="journey" className="space-y-2 sm:space-y-3">
               <TabsList className="p-1.5 sm:p-2 gap-1 sm:gap-2 font-body w-full flex">
                 <TabsTrigger value="journey" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
                   <Compass className="h-4 w-4" /> Journey
