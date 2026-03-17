@@ -1,4 +1,9 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
+import { SetReminderSheet } from '@/components/dashboard/SetReminderSheet';
+import { useNavigate } from 'react-router-dom';
+import { MessageSquare, Bell } from 'lucide-react';
 import type { Snapshot } from '@/types';
 
 interface PulseAlert {
@@ -6,6 +11,7 @@ interface PulseAlert {
   headline: string;
   detail: string;
   type: 'declining' | 'stagnant' | 'growing' | 'warning';
+  categoryId?: string;
 }
 
 function generateAlerts(snapshots: Snapshot[]): PulseAlert[] {
@@ -15,38 +21,34 @@ function generateAlerts(snapshots: Snapshot[]): PulseAlert[] {
   const sorted = [...snapshots].sort((a, b) => a.date.localeCompare(b.date));
   const recent3 = sorted.slice(-3);
   const catMap = new Map(SNAPSHOT_CATEGORIES.map(c => [c.id, c.name]));
-
-  // Per-category analysis
   const categoryIds = new Set(sorted[0]?.ratings.map(r => r.categoryId) || []);
 
   for (const catId of categoryIds) {
     const last3Scores = recent3.map(s => s.ratings.find(r => r.categoryId === catId)?.score ?? 0);
     const catName = catMap.get(catId) || catId;
 
-    // 3-month declining trend
     if (last3Scores[0] > last3Scores[1] && last3Scores[1] > last3Scores[2]) {
       alerts.push({
         emoji: '📉',
         headline: `${catName} has declined 3 months straight`,
         detail: `You scored ${last3Scores.join('→')}. Time to address this before it becomes a pattern.`,
         type: 'declining',
+        categoryId: catId,
       });
     }
 
-    // Stagnant at low score (≤4 for 3+ months)
     if (last3Scores.every(s => s <= 4)) {
-      // Don't double-count if already declining
       if (!(last3Scores[0] > last3Scores[1] && last3Scores[1] > last3Scores[2])) {
         alerts.push({
           emoji: '⚠️',
           headline: `${catName} has been stuck at ${last3Scores[2]}`,
           detail: `It's been at ${last3Scores.join(', ')} for three months. Small steps compound.`,
           type: 'stagnant',
+          categoryId: catId,
         });
       }
     }
 
-    // Spouse perception gap
     const latestSnap = sorted[sorted.length - 1];
     const latestRating = latestSnap.ratings.find(r => r.categoryId === catId);
     if (latestRating?.spouseScore !== undefined && latestRating.spouseScore > 0) {
@@ -57,22 +59,24 @@ function generateAlerts(snapshots: Snapshot[]): PulseAlert[] {
           headline: `Your wife sees ${catName} differently`,
           detail: `You scored ${latestRating.score}, she scored ${latestRating.spouseScore}. That gap matters.`,
           type: 'warning',
+          categoryId: catId,
         });
       }
     }
   }
 
-  // Find biggest positive trend (last 6 months)
   const recent6 = sorted.slice(-6);
   if (recent6.length >= 2) {
     let bestDelta = 0;
     let bestCat = '';
+    let bestCatId = '';
     for (const catId of categoryIds) {
       const first = recent6[0].ratings.find(r => r.categoryId === catId)?.score ?? 0;
       const last = recent6[recent6.length - 1].ratings.find(r => r.categoryId === catId)?.score ?? 0;
       if (last - first > bestDelta) {
         bestDelta = last - first;
         bestCat = catMap.get(catId) || catId;
+        bestCatId = catId;
       }
     }
     if (bestDelta >= 2) {
@@ -81,11 +85,11 @@ function generateAlerts(snapshots: Snapshot[]): PulseAlert[] {
         headline: `${bestCat} is your growth story`,
         detail: `Up ${bestDelta} points over 6 months. Whatever you're doing, keep doing it.`,
         type: 'growing',
+        categoryId: bestCatId,
       });
     }
   }
 
-  // Prioritize: declining first, then warning, stagnant, growing. Limit to 3.
   const priority: Record<string, number> = { declining: 0, warning: 1, stagnant: 2, growing: 3 };
   alerts.sort((a, b) => priority[a.type] - priority[b.type]);
   return alerts.slice(0, 3);
@@ -107,8 +111,24 @@ const bgColors: Record<string, string> = {
 
 export function PulseAlerts({ snapshots }: { snapshots: Snapshot[] }) {
   const alerts = generateAlerts(snapshots);
+  const navigate = useNavigate();
+  const [reminderSheet, setReminderSheet] = useState(false);
+  const [reminderDefaults, setReminderDefaults] = useState({ text: '', categoryId: '' });
 
   if (alerts.length === 0) return null;
+
+  const handleAskJames = (alert: PulseAlert) => {
+    navigate('/snapshot?mode=review&tab=insights');
+  };
+
+  const handleSetReminder = (alert: PulseAlert) => {
+    const catName = SNAPSHOT_CATEGORIES.find(c => c.id === alert.categoryId)?.name || '';
+    setReminderDefaults({
+      text: `Work on ${catName}: ${alert.headline}`,
+      categoryId: alert.categoryId || '',
+    });
+    setReminderSheet(true);
+  };
 
   return (
     <div className="space-y-4">
@@ -131,11 +151,33 @@ export function PulseAlerts({ snapshots }: { snapshots: Snapshot[] }) {
                 <p className="font-body text-sm text-muted-foreground mt-1 leading-relaxed">
                   {alert.detail}
                 </p>
+                <div className="flex items-center gap-3 mt-3">
+                  <button
+                    onClick={() => handleAskJames(alert)}
+                    className="inline-flex items-center gap-1 text-sm font-body text-primary hover:text-primary/80 transition-colors min-h-[36px]"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    Ask James
+                  </button>
+                  <button
+                    onClick={() => handleSetReminder(alert)}
+                    className="inline-flex items-center gap-1 text-sm font-body text-muted-foreground hover:text-foreground transition-colors min-h-[36px]"
+                  >
+                    <Bell className="h-3.5 w-3.5" />
+                    Set reminder
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         ))}
       </div>
+      <SetReminderSheet
+        open={reminderSheet}
+        onOpenChange={setReminderSheet}
+        defaultText={reminderDefaults.text}
+        defaultCategoryId={reminderDefaults.categoryId}
+      />
     </div>
   );
 }
