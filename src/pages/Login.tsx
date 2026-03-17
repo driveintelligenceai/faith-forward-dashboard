@@ -154,6 +154,45 @@ export default function Login() {
           </form>
         )}
 
+        {/* Password login toggle */}
+        <div className="pt-1">
+          <button
+            onClick={() => setShowPasswordLogin(!showPasswordLogin)}
+            className="w-full text-sm font-body text-primary-foreground/50 hover:text-secondary transition-colors py-2"
+          >
+            {showPasswordLogin ? 'Hide' : 'Sign in with password'}
+          </button>
+        </div>
+
+        {showPasswordLogin && (
+          <form onSubmit={handlePasswordLogin} className="space-y-3">
+            <Input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="h-14 text-base font-body rounded-xl bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 focus:border-secondary"
+              required
+            />
+            <Input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="h-14 text-base font-body rounded-xl bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 focus:border-secondary"
+              required
+            />
+            <Button
+              type="submit"
+              variant="outline"
+              className="w-full h-14 text-base font-heading font-semibold rounded-xl bg-transparent border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
+              disabled={loading}
+            >
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Sign in / Sign up'}
+            </Button>
+          </form>
+        )}
+
         {/* Demo */}
         <div className="pt-2">
           <button
