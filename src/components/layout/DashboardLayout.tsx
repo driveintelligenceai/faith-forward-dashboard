@@ -16,19 +16,18 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Top bar — minimal, functional */}
           <header className="h-14 sm:h-16 flex items-center justify-between border-b border-border/60 bg-card/80 backdrop-blur-sm px-4 sm:px-6 lg:px-8 shrink-0 sticky top-0 z-10">
             <div className="flex items-center gap-3">
-              <SidebarTrigger className="h-9 w-9 rounded-lg" />
+              <SidebarTrigger className="h-10 w-10 rounded-lg" />
               {/* Mobile logo — visible when sidebar is hidden */}
               <img
                 src={ironForumsLogo}
                 alt="Iron Forums"
-                className="h-7 w-auto sm:hidden"
+                className="h-10 w-auto sm:hidden"
               />
               <div className="h-5 w-px bg-border/60 hidden sm:block" />
               <span className="text-sm font-body font-medium text-muted-foreground/70 hidden sm:block tracking-wide">
                 Iron Forums
               </span>
             </div>
-            {/* Intentionally empty — role shown on dashboard welcome */}
             <div />
           </header>
 
