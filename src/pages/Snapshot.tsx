@@ -229,7 +229,7 @@ export default function Snapshot() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-5 sm:space-y-8">
+      <div className="space-y-3 sm:space-y-4">
         {/* Header */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-5">
           <div>
