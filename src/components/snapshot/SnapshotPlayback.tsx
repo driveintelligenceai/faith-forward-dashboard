@@ -193,7 +193,7 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
         </div>
 
         {/* Main layout: radar + stat cards */}
-        <div className="flex flex-col lg:flex-row lg:items-start gap-4 sm:gap-6">
+        <div className="flex flex-col lg:flex-row lg:items-start gap-3 sm:gap-4">
           {/* Left stat cards — desktop only */}
           {!isMobile && stats && (
             <div className="hidden lg:flex flex-col gap-3 w-48 shrink-0 pt-12">
