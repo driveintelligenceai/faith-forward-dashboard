@@ -31,48 +31,56 @@ export default function Community() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-10">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-heading font-bold tracking-tight text-primary">
+          <h1 className="text-4xl sm:text-5xl font-heading font-bold tracking-tight text-primary">
             Community
           </h1>
-          <p className="text-base font-body text-muted-foreground mt-2">
+          <p className="text-lg font-body text-muted-foreground mt-3">
             Connect with your brothers across chapters
           </p>
         </div>
 
-        <Tabs defaultValue="chapters" className="space-y-6">
-          <TabsList className="flex-wrap h-auto gap-1 font-body">
-            <TabsTrigger value="chapters" className="font-body font-semibold">Chapters</TabsTrigger>
-            <TabsTrigger value="events" className="font-body font-semibold">Events</TabsTrigger>
-            <TabsTrigger value="discussions" className="font-body font-semibold">Discussions</TabsTrigger>
-            <TabsTrigger value="directory" className="font-body font-semibold">Directory</TabsTrigger>
+        <Tabs defaultValue="chapters" className="space-y-8">
+          <TabsList className="flex-wrap h-auto gap-2 p-2 font-body">
+            <TabsTrigger value="chapters" className="font-body font-semibold text-base px-5 py-2.5 min-h-[44px]">
+              Chapters
+            </TabsTrigger>
+            <TabsTrigger value="events" className="font-body font-semibold text-base px-5 py-2.5 min-h-[44px]">
+              Events
+            </TabsTrigger>
+            <TabsTrigger value="discussions" className="font-body font-semibold text-base px-5 py-2.5 min-h-[44px]">
+              Discussions
+            </TabsTrigger>
+            <TabsTrigger value="directory" className="font-body font-semibold text-base px-5 py-2.5 min-h-[44px]">
+              Member Directory
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="chapters">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {MOCK_CHAPTERS.map((chapter) => (
-                <Card key={chapter.id} className="hover:shadow-md hover:border-secondary/40 transition-all">
-                  <CardContent className="p-6">
+                <Card key={chapter.id} className="hover:shadow-md transition-all">
+                  <CardContent className="p-7">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-xl font-heading font-bold">{chapter.name}</h3>
-                        <div className="flex items-center gap-1 text-sm font-body text-muted-foreground mt-1">
-                          <MapPin className="h-4 w-4" />
+                        <h3 className="text-2xl font-heading font-bold">{chapter.name}</h3>
+                        <div className="flex items-center gap-2 text-base font-body text-muted-foreground mt-2">
+                          <MapPin className="h-5 w-5 shrink-0" />
                           {chapter.city}, {chapter.state}
                         </div>
                       </div>
-                      <Badge className="bg-secondary text-secondary-foreground font-body font-semibold border-0">
+                      <Badge className="bg-secondary text-secondary-foreground font-body font-semibold text-sm border-0 px-3 py-1">
                         {chapter.memberCount} members
                       </Badge>
                     </div>
-                    <div className="mt-4 space-y-2 text-sm font-body">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <UserCircle className="h-4 w-4" />
+                    <div className="mt-5 space-y-3">
+                      <div className="flex items-center gap-3 text-base font-body text-muted-foreground">
+                        <UserCircle className="h-5 w-5 shrink-0" />
                         <span>Facilitator: <span className="font-semibold text-foreground">{chapter.facilitatorName}</span></span>
                       </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Clock className="h-4 w-4" />
+                      <div className="flex items-center gap-3 text-base font-body text-muted-foreground">
+                        <Clock className="h-5 w-5 shrink-0" />
                         <span>{chapter.meetingDay}s at {chapter.meetingTime}</span>
                       </div>
                     </div>
@@ -83,38 +91,39 @@ export default function Community() {
           </TabsContent>
 
           <TabsContent value="events">
-            <div className="space-y-4">
+            <div className="space-y-5">
               {MOCK_EVENTS.map((event) => (
                 <Card key={event.id} className="hover:shadow-md transition-all">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                  <CardContent className="p-7">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5">
                       <div className="flex-1">
-                        <h3 className="text-xl font-heading font-bold">{event.title}</h3>
-                        <p className="text-sm font-body text-muted-foreground mt-1">{event.description}</p>
-                        <div className="flex flex-wrap gap-4 mt-3 text-sm font-body text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4 text-secondary" />
+                        <h3 className="text-2xl font-heading font-bold">{event.title}</h3>
+                        <p className="text-base font-body text-muted-foreground mt-2">{event.description}</p>
+                        <div className="flex flex-wrap gap-5 mt-4 text-base font-body text-muted-foreground">
+                          <span className="flex items-center gap-2">
+                            <Calendar className="h-5 w-5 text-secondary shrink-0" />
                             {new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4 text-secondary" />
+                          <span className="flex items-center gap-2">
+                            <MapPin className="h-5 w-5 text-secondary shrink-0" />
                             {event.location}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <Users className="h-4 w-4 text-secondary" />
-                            {event.attendees.length}/{event.maxAttendees} attending
+                          <span className="flex items-center gap-2">
+                            <Users className="h-5 w-5 text-secondary shrink-0" />
+                            {event.attendees.length} of {event.maxAttendees} attending
                           </span>
                         </div>
                       </div>
                       <Button
+                        size="lg"
                         variant={event.attendees.includes('1') ? 'secondary' : 'default'}
-                        className="font-heading font-semibold shrink-0"
+                        className="font-heading font-semibold text-base h-12 px-6 shrink-0"
                         onClick={() => toast({ title: event.attendees.includes('1') ? 'RSVP Cancelled' : 'RSVP Confirmed', description: event.title })}
                       >
                         {event.attendees.includes('1') ? (
-                          <><CheckCircle2 className="h-4 w-4 mr-1" /> Attending</>
+                          <><CheckCircle2 className="h-5 w-5 mr-2" /> Attending</>
                         ) : (
-                          'RSVP'
+                          'RSVP Now'
                         )}
                       </Button>
                     </div>
@@ -125,26 +134,24 @@ export default function Community() {
           </TabsContent>
 
           <TabsContent value="discussions">
-            <div className="space-y-4">
+            <div className="space-y-5">
               {MOCK_POSTS.map((post) => (
-                <Card key={post.id} className="hover:shadow-md hover:border-secondary/40 transition-all cursor-pointer">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between gap-4">
+                <Card key={post.id} className="hover:shadow-md transition-all cursor-pointer">
+                  <CardContent className="p-7">
+                    <div className="flex items-start justify-between gap-5">
                       <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline" className="text-xs font-body font-semibold">{post.category}</Badge>
-                        </div>
-                        <h3 className="text-lg font-heading font-bold">{post.title}</h3>
-                        <p className="text-sm font-body text-muted-foreground mt-1 line-clamp-2">{post.content}</p>
-                        <div className="flex items-center gap-3 mt-3 text-sm font-body text-muted-foreground">
+                        <Badge variant="outline" className="text-sm font-body font-semibold mb-3">{post.category}</Badge>
+                        <h3 className="text-xl font-heading font-bold">{post.title}</h3>
+                        <p className="text-base font-body text-muted-foreground mt-2 line-clamp-2">{post.content}</p>
+                        <div className="flex items-center gap-3 mt-3 text-base font-body text-muted-foreground">
                           <span className="font-semibold text-foreground">{post.authorName}</span>
-                          <span>•</span>
-                          <span>{new Date(post.date).toLocaleDateString()}</span>
+                          <span>·</span>
+                          <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 text-muted-foreground shrink-0">
-                        <MessageCircle className="h-4 w-4" />
-                        <span className="text-sm font-body font-semibold">{post.replies}</span>
+                      <div className="flex items-center gap-2 text-muted-foreground shrink-0 bg-muted/50 rounded-lg px-3 py-2">
+                        <MessageCircle className="h-5 w-5" />
+                        <span className="text-lg font-heading font-bold">{post.replies}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -154,29 +161,29 @@ export default function Community() {
           </TabsContent>
 
           <TabsContent value="directory">
-            <div className="space-y-5">
+            <div className="space-y-6">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   placeholder="Search members by name or chapter..."
-                  className="pl-11 h-12 text-base font-body"
+                  className="pl-12 h-14 text-lg font-body rounded-xl"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {filteredMembers.map((member) => (
                   <Card key={member.id} className="hover:shadow-md transition-all">
-                    <CardContent className="p-5 flex items-center gap-4">
-                      <div className="h-14 w-14 rounded-full bg-primary flex items-center justify-center shrink-0">
-                        <span className="text-primary-foreground font-heading font-bold text-lg">
+                    <CardContent className="p-6 flex items-center gap-5">
+                      <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center shrink-0">
+                        <span className="text-primary-foreground font-heading font-bold text-xl">
                           {member.name.split(' ').map((n) => n[0]).join('')}
                         </span>
                       </div>
                       <div>
-                        <h4 className="font-heading font-semibold text-base">{member.name}</h4>
-                        <p className="text-sm font-body text-muted-foreground">{member.chapter}</p>
-                        <Badge className={`${ROLE_COLORS[member.role]} text-xs font-body mt-1 border-0`}>
+                        <h4 className="font-heading font-bold text-lg">{member.name}</h4>
+                        <p className="text-base font-body text-muted-foreground">{member.chapter}</p>
+                        <Badge className={`${ROLE_COLORS[member.role]} text-sm font-body mt-1.5 border-0`}>
                           {ROLE_LABELS[member.role]}
                         </Badge>
                       </div>
