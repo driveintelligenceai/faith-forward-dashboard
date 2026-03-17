@@ -7,6 +7,7 @@ import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import { SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
 import { buildSnapshotProfileContext } from '@/lib/snapshot-context';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSnapshots } from '@/hooks/use-snapshots';
 import type { ChatMessage, UserRole } from '@/types';
 import { ROLE_LABELS } from '@/types';
 import { Send, Bot, User, Sparkles } from 'lucide-react';
