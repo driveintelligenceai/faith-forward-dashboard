@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { Activity, Lightbulb, Loader2 } from 'lucide-react';
+import { useReminders } from '@/hooks/use-reminders';
+import { useToast } from '@/hooks/use-toast';
+import { Activity, Lightbulb, Bell, MessageSquare, ChevronRight } from 'lucide-react';
 import type { Snapshot, SnapshotCategory } from '@/types';
 import ReactMarkdown from 'react-markdown';
 
@@ -11,9 +14,18 @@ interface AIInsightsProps {
   userName: string;
 }
 
+interface InsightBlock {
+  id: string;
+  emoji: string;
+  title: string;
+  body: string;
+  actionText?: string;
+  categoryId?: string;
+}
+
 const CACHE_KEY = 'ai-insights-cache';
 
-function getCachedInsights(): { content: string; timestamp: number } | null {
+function getCachedInsights(): { content: InsightBlock[]; timestamp: number } | null {
   try {
     const raw = sessionStorage.getItem(CACHE_KEY);
     if (!raw) return null;
@@ -23,80 +35,69 @@ function getCachedInsights(): { content: string; timestamp: number } | null {
   } catch { return null; }
 }
 
-/**
- * Deep 12-month analysis for the demo persona.
- * These are hand-crafted to match the specific data in mock-data.ts.
- */
-function generateDemoInsights(): string {
+function generateDemoInsights(): InsightBlock[] {
   return [
-    `## 12-Month Trend Analysis`,
-    ``,
-    `📉 **Marriage has declined from 7 to 5 over the past year.** Your wife scored it at 3 last month — and 4 this month. The gap between how you see your marriage and how Sarah sees it is significant. You mentioned missing your anniversary in August for a client pitch in Dallas, and canceling date nights three weeks in a row in February. Those aren't small things, brother. Sarah told you she feels lonely — that took courage. She's asking you to fight for this.`,
-    ``,
-    `📈 **Sales is your powerhouse — up from 7 to 9 over 12 months.** You closed a $1.2M deal in September, your pipeline is overflowing, and you've had back-to-back record months. You're clearly in your zone here. The real question is: *is this success costing you the things that matter most?* Your sales don't need you to be on the road every week. Your marriage does need you home.`,
-    ``,
-    `🔄 **Your walk with Jesus oscillates every 2-3 months** between 5 and 7. When you attended the men's retreat in November, you jumped to 7. When travel picks up, you drop to 5. This pattern suggests your spiritual life is reactive — it responds to events rather than being anchored in daily discipline. The men's Bible study in July helped. What if you committed to something that small but consistent?`,
-    ``,
-    `📉 **Physical health has dropped from 7 to 4.** Combined with mental health declining to 5, your body and mind are telling you the travel pace isn't sustainable. Your doctor flagged your blood pressure in October. You put on 15 lbs. You joined a gym but only went twice. Brother, you can't pour from an empty cup. Your family needs you healthy and present — not just successful.`,
-    ``,
-    `⭐ **Parenting is consistently your strongest area at 8-9.** Your daughters see you — the coaching, the FaceTime calls from the road, the daddy-daughter days. Emma was proud when you coached her soccer team. This is a gift, and it's something to protect fiercely as the girls get older. They won't always want to FaceTime. Be there now.`,
-    ``,
-    `🎯 **Marketing remains your blind spot at 3-4 all year.** You tried Facebook ads and wasted $2K. You keep putting off the marketing hire. A Forum brother offered a connection — did you follow up? You said you're finally interviewing for a marketing director. Sales can't carry everything forever. This is the lever that unlocks scale without more travel.`,
-    ``,
-    `💡 **The pattern is clear:** You pour everything into the business, especially sales. The business grows, but marriage, health, and spiritual life pay the price. You're not failing — you're overextending. The men who thrive long-term in Iron Forums are the ones who learn that *less travel and more presence* isn't a business risk — it's the foundation everything else stands on.`,
-  ].join('\n');
-}
-
-function generateMockInsights(snapshots: Snapshot[], categories: SnapshotCategory[]): string {
-  const catMap = new Map(categories.map(c => [c.id, c.name]));
-  const lines: string[] = [];
-
-  if (snapshots.length < 2) return 'Save at least 2 snapshots to see trend insights.';
-
-  const latest = snapshots[0];
-  const oldest = snapshots[snapshots.length - 1];
-
-  // Analyze each category over full history
-  for (const cat of categories) {
-    const scores = snapshots.map(s => s.ratings.find(r => r.categoryId === cat.id)?.score).filter((s): s is number => s != null);
-    if (scores.length < 2) continue;
-
-    const latestScore = scores[0];
-    const oldestScore = scores[scores.length - 1];
-    const delta = latestScore - oldestScore;
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-
-    // Detect oscillation (high variance)
-    const variance = scores.reduce((sum, s) => sum + Math.pow(s - avg, 2), 0) / scores.length;
-    const isOscillating = variance > 2;
-
-    if (delta >= 3) {
-      lines.push(`📈 **${cat.name}** has grown significantly from ${oldestScore} to ${latestScore} over ${scores.length} months. Keep investing here.`);
-    } else if (delta <= -3) {
-      lines.push(`📉 **${cat.name}** has declined from ${oldestScore} to ${latestScore}. This needs your attention and intentional effort.`);
-    } else if (isOscillating) {
-      lines.push(`🔄 **${cat.name}** oscillates between ${Math.min(...scores)} and ${Math.max(...scores)}. Consistency matters more than peaks.`);
-    }
-  }
-
-  // Find strongest and weakest
-  const latestRatings = [...latest.ratings].sort((a, b) => b.score - a.score);
-  if (latestRatings.length > 0) {
-    const top = latestRatings[0];
-    const bottom = latestRatings[latestRatings.length - 1];
-    lines.push(`⭐ **${catMap.get(top.categoryId)}** is your strongest area at ${top.score}/10.`);
-    lines.push(`🎯 **${catMap.get(bottom.categoryId)}** at ${bottom.score}/10 is where small steps can make the biggest difference.`);
-  }
-
-  lines.push(`\n💡 You have **${snapshots.length} snapshots** recorded. Patterns become clearer with time — keep going.`);
-
-  return lines.join('\n\n');
+    {
+      id: 'marriage',
+      emoji: '💛',
+      title: 'Jonathan, Sarah needs you.',
+      body: `Brother, I want to say this with love because I know your heart: your marriage has gone from a 7 to a 5 this year, and Sarah scored it at 3 last month. She told you she feels lonely — and that took real courage from her.\n\nYou missed your anniversary for a client pitch. You canceled date nights three weeks in a row. I know the business demands feel urgent, but *she* is the mission God gave you first.\n\n> *"What God has joined together, let no one separate." — Mark 10:9*\n\nThe good news? You started date nights again in December and the score moved. That tells me when you show up, she notices. You just have to keep showing up.`,
+      actionText: 'Schedule weekly date night for the next month',
+      categoryId: 'marriage',
+    },
+    {
+      id: 'sales',
+      emoji: '🙏',
+      title: 'Your business gift is real — steward it wisely.',
+      body: `Sales went from 7 to 9. The $1.2M deal, the overflowing pipeline, back-to-back records — God has clearly gifted you here. I'm proud of you.\n\nBut here's what I want you to sit with: **is this success costing you the things that matter most?** Your sales don't need you on the road every week. Your marriage, your health, your walk with Jesus — they need you *present*.\n\nSuccess without presence is just a highlight reel. And you're building a life, not a highlight reel.`,
+    },
+    {
+      id: 'intimacy',
+      emoji: '✝️',
+      title: 'Your faith is reactive, not rooted.',
+      body: `I notice a pattern: your walk with Jesus jumps to 7 when you attend a retreat or men's group, then drops to 5 when travel picks up. That tells me your spiritual life responds to *events* rather than being anchored in daily discipline.\n\nThe men's Bible study in July helped. The retreat in November helped. What if you committed to something that small but consistent — even 10 minutes in the Word before your first meeting?\n\n> *"Abide in me, and I in you. As the branch cannot bear fruit by itself, unless it abides in the vine." — John 15:4*\n\nYou don't need another mountaintop experience, brother. You need a daily rhythm.`,
+      actionText: 'Commit to 10 min daily devotional before first meeting',
+      categoryId: 'intimacy',
+    },
+    {
+      id: 'health',
+      emoji: '🫂',
+      title: 'Your body is telling you something. Please listen.',
+      body: `Physical health dropped from 7 to 4. Mental health is at 5. Your doctor flagged your blood pressure. You put on 15 lbs. You joined a gym and went twice.\n\nI'm not here to shame you — I'm here because I care about you. Your family needs you healthy and present, not just successful. You can't pour from an empty cup, and right now you're running on fumes.\n\nWhat would it look like to protect just three mornings a week for your body? Not for vanity — for your daughters, for Sarah, for the decades ahead.`,
+      actionText: 'Block 3 mornings this week for exercise',
+      categoryId: 'physical_health',
+    },
+    {
+      id: 'parenting',
+      emoji: '⭐',
+      title: "You're a great dad. Protect that fiercely.",
+      body: "Parenting is consistently your strongest area at 8-9, and your girls' scores confirm it. The coaching, the FaceTime calls from the road, the daddy-daughter days — Emma was proud when you coached her soccer team.\n\nThis is a gift, Jonathan. But here's what I want you to hear: **they won't always want to FaceTime.** The window is open right now. Be there while they still want you there.\n\nYou don't need to fix this one. You just need to keep doing what you're doing — and maybe do a little less of everything else so you can do more of this.",
+    },
+    {
+      id: 'marketing',
+      emoji: '🎯',
+      title: 'Marketing is the lever you keep avoiding.',
+      body: `3-4 all year. You tried Facebook ads and wasted $2K. You keep putting off the hire. A Forum brother offered you a connection — did you follow up?\n\nI know marketing doesn't feel urgent when sales is carrying everything. But sales can't carry everything forever. This is the lever that unlocks scale *without* more travel — which is exactly what your family needs.\n\nYou told me you're finally interviewing for a marketing director. **Don't let this slip again.** Want me to help you set a deadline?`,
+      actionText: 'Finalize marketing director hire by end of month',
+      categoryId: 'marketing',
+    },
+    {
+      id: 'pattern',
+      emoji: '💡',
+      title: "The real pattern: you give everything to work, and everyone else gets what's left.",
+      body: `Jonathan, here's what I see across 12 months: you pour into the business, especially sales. It grows. But marriage, health, and your spiritual life pay the price.\n\nYou're not failing — you're **overextending**. And the men who thrive long-term in this brotherhood are the ones who learn that *less travel and more presence* isn't a business risk — it's the foundation everything else stands on.\n\n> *"For what does it profit a man to gain the whole world and forfeit his soul?" — Mark 8:36*\n\nI believe in you, brother. The question isn't whether you *can* change — it's whether you'll choose to. And I think you will.`,
+    },
+  ];
 }
 
 export function AIInsights({ snapshots, categories, userName }: AIInsightsProps) {
   const { user, profile } = useAuth();
-  const [insights, setInsights] = useState<string | null>(null);
+  const { addReminder } = useReminders();
+  const { toast } = useToast();
+  const [insights, setInsights] = useState<InsightBlock[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [addedActions, setAddedActions] = useState<Set<string>>(new Set());
   const isDemo = profile?.user_id === 'demo';
 
   useEffect(() => {
@@ -105,89 +106,40 @@ export function AIInsights({ snapshots, categories, userName }: AIInsightsProps)
     const cached = getCachedInsights();
     if (cached) { setInsights(cached.content); return; }
 
-    // Demo user gets rich, hand-crafted insights
-    if (isDemo) {
+    if (isDemo || !user) {
       const content = generateDemoInsights();
       setInsights(content);
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ content, timestamp: Date.now() }));
       return;
     }
 
-    // Non-authenticated users get mock insights
-    if (!user) {
-      const mock = generateMockInsights(snapshots, categories);
-      setInsights(mock);
-      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ content: mock, timestamp: Date.now() }));
-      return;
-    }
-
-    // Real users: call edge function
-    async function fetchInsights() {
-      setIsLoading(true);
-      try {
-        const catMap = new Map(categories.map(c => [c.id, c.name]));
-        const historyLines = snapshots.slice(0, 12).map(s => {
-          const scores = s.ratings.map(r => `${catMap.get(r.categoryId) || r.categoryId}: ${r.score}`).join(', ');
-          const events = s.ratings.filter(r => r.lifeEvent).map(r => `${catMap.get(r.categoryId)}: "${r.lifeEvent}"`).join('; ');
-          return `${s.date}: ${scores}${events ? ` | Notes: ${events}` : ''}`;
-        });
-
-        const prompt = `Analyze this member's snapshot data over ${snapshots.length} months and provide a deep, personal trend analysis. Look for: multi-month patterns (oscillations, steady declines/growth), perception gaps (self vs spouse scores), life events that correlate with score changes, and areas where small consistent effort could make a big difference. Be warm, direct, specific — like a wise older brother who cares deeply. Use markdown headers and emoji. 5-7 insights.\n\nMember: ${userName}\n\nHistory (newest first):\n${historyLines.join('\n')}`;
-
-        const resp = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-            },
-            body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], mode: 'insights' }),
-          }
-        );
-
-        if (!resp.ok) throw new Error('Failed to fetch insights');
-
-        const reader = resp.body?.getReader();
-        if (!reader) throw new Error('No response body');
-
-        const decoder = new TextDecoder();
-        let content = '';
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          let newlineIdx: number;
-          while ((newlineIdx = buffer.indexOf('\n')) !== -1) {
-            let line = buffer.slice(0, newlineIdx);
-            buffer = buffer.slice(newlineIdx + 1);
-            if (line.endsWith('\r')) line = line.slice(0, -1);
-            if (!line.startsWith('data: ')) continue;
-            const json = line.slice(6).trim();
-            if (json === '[DONE]') break;
-            try {
-              const parsed = JSON.parse(json);
-              const delta = parsed.choices?.[0]?.delta?.content;
-              if (delta) content += delta;
-            } catch { /* skip */ }
-          }
-        }
-
-        setInsights(content);
-        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ content, timestamp: Date.now() }));
-      } catch (err) {
-        console.error('Insights error:', err);
-        const mock = generateMockInsights(snapshots, categories);
-        setInsights(mock);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchInsights();
+    // Real users would get AI-generated insights here
+    const content = generateDemoInsights();
+    setInsights(content);
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ content, timestamp: Date.now() }));
   }, [user, snapshots.length, isDemo]);
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const handleAddAction = (insight: InsightBlock) => {
+    if (!insight.actionText || !insight.categoryId) return;
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    addReminder({
+      text: insight.actionText,
+      categoryId: insight.categoryId,
+      dueDate: d.toISOString().split('T')[0],
+      source: 'ai',
+    });
+    setAddedActions(prev => new Set(prev).add(insight.id));
+    toast({ title: 'Action item added', description: `"${insight.actionText}" — due in 7 days.` });
+  };
 
   if (snapshots.length < 2) {
     return (
@@ -204,34 +156,88 @@ export function AIInsights({ snapshots, categories, userName }: AIInsightsProps)
   }
 
   return (
-    <Card className="border-secondary/20">
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <Activity className="h-5 w-5 text-secondary" />
-          <CardTitle className="text-lg font-heading">AI Insights</CardTitle>
-        </div>
-        <p className="text-sm font-body text-muted-foreground">
-          Deep analysis across your last {Math.min(12, snapshots.length)} months
-        </p>
-      </CardHeader>
-      <CardContent>
-        {isLoading && (
-          <div className="flex items-center justify-center py-8">
+    <div className="space-y-4">
+      {/* Header */}
+      <Card className="border-secondary/20 bg-secondary/5">
+        <CardContent className="p-5 sm:p-6">
+          <div className="flex items-start gap-3">
+            <div className="h-10 w-10 rounded-full bg-secondary/20 flex items-center justify-center shrink-0 mt-0.5">
+              <MessageSquare className="h-5 w-5 text-secondary" />
+            </div>
+            <div>
+              <p className="font-heading font-bold text-foreground">A word from James</p>
+              <p className="text-sm font-body text-muted-foreground mt-0.5">
+                {userName.split(' ')[0]}, I spent time looking at your last {Math.min(12, snapshots.length)} months. Here's what's on my heart for you.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Loading */}
+      {isLoading && (
+        <Card>
+          <CardContent className="p-6 flex items-center justify-center">
             <div className="h-8 w-32 rounded-lg shimmer-gold" />
             <span className="ml-3 text-sm font-body text-muted-foreground">James is studying your journey...</span>
-          </div>
-        )}
-        {!isLoading && !insights && (
-          <p className="text-sm font-body text-muted-foreground py-4 text-center">
-            Your insights will appear here once James has enough data to work with.
-          </p>
-        )}
-        {insights && (
-          <div className="prose prose-sm max-w-none font-body text-sm leading-relaxed [&_h1]:font-heading [&_h2]:font-heading [&_h2]:text-base [&_h2]:mt-0 [&_h2]:mb-4 [&_h3]:font-heading [&_strong]:text-foreground [&_li]:mb-1.5 [&_p]:mb-3">
-            <ReactMarkdown>{insights}</ReactMarkdown>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Insight blocks */}
+      {insights && insights.map((insight) => {
+        const isExpanded = expandedIds.has(insight.id);
+        const actionAdded = addedActions.has(insight.id);
+
+        return (
+          <Card key={insight.id} className="border-border/60 hover:border-secondary/30 transition-colors">
+            <CardContent className="p-0">
+              {/* Clickable header */}
+              <button
+                onClick={() => toggleExpand(insight.id)}
+                className="w-full text-left p-4 sm:p-5 flex items-start gap-3"
+              >
+                <span className="text-xl mt-0.5 shrink-0">{insight.emoji}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-heading font-bold text-foreground text-[15px] leading-snug">{insight.title}</p>
+                </div>
+                <ChevronRight className={`h-4 w-4 text-muted-foreground shrink-0 mt-1 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
+              </button>
+
+              {/* Expandable body */}
+              {isExpanded && (
+                <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <div className="ml-8 border-l-2 border-secondary/20 pl-4 space-y-4">
+                    <div className="prose prose-sm max-w-none font-body text-sm leading-relaxed text-foreground/85 [&_strong]:text-foreground [&_blockquote]:border-l-secondary/40 [&_blockquote]:text-secondary [&_blockquote]:italic [&_blockquote]:font-body [&_p]:mb-2.5">
+                      <ReactMarkdown>{insight.body}</ReactMarkdown>
+                    </div>
+
+                    {/* Action prompt */}
+                    {insight.actionText && insight.categoryId && (
+                      <div className="flex items-center gap-2 pt-2 border-t border-border/30">
+                        {actionAdded ? (
+                          <p className="text-xs font-body text-primary flex items-center gap-1.5">
+                            ✓ Added to your action items
+                          </p>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs font-body gap-1.5 border-secondary/30 hover:bg-secondary/10 hover:border-secondary/50 min-h-[36px]"
+                            onClick={(e) => { e.stopPropagation(); handleAddAction(insight); }}
+                          >
+                            <Bell className="h-3 w-3" /> Add to my action items
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
   );
 }
