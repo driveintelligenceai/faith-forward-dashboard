@@ -65,7 +65,7 @@ export default function Login() {
               Sign in to your Iron Forums dashboard
             </CardDescription>
             <p className="text-xs font-body text-secondary font-semibold tracking-[0.15em] mt-0.5">
-              Connect · Sharpen · Grow
+              Connect » Sharpen » Grow
             </p>
           </div>
         </CardHeader>
