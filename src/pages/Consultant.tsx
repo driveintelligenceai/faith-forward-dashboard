@@ -131,17 +131,17 @@ export default function Consultant() {
     setInput('');
     setIsStreaming(true);
 
-    // Build messages with full snapshot profile context injected in the first user turn
+    // Persist user message
+    persistMessage('user', text);
+
     const aiMessages = messages
       .filter(m => m.role === 'user' || m.role === 'assistant')
-      .map((m, i) => ({
+      .map((m) => ({
         role: m.role as 'user' | 'assistant',
         content: m.content,
       }));
 
-    // Inject profile context with every message so AI always has full picture
     const contextualMessage = `[SNAPSHOT DATA — USE THIS TO PERSONALIZE YOUR RESPONSE]\n${profileContext}\n[END SNAPSHOT DATA]\n\nUser message: ${text}`;
-
     aiMessages.push({ role: 'user' as const, content: contextualMessage });
 
     let assistantSoFar = '';
@@ -161,7 +161,11 @@ export default function Consultant() {
           return [...prev, { id: assistantId, role: 'assistant', content: currentContent, timestamp: new Date().toISOString() }];
         });
       },
-      onDone: () => setIsStreaming(false),
+      onDone: () => {
+        setIsStreaming(false);
+        // Persist assistant response
+        if (assistantSoFar) persistMessage('assistant', assistantSoFar);
+      },
       onError: (error) => {
         setIsStreaming(false);
         toast({ title: 'Connection Issue', description: error, variant: 'destructive' });
