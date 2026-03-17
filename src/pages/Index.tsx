@@ -1,19 +1,15 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { MOCK_SNAPSHOTS, MOCK_ANNOUNCEMENTS, MOCK_EVENTS } from '@/data/mock-data';
+import { Card, CardContent } from '@/components/ui/card';
+import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import { SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
 import { useSnapshots } from '@/hooks/use-snapshots';
 import { ROLE_LABELS } from '@/types';
 import type { UserRole } from '@/types';
 import { useNavigate } from 'react-router-dom';
-import { ConsultantWidget } from '@/components/dashboard/ConsultantWidget';
 import {
   ClipboardCheck,
   ChevronRight,
-  Calendar,
-  Megaphone,
   TrendingUp,
   TrendingDown,
   Minus,
@@ -48,9 +44,6 @@ export default function Index() {
   const topCategory = topArea ? SNAPSHOT_CATEGORIES.find(c => c.id === topArea.categoryId) : null;
   const weakCategory = weakArea ? SNAPSHOT_CATEGORIES.find(c => c.id === weakArea.categoryId) : null;
 
-  const upcomingEvents = MOCK_EVENTS.filter(e => new Date(e.date) >= new Date()).slice(0, 2);
-
-  // Check if user has taken this month's snapshot
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const hasThisMonthSnapshot = latestSnapshot && latestSnapshot.date.startsWith(currentMonth);
@@ -140,7 +133,7 @@ export default function Index() {
           </Card>
         </div>
 
-        {/* Snapshots on record + Trend teaser (minimal — no individual scores to avoid bias) */}
+        {/* Snapshots on record */}
         <Card className="cursor-pointer hover:shadow-sm transition-shadow" onClick={() => navigate('/snapshot')}>
           <CardContent className="p-4 sm:p-5 flex items-center justify-between">
             <div>
@@ -152,58 +145,6 @@ export default function Index() {
             <ChevronRight className="h-4 w-4 text-muted-foreground/40" />
           </CardContent>
         </Card>
-
-        {/* Bottom: Announcements + Events + Consultant */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
-          <div className="lg:col-span-8 space-y-4">
-            {/* Announcements */}
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <Megaphone className="h-4 w-4 text-muted-foreground" />
-                  <CardTitle className="text-lg font-heading">Announcements</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-0">
-                {MOCK_ANNOUNCEMENTS.slice(0, 3).map((a, i) => (
-                  <div key={a.id} className={`py-3 ${i < 2 ? 'border-b border-border/20' : ''}`}>
-                    <p className="font-heading font-bold text-sm leading-snug">{a.title}</p>
-                    <p className="text-xs font-body text-muted-foreground mt-0.5 line-clamp-2">{a.content}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Upcoming Events */}
-            {upcomingEvents.length > 0 && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <CardTitle className="text-lg font-heading">Upcoming</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-0">
-                  {upcomingEvents.map((event, i) => (
-                    <div key={event.id} className={`flex items-center justify-between py-3 ${i < upcomingEvents.length - 1 ? 'border-b border-border/20' : ''}`}>
-                      <div className="min-w-0">
-                        <p className="font-heading font-bold text-sm leading-snug">{event.title}</p>
-                        <p className="text-xs font-body text-muted-foreground mt-0.5">{event.location}</p>
-                      </div>
-                      <p className="text-sm font-heading font-bold text-primary shrink-0 ml-3">
-                        {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </p>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          <div className="lg:col-span-4">
-            <ConsultantWidget />
-          </div>
-        </div>
       </div>
     </DashboardLayout>
   );
