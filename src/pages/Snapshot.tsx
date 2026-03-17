@@ -224,7 +224,7 @@ export default function Snapshot() {
 
             {/* Step 0: Foundation */}
             {step === 0 && (
-              <Card className="border-secondary/20">
+              <Card className="border-secondary/20 animate-slide-up-fade">
                 <CardContent className="p-6 sm:p-8 space-y-6">
                   <div className="text-center space-y-2 pb-2">
                     <h2 className="text-xl sm:text-2xl font-heading font-bold text-primary">
