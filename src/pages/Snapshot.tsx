@@ -11,7 +11,7 @@ import { SNAPSHOT_CONFIGS } from '@/data/snapshot-categories';
 import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import { useAuth } from '@/contexts/AuthContext';
 import { getRoleSnapshotType, SNAPSHOT_TYPE_LABELS } from '@/types';
-import type { SnapshotRating, SnapshotType, SnapshotCategory } from '@/types';
+import type { SnapshotRating, SnapshotType, SnapshotCategory, UserRole } from '@/types';
 import { Save, History, BarChart3, BookOpen, MessageCircle, X, Bookmark } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
