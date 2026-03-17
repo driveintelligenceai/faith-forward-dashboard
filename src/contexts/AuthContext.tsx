@@ -35,6 +35,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ error: string | null }>;
   signup: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
   loginWithGoogle: () => Promise<{ error: string | null }>;
+  sendMagicLink: (email: string) => Promise<{ error: string | null }>;
   loginAsDemo: () => void;
   logout: () => Promise<void>;
   hasRole: (role: UserRole) => boolean;
@@ -66,13 +67,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      if (s?.user) fetchProfile(s.user.id);
-      setIsLoading(false);
-    });
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
@@ -81,6 +75,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setProfile(null);
       }
+      setIsLoading(false);
+    });
+
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      setSession(s);
+      setUser(s?.user ?? null);
+      if (s?.user) fetchProfile(s.user.id);
       setIsLoading(false);
     });
 
@@ -112,6 +113,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       return { error: e instanceof Error ? e.message : 'Google sign-in failed' };
     }
+  };
+
+  const sendMagicLink = async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin },
+    });
+    return { error: error?.message ?? null };
   };
 
   const logout = async () => {
@@ -169,6 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         signup,
         loginWithGoogle,
+        sendMagicLink,
         loginAsDemo,
         logout,
         hasRole,
