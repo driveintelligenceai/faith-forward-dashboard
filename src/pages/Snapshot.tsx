@@ -42,8 +42,8 @@ function getScoreLabel(score: number) {
 
 export default function Snapshot() {
   const { toast } = useToast();
-  const { user } = useAuth();
-  const defaultType = user ? getRoleSnapshotType(user.role) : 'member';
+  const { profile } = useAuth();
+  const defaultType = profile ? getRoleSnapshotType((profile.role || 'member') as UserRole) : 'member';
   const [snapshotType, setSnapshotType] = useState<SnapshotType>(defaultType);
   const categories = SNAPSHOT_CONFIGS[snapshotType];
 
