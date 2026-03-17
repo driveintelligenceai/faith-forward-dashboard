@@ -76,7 +76,7 @@ export default function Snapshot() {
   const [reminderDefaults, setReminderDefaults] = useState({ text: '', categoryId: '' });
   const [viewingIdx, setViewingIdx] = useState(0); // 0 = latest snapshot
   const [isPlaying, setIsPlaying] = useState(false);
-  const playIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const playIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [ratings, setRatings] = useState<Record<string, SnapshotRating>>(() => {
     const initial: Record<string, SnapshotRating> = {};
