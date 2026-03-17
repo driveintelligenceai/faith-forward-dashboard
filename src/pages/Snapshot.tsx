@@ -13,15 +13,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSnapshots } from '@/hooks/use-snapshots';
 import { getRoleSnapshotType, SNAPSHOT_TYPE_LABELS } from '@/types';
 import type { SnapshotRating, SnapshotType, SnapshotCategory, UserRole } from '@/types';
-import { Save, History, BarChart3, MessageCircle, Bookmark, Loader2, Activity } from 'lucide-react';
+import { Save, History, MessageCircle, Bookmark, Loader2, Activity, Eye, Pencil } from 'lucide-react';
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  ResponsiveContainer,
 } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
 import { SnapshotCompanion } from '@/components/snapshot/SnapshotCompanion';
 import { MobileCompanionSheet } from '@/components/snapshot/MobileCompanionSheet';
 import { AIInsights } from '@/components/snapshot/AIInsights';
+import { CategoryTimeline } from '@/components/snapshot/CategoryTimeline';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 function getScoreColor(score: number) {
@@ -48,6 +49,14 @@ export default function Snapshot() {
   const allSnapshots = dbSnapshots.length > 0 ? dbSnapshots : MOCK_SNAPSHOTS;
   const latestSaved = allSnapshots[0];
 
+  // Determine if user has saved this month's snapshot
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const hasCurrentMonth = latestSaved && latestSaved.date.startsWith(currentMonth);
+
+  // Mode: 'score' = fresh scoring (no history visible), 'review' = post-save review
+  const [mode, setMode] = useState<'score' | 'review'>(hasCurrentMonth ? 'review' : 'score');
+
   const [purposeStatement, setPurposeStatement] = useState(latestSaved?.purposeStatement ?? '');
   const [quarterlyGoal, setQuarterlyGoal] = useState(latestSaved?.quarterlyGoal ?? '');
   const [majorIssue, setMajorIssue] = useState(latestSaved?.majorIssue ?? '');
@@ -61,8 +70,13 @@ export default function Snapshot() {
   const [ratings, setRatings] = useState<Record<string, SnapshotRating>>(() => {
     const initial: Record<string, SnapshotRating> = {};
     Object.values(SNAPSHOT_CONFIGS).flat().forEach((cat) => {
-      const existing = latestSaved?.ratings.find((r) => r.categoryId === cat.id);
-      initial[cat.id] = existing ?? { categoryId: cat.id, score: 5, spouseScore: 5, childScore: 5 };
+      // In score mode, start fresh at 5 (don't load previous scores to avoid bias)
+      if (!hasCurrentMonth) {
+        initial[cat.id] = { categoryId: cat.id, score: 5, spouseScore: 5, childScore: 5 };
+      } else {
+        const existing = latestSaved?.ratings.find((r) => r.categoryId === cat.id);
+        initial[cat.id] = existing ?? { categoryId: cat.id, score: 5, spouseScore: 5, childScore: 5 };
+      }
     });
     return initial;
   });
@@ -80,9 +94,7 @@ export default function Snapshot() {
 
   const handleCategoryFocus = (cat: SnapshotCategory) => {
     setActiveCategory(cat);
-    if (isMobile) {
-      setMobileSheetOpen(true);
-    }
+    if (isMobile) setMobileSheetOpen(true);
   };
 
   const scrollToCategory = (catId: string) => {
@@ -101,22 +113,21 @@ export default function Snapshot() {
         enrichedRatings[catId] = { ...enrichedRatings[catId], lifeEvent: note };
       }
     });
-    await saveSnapshot(snapshotType, purposeStatement, quarterlyGoal, majorIssue, enrichedRatings);
+    const result = await saveSnapshot(snapshotType, purposeStatement, quarterlyGoal, majorIssue, enrichedRatings);
+    if (result) {
+      setMode('review');
+    }
   };
 
-  const personalCategories = categories.filter((c) => c.group === 'personal');
-  const professionalCategories = categories.filter((c) => c.group === 'professional');
-  const spiritualCategories = categories.filter((c) => c.group === 'spiritual');
+  const personalCategories = categories.filter(c => c.group === 'personal');
+  const professionalCategories = categories.filter(c => c.group === 'professional');
+  const spiritualCategories = categories.filter(c => c.group === 'spiritual');
 
-  const historyData = allSnapshots.slice().reverse().map((s) => {
-    const row: Record<string, string | number> = {
-      date: new Date(s.date).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
-    };
-    s.ratings.forEach((r) => { row[r.categoryId] = r.score; });
-    return row;
-  });
+  const avgScore = categories.length > 0
+    ? (categories.reduce((sum, c) => sum + (ratings[c.id]?.score ?? 5), 0) / categories.length).toFixed(1)
+    : '5.0';
 
-  const radarData = categories.map((cat) => ({
+  const radarData = categories.map(cat => ({
     category: cat.name.length > 10 ? cat.name.slice(0, 10) + '…' : cat.name,
     fullCategory: cat.name,
     catId: cat.id,
@@ -124,39 +135,22 @@ export default function Snapshot() {
     fullMark: 10,
   }));
 
-  const avgScore = categories.length > 0
-    ? (categories.reduce((sum, c) => sum + (ratings[c.id]?.score ?? 5), 0) / categories.length).toFixed(1)
-    : '5.0';
-
-  // Find weakest area for AI callout
-  const weakestCat = categories.reduce((worst, c) => {
-    const s = ratings[c.id]?.score ?? 5;
-    const ws = ratings[worst.id]?.score ?? 5;
-    return s < ws ? c : worst;
-  }, categories[0]);
-  const weakestScore = ratings[weakestCat?.id]?.score ?? 5;
-
   const renderCategoryCard = (cat: SnapshotCategory) => {
     const rating = ratings[cat.id];
     const score = rating?.score ?? 5;
 
     return (
-      <div
-        key={cat.id}
-        ref={(el) => { if (el) categoryRefs.current.set(cat.id, el); }}
-      >
+      <div key={cat.id} ref={(el) => { if (el) categoryRefs.current.set(cat.id, el); }}>
         <Card
           className={`${getScoreBg(score)} transition-all cursor-pointer ${activeCategory?.id === cat.id ? 'ring-2 ring-secondary shadow-md' : 'hover:shadow-sm'}`}
           onClick={() => handleCategoryFocus(cat)}
         >
           <CardContent className="p-4">
-            {/* Name + Score row */}
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-base font-heading font-bold leading-tight">{cat.name}</h3>
               <span className={`text-3xl font-heading font-bold ${getScoreColor(score)}`}>{score}</span>
             </div>
 
-            {/* Slider */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <Label className="text-xs font-body text-muted-foreground">Your Rating</Label>
@@ -165,12 +159,10 @@ export default function Snapshot() {
               <Slider
                 value={[score]}
                 onValueChange={([v]) => updateRating(cat.id, 'score', v)}
-                min={1} max={10} step={1}
-                className="py-1"
+                min={1} max={10} step={1} className="py-1"
               />
             </div>
 
-            {/* Spouse/Child ratings — compact on mobile */}
             {cat.hasSpouseRating && (
               <div className="space-y-1.5 pt-2 mt-2 border-t border-border/30">
                 <div className="flex items-center justify-between">
@@ -199,7 +191,7 @@ export default function Snapshot() {
               </div>
             )}
 
-            {/* Life note — inline textarea instead of window.prompt */}
+            {/* Life note */}
             {annotations[cat.id] ? (
               <div className="pt-2 mt-2 border-t border-border/30">
                 <div className="flex items-center gap-1.5">
@@ -219,41 +211,20 @@ export default function Snapshot() {
                   onClick={(e) => e.stopPropagation()}
                 />
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-xs h-8"
-                    onClick={(e) => { e.stopPropagation(); setEditingNote(null); setNoteInput(''); }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="text-xs h-8"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (noteInput.trim()) {
-                        setAnnotations((prev) => ({ ...prev, [cat.id]: noteInput.trim() }));
-                      }
-                      setEditingNote(null);
-                      setNoteInput('');
-                    }}
-                  >
-                    Save
-                  </Button>
+                  <Button size="sm" variant="outline" className="text-xs h-8" onClick={(e) => { e.stopPropagation(); setEditingNote(null); setNoteInput(''); }}>Cancel</Button>
+                  <Button size="sm" className="text-xs h-8" onClick={(e) => {
+                    e.stopPropagation();
+                    if (noteInput.trim()) setAnnotations(prev => ({ ...prev, [cat.id]: noteInput.trim() }));
+                    setEditingNote(null); setNoteInput('');
+                  }}>Save</Button>
                 </div>
               </div>
             ) : (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditingNote(cat.id);
-                  setNoteInput('');
-                }}
+                onClick={(e) => { e.stopPropagation(); setEditingNote(cat.id); setNoteInput(''); }}
                 className="text-xs font-body text-muted-foreground hover:text-secondary transition-colors flex items-center gap-1 pt-2 mt-2 border-t border-border/30 min-h-[36px]"
               >
-                <Bookmark className="h-3.5 w-3.5" />
-                Add a life note
+                <Bookmark className="h-3.5 w-3.5" /> Add a life note
               </button>
             )}
           </CardContent>
@@ -297,20 +268,34 @@ export default function Snapshot() {
   return (
     <DashboardLayout>
       <div className="space-y-5 sm:space-y-8">
-        {/* Header — simplified on mobile */}
+        {/* Header */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-5">
           <div>
             <h1 className="text-2xl sm:text-4xl font-heading font-bold tracking-tight text-primary">
               {SNAPSHOT_TYPE_LABELS[snapshotType]}
             </h1>
             <p className="text-sm sm:text-base font-body text-muted-foreground mt-1">
-              Rate your last 30 days honestly.
+              {mode === 'score'
+                ? 'Rate your last 30 days honestly. No peeking at last month.'
+                : 'Your results are in. Review your trends and insights.'}
               {allSnapshots.length > 0 && (
                 <span className="text-secondary font-semibold"> · {allSnapshots.length} on record</span>
               )}
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
+            {/* Mode toggle */}
+            {hasCurrentMonth && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setMode(mode === 'score' ? 'review' : 'score')}
+                className="font-body text-sm gap-1.5"
+              >
+                {mode === 'score' ? <Eye className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+                {mode === 'score' ? 'View Results' : 'Edit Scores'}
+              </Button>
+            )}
             <Select value={snapshotType} onValueChange={(v) => setSnapshotType(v as SnapshotType)}>
               <SelectTrigger className="w-[180px] sm:w-[220px] font-body text-sm sm:text-base h-10 sm:h-12">
                 <SelectValue />
@@ -325,104 +310,34 @@ export default function Snapshot() {
           </div>
         </div>
 
-        {/* Score Summary — mobile: just avg + save */}
-        <Card className="border-secondary/20 bg-secondary/5">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="text-center">
-                  <p className="text-3xl sm:text-4xl font-heading font-bold text-secondary">{avgScore}</p>
-                  <p className="text-xs sm:text-sm font-body text-muted-foreground">Overall</p>
-                </div>
-                {/* Category scores — hidden on mobile */}
-                <div className="hidden sm:flex gap-4 ml-4 overflow-x-auto pb-1">
-                  {categories.map((cat) => {
-                    const s = ratings[cat.id]?.score ?? 5;
-                    return (
-                      <button
-                        key={cat.id}
-                        onClick={() => scrollToCategory(cat.id)}
-                        className={`text-center transition-all hover:scale-105 shrink-0 ${activeCategory?.id === cat.id ? 'scale-105' : ''}`}
-                        title={cat.name}
-                      >
-                        <p className={`text-xl font-heading font-bold ${getScoreColor(s)}`}>{s}</p>
-                        <p className="text-xs font-body text-muted-foreground max-w-[60px] truncate">{cat.name}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              <Button
-                size={isMobile ? 'default' : 'lg'}
-                onClick={handleSave}
-                disabled={isSaving}
-                className="font-heading font-semibold h-10 sm:h-12 px-4 sm:px-6 gap-2 text-sm sm:text-base shrink-0"
-              >
-                {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                {isSaving ? 'Saving...' : 'Save'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Tabs defaultValue="snapshot" className="space-y-4 sm:space-y-6">
-          <TabsList className="p-1.5 sm:p-2 gap-1 sm:gap-2 font-body w-full flex">
-            <TabsTrigger value="snapshot" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[44px]">
-              <Save className="h-4 w-4" /> <span className="hidden sm:inline">My</span> Snapshot
-            </TabsTrigger>
-            <TabsTrigger value="insights" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[44px]">
-              <Activity className="h-4 w-4" /> Insights
-            </TabsTrigger>
-            <TabsTrigger value="history" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[44px]">
-              <History className="h-4 w-4" /> History
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="snapshot">
-            {/* Radar chart at top */}
-            <Card className="mb-5 sm:mb-8">
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* SCORE MODE — Clean slate, no history, just rate        */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {mode === 'score' && (
+          <>
+            {/* Score bar — only shows overall avg + save button */}
+            <Card className="border-secondary/20 bg-secondary/5">
               <CardContent className="p-4 sm:p-6">
-                <div className="h-[250px] sm:h-[320px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart data={radarData} cx="50%" cy="50%" outerRadius={isMobile ? '65%' : '70%'}>
-                      <PolarGrid stroke="hsl(213 15% 82%)" />
-                      <PolarAngleAxis
-                        dataKey="category"
-                        tick={{ fontSize: isMobile ? 10 : 12, fontFamily: 'Quicksand' }}
-                      />
-                      <PolarRadiusAxis angle={90} domain={[0, 10]} tick={{ fontSize: 10, fontFamily: 'Quicksand' }} />
-                      <Radar
-                        name="Score"
-                        dataKey="score"
-                        stroke="hsl(39 78% 48%)"
-                        fill="hsl(39 78% 48%)"
-                        fillOpacity={0.25}
-                        strokeWidth={2.5}
-                      />
-                    </RadarChart>
-                  </ResponsiveContainer>
-                </div>
-                {/* AI callout for weakest area */}
-                {weakestCat && weakestScore <= 6 && (
-                  <button
-                    onClick={() => {
-                      setActiveCategory(weakestCat);
-                      if (isMobile) setMobileSheetOpen(true);
-                      scrollToCategory(weakestCat.id);
-                    }}
-                    className="mt-3 w-full text-left px-3 py-2 rounded-lg bg-secondary/10 border border-secondary/20 hover:bg-secondary/15 transition-colors"
+                <div className="flex items-center justify-between gap-4">
+                  <div className="text-center">
+                    <p className="text-3xl sm:text-4xl font-heading font-bold text-secondary">{avgScore}</p>
+                    <p className="text-xs sm:text-sm font-body text-muted-foreground">Overall</p>
+                  </div>
+                  <Button
+                    size={isMobile ? 'default' : 'lg'}
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="font-heading font-semibold h-10 sm:h-12 px-4 sm:px-6 gap-2 text-sm sm:text-base shrink-0"
                   >
-                    <p className="text-xs font-body text-muted-foreground">
-                      <span className="text-secondary font-semibold">Your focus area:</span>{' '}
-                      {weakestCat.name} ({weakestScore}/10). Tap to discuss with your AI companion.
-                    </p>
-                  </button>
-                )}
+                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    {isSaving ? 'Saving...' : 'Save Snapshot'}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 
-            <div className={`grid gap-6 sm:gap-8 ${!isMobile ? 'lg:grid-cols-[1fr_360px]' : 'grid-cols-1'}`}>
-              {/* Left: Scorecard */}
+            <div className={`grid gap-6 sm:gap-8 ${!isMobile ? 'lg:grid-cols-[1fr_420px]' : 'grid-cols-1'}`}>
+              {/* Left: Scoring cards */}
               <div className="space-y-6 sm:space-y-8">
                 {/* Purpose & Goal */}
                 <Card>
@@ -454,7 +369,7 @@ export default function Snapshot() {
                 {renderCategoryGroup('Personal Life', personalCategories, 'bg-primary')}
                 {renderCategoryGroup('Professional Life', professionalCategories, 'bg-primary/60')}
 
-                {/* Major Issue */}
+                {/* Prayer Request */}
                 <Card>
                   <CardHeader className="pb-2 px-4 sm:px-6">
                     <CardTitle className="text-lg sm:text-xl font-heading">Prayer Request</CardTitle>
@@ -482,7 +397,7 @@ export default function Snapshot() {
                 </div>
               </div>
 
-              {/* Right: AI Companion — desktop only */}
+              {/* Right: AI Companion — desktop */}
               {!isMobile && (
                 <div className="hidden lg:block">
                   <div className="sticky top-20 h-[calc(100vh-12rem)]">
@@ -498,7 +413,7 @@ export default function Snapshot() {
               )}
             </div>
 
-            {/* Mobile: AI Companion bottom sheet */}
+            {/* Mobile: AI Companion */}
             {isMobile && (
               <>
                 <MobileCompanionSheet
@@ -510,75 +425,152 @@ export default function Snapshot() {
                   userName={profile?.full_name ?? 'Brother'}
                   allSnapshots={allSnapshots}
                 />
-                {/* FAB to open companion */}
                 <div className="fixed bottom-5 right-5 z-40">
-                  <Button
-                    size="lg"
-                    className="rounded-full h-14 w-14 shadow-xl"
-                    onClick={() => setMobileSheetOpen(true)}
-                  >
+                  <Button size="lg" className="rounded-full h-14 w-14 shadow-xl" onClick={() => setMobileSheetOpen(true)}>
                     <MessageCircle className="h-6 w-6" />
                   </Button>
                 </div>
               </>
             )}
-          </TabsContent>
+          </>
+        )}
 
-          <TabsContent value="insights">
-            <AIInsights
-              snapshots={allSnapshots}
-              categories={categories}
-              userName={profile?.full_name ?? 'Brother'}
-            />
-          </TabsContent>
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* REVIEW MODE — Post-save: history, insights, radar      */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {mode === 'review' && (
+          <Tabs defaultValue="results" className="space-y-4 sm:space-y-6">
+            <TabsList className="p-1.5 sm:p-2 gap-1 sm:gap-2 font-body w-full flex">
+              <TabsTrigger value="results" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[44px]">
+                <Eye className="h-4 w-4" /> Results
+              </TabsTrigger>
+              <TabsTrigger value="insights" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[44px]">
+                <Activity className="h-4 w-4" /> Insights
+              </TabsTrigger>
+              <TabsTrigger value="history" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[44px]">
+                <History className="h-4 w-4" /> History
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="history">
-            <Card>
-              <CardHeader className="px-4 sm:px-6">
-                <CardTitle className="font-heading text-xl sm:text-2xl">Score Trends</CardTitle>
-                <p className="text-sm font-body text-muted-foreground mt-1">
-                  {allSnapshots.length > 0
-                    ? `${allSnapshots.length} snapshots tracked.`
-                    : 'Save your first Snapshot to start tracking.'}
-                </p>
-              </CardHeader>
-              <CardContent className="px-2 sm:px-6">
-                {allSnapshots.length > 0 ? (
-                  <div className="h-[300px] sm:h-[450px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={historyData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(213 15% 82%)" />
-                        <XAxis dataKey="date" tick={{ fontSize: isMobile ? 10 : 14, fontFamily: 'Quicksand' }} />
-                        <YAxis domain={[0, 10]} tick={{ fontSize: isMobile ? 10 : 14, fontFamily: 'Quicksand' }} />
-                        <Tooltip contentStyle={{ fontFamily: 'Quicksand', borderRadius: '8px', fontSize: 12 }} />
-                        {categories.map((cat, i) => (
-                          <Line
-                            key={cat.id}
-                            type="monotone"
-                            dataKey={cat.id}
-                            name={cat.name}
-                            stroke={`hsl(${(i * 33) % 360} 60% 45%)`}
-                            strokeWidth={2}
-                            dot={{ r: isMobile ? 3 : 4 }}
-                            connectNulls
-                          />
-                        ))}
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <div className="h-[200px] flex items-center justify-center text-center">
-                    <div>
-                      <History className="h-12 w-12 text-muted-foreground/20 mx-auto mb-3" />
-                      <p className="text-base font-heading font-bold text-muted-foreground">No history yet</p>
-                      <p className="text-sm font-body text-muted-foreground mt-1">Save your first Snapshot to begin.</p>
+            {/* RESULTS TAB */}
+            <TabsContent value="results">
+              <div className="space-y-6">
+                {/* Overall Score + Radar */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                  <Card className="border-secondary/20 bg-secondary/5">
+                    <CardContent className="p-6 sm:p-8 text-center">
+                      <p className="text-6xl sm:text-7xl font-heading font-bold text-secondary">{avgScore}</p>
+                      <p className="text-sm font-body text-muted-foreground mt-2">Overall Score · {categories.length} categories</p>
+                      {previousRatings && (
+                        <p className="text-xs font-body text-muted-foreground mt-1">
+                          {(() => {
+                            const prevAvg = categories.reduce((s, c) => s + (previousRatings[c.id]?.score ?? 5), 0) / categories.length;
+                            const delta = parseFloat(avgScore) - prevAvg;
+                            return delta > 0 ? `↑ Up ${delta.toFixed(1)} from last month` : delta < 0 ? `↓ Down ${Math.abs(delta).toFixed(1)} from last month` : 'Same as last month';
+                          })()}
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="h-[250px] sm:h-[280px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <RadarChart data={radarData} cx="50%" cy="50%" outerRadius={isMobile ? '65%' : '70%'}>
+                            <PolarGrid stroke="hsl(213 15% 82%)" />
+                            <PolarAngleAxis dataKey="category" tick={{ fontSize: isMobile ? 10 : 12, fontFamily: 'Quicksand' }} />
+                            <PolarRadiusAxis angle={90} domain={[0, 10]} tick={{ fontSize: 10, fontFamily: 'Quicksand' }} />
+                            <Radar name="Score" dataKey="score" stroke="hsl(39 78% 48%)" fill="hsl(39 78% 48%)" fillOpacity={0.25} strokeWidth={2.5} />
+                          </RadarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Per-category scores with comparison */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg font-heading">Category Breakdown</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {categories.map(cat => {
+                        const score = ratings[cat.id]?.score ?? 5;
+                        const prevScore = previousRatings?.[cat.id]?.score;
+                        const delta = prevScore !== undefined ? score - prevScore : null;
+                        return (
+                          <div key={cat.id} className={`flex items-center justify-between p-3 rounded-lg ${getScoreBg(score)}`}>
+                            <span className="text-sm font-heading font-bold truncate mr-2">{cat.name}</span>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {delta !== null && delta !== 0 && (
+                                <span className={`text-xs font-body font-bold ${delta > 0 ? 'text-primary' : 'text-destructive'}`}>
+                                  {delta > 0 ? '+' : ''}{delta}
+                                </span>
+                              )}
+                              <span className={`text-xl font-heading font-bold ${getScoreColor(score)}`}>{score}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* INSIGHTS TAB */}
+            <TabsContent value="insights">
+              <AIInsights
+                snapshots={allSnapshots}
+                categories={categories}
+                userName={profile?.full_name ?? 'Brother'}
+              />
+            </TabsContent>
+
+            {/* HISTORY TAB — Category Timeline Cards */}
+            <TabsContent value="history">
+              <div className="space-y-6">
+                {/* Overall trend summary */}
+                <Card className="border-secondary/20">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-lg font-heading font-bold">12-Month Journey</p>
+                        <p className="text-sm font-body text-muted-foreground mt-0.5">
+                          Tap any month to see what happened. Look for your <span className="text-secondary font-semibold">life notes</span> — they tell the real story.
+                        </p>
+                      </div>
+                      <p className="text-sm font-body text-muted-foreground shrink-0">
+                        {allSnapshots.length} snapshots
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Grouped by category type */}
+                {[
+                  { title: 'Spiritual Life', cats: spiritualCategories, color: 'bg-secondary' },
+                  { title: 'Personal Life', cats: personalCategories, color: 'bg-primary' },
+                  { title: 'Professional Life', cats: professionalCategories, color: 'bg-primary/60' },
+                ].map(({ title, cats, color }) => cats.length > 0 && (
+                  <div key={title}>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`h-6 w-1.5 rounded-full ${color}`} />
+                      <h2 className="text-lg font-heading font-bold text-primary">{title}</h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {cats.map(cat => (
+                        <CategoryTimeline key={cat.id} category={cat} snapshots={allSnapshots} />
+                      ))}
                     </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
     </DashboardLayout>
   );
