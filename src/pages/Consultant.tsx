@@ -27,14 +27,14 @@ export default function Consultant() {
 
   // Build comprehensive profile context from all snapshot data
   const profileContext = buildSnapshotProfileContext(
-    MOCK_SNAPSHOTS,
+    allSnapshots,
     SNAPSHOT_CATEGORIES,
     userName,
     chapter,
     ROLE_LABELS[role as UserRole] || role
   );
 
-  const latestSnapshot = MOCK_SNAPSHOTS[0];
+  const latestSnapshot = allSnapshots[0];
   const weakAreas = latestSnapshot
     ? latestSnapshot.ratings
         .filter((r) => r.score <= 5)
