@@ -28,7 +28,7 @@ const LEADER_CATEGORIES: SnapshotCategory[] = [
   { id: 'physical_health', name: 'Physical Health', group: 'personal', scriptureRef: '1 Cor. 6:19-20', description: 'Exercise, nutrition, sleep, and honoring your body as a temple.' },
 ];
 
-// ─── ADVISOR SNAPSHOT ───
+// ─── IRON PULSE (ADVISOR) ───
 const ADVISOR_CATEGORIES: SnapshotCategory[] = [
   { id: 'intimacy', name: 'Intimacy with Jesus', group: 'spiritual', scriptureRef: 'Matt. 22:37-38', description: 'Your personal walk with Christ — prayer life, time in the Word, obedience.' },
   { id: 'marriage', name: 'Marriage', group: 'personal', scriptureRef: 'Mark 10:8-10', hasSpouseRating: true, description: 'The health of your covenant relationship.' },

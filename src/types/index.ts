@@ -117,10 +117,10 @@ export const ROLE_COLORS: Record<UserRole, string> = {
 };
 
 export const SNAPSHOT_TYPE_LABELS: Record<SnapshotType, string> = {
-  member: 'Member Snapshot™',
-  leader: 'Leader Snapshot™',
-  advisor: 'Advisor Snapshot™',
-  nonprofit: 'Nonprofit Snapshot™',
+  member: 'Iron Core',
+  leader: 'Iron Edge',
+  advisor: 'Iron Pulse',
+  nonprofit: 'Iron Mission',
 };
 
 export function getRoleSnapshotType(role: UserRole): SnapshotType {

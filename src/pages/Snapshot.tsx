@@ -259,10 +259,10 @@ export default function Snapshot() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="member" className="text-sm py-2.5">Member Snapshot™</SelectItem>
-                <SelectItem value="leader" className="text-sm py-2.5">Leader Snapshot™</SelectItem>
-                <SelectItem value="advisor" className="text-sm py-2.5">Advisor Snapshot™</SelectItem>
-                <SelectItem value="nonprofit" className="text-sm py-2.5">Nonprofit Snapshot™</SelectItem>
+                <SelectItem value="member" className="text-sm py-2.5">Iron Core</SelectItem>
+                <SelectItem value="leader" className="text-sm py-2.5">Iron Edge</SelectItem>
+                <SelectItem value="advisor" className="text-sm py-2.5">Iron Pulse</SelectItem>
+                <SelectItem value="nonprofit" className="text-sm py-2.5">Iron Mission</SelectItem>
               </SelectContent>
             </Select>
           </div>
