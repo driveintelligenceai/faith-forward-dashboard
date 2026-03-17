@@ -40,7 +40,7 @@ export function CategorySparkline({ categoryId, snapshots, width = 100, height =
 
   if (!points) return null;
 
-  const strokeColor = points.trend >= 0 ? 'hsl(var(--score-high))' : 'hsl(var(--score-low))';
+  const strokeColor = points.trend >= 0 ? 'hsl(var(--primary))' : 'hsl(var(--destructive))';
 
   return (
     <div className="flex items-center gap-1.5">
