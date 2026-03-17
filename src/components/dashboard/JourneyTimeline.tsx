@@ -90,13 +90,15 @@ export function JourneyTimeline({ snapshots }: { snapshots: Snapshot[] }) {
                 )}
               </div>
 
-              {/* Category dots */}
-              <div className="flex flex-wrap gap-1.5">
+              {/* Category dots with tooltips */}
+              <div className="flex flex-wrap gap-1.5" role="list" aria-label="Category scores">
                 {card.dots.map(dot => (
                   <div
                     key={dot.catId}
+                    role="listitem"
                     className={`h-3 w-3 rounded-full ${getScoreColor(dot.score)}`}
                     title={`${dot.catName}: ${dot.score}/10`}
+                    aria-label={`${dot.catName}: ${dot.score} out of 10`}
                   />
                 ))}
               </div>

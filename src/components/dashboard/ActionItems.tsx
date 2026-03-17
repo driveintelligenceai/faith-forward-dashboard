@@ -63,12 +63,13 @@ export function ActionItems() {
           {upcoming.map(item => (
             <div
               key={item.id}
-              className="flex items-start gap-3 py-3 px-1 border-b border-border/30 last:border-0 transition-all"
+              className={`flex items-start gap-3 py-3 px-1 border-b border-border/30 last:border-0 transition-all ${item.completed ? 'opacity-50' : ''}`}
             >
               <Checkbox
                 checked={item.completed}
                 onCheckedChange={() => completeReminder(item.id)}
                 className="mt-0.5 h-5 w-5 shrink-0"
+                aria-label={`Mark "${item.text}" as complete`}
               />
               <div className="flex-1 min-w-0">
                 <p className={`font-body text-[15px] leading-snug ${item.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
