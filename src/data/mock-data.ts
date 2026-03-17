@@ -183,7 +183,7 @@ export const MOCK_EVENTS: ForumEvent[] = [
     title: 'Nashville Forum Guest Day',
     date: '2026-04-16',
     location: 'Nashville, TN',
-    description: 'Bring a business owner friend to experience Iron Forums firsthand. See how we help leaders Connect · Sharpen · Grow.',
+    description: 'Bring a business owner friend to experience Iron Forums firsthand. See how we help leaders Connect » Sharpen » Grow.',
     chapterId: '5',
     attendees: ['9', '15'],
     maxAttendees: 25,
