@@ -204,8 +204,8 @@ export function AIInsights({ snapshots, categories, userName }: AIInsightsProps)
             <span className="ml-2 text-sm font-body text-muted-foreground">Analyzing your data...</span>
           </div>
         )}
-        {error && (
-          <p className="text-sm font-body text-destructive py-4">{error}</p>
+        {!isLoading && !insights && (
+          <p className="text-sm font-body text-muted-foreground py-4">No insights available yet.</p>
         )}
         {insights && (
           <div className="prose prose-sm max-w-none font-body text-sm leading-relaxed [&_h1]:font-heading [&_h2]:font-heading [&_h3]:font-heading [&_strong]:text-foreground [&_li]:mb-1.5">
