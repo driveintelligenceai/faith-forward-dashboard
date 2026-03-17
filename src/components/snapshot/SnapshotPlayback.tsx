@@ -303,7 +303,7 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
         )}
 
         {/* Playback controls */}
-        <div className="mt-4 sm:mt-6 space-y-3">
+        <div className="mt-2 sm:mt-3 space-y-2">
           {/* Timeline dots */}
           <div className="flex items-center gap-1 justify-center">
             {chronological.map((snap, i) => (

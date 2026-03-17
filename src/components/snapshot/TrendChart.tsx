@@ -75,7 +75,7 @@ export function TrendChart({ snapshots, categories }: TrendChartProps) {
 
   return (
     <Card className="border-secondary/20">
-      <CardContent className="p-4 sm:p-6 lg:p-8">
+      <CardContent className="p-3 sm:p-4 lg:p-5">
         {/* Header */}
         <div className="mb-4">
           <h2 className="text-xl sm:text-2xl font-heading font-bold text-primary">Category Trends</h2>

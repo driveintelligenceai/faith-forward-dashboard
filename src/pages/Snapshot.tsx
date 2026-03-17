@@ -496,7 +496,7 @@ export default function Snapshot() {
 
               {/* JOURNEY TAB — the hero experience */}
               <TabsContent value="journey">
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <SnapshotPlayback snapshots={allSnapshots} categories={categories} />
                   <TrendChart snapshots={allSnapshots} categories={categories} />
                   <SnapshotSummary snapshots={allSnapshots} categories={categories} />
