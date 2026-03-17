@@ -46,7 +46,7 @@
     --input: 213 15% 82%;
     --ring: 213 93% 23%;
 
-    --radius: 0.625rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 213 93% 23%;
     --sidebar-foreground: 43 29% 92%;
@@ -108,7 +108,13 @@
   }
 
   html {
-    font-size: 17px;
+    font-size: 16px;
+  }
+
+  @media (min-width: 640px) {
+    html {
+      font-size: 17px;
+    }
   }
 
   body {
@@ -123,16 +129,44 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'League Spartan', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
   }
 
   /* Ensure all interactive elements have minimum touch target */
   button, a, [role="button"], input, select, textarea {
-    min-height: 2.5rem;
+    min-height: 2.75rem;
   }
 
   /* Larger focus rings for visibility */
   :focus-visible {
     @apply ring-2 ring-ring ring-offset-2 ring-offset-background outline-none;
+  }
+}
+
+/* Refined card shadows */
+@layer utilities {
+  .shadow-card {
+    box-shadow:
+      0 1px 3px 0 hsl(213 15% 82% / 0.12),
+      0 1px 2px -1px hsl(213 15% 82% / 0.12);
+  }
+}
+
+/* Smooth page transitions */
+@layer base {
+  main {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }

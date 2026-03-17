@@ -28,7 +28,7 @@ import {
 const mainNav = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard, desc: 'Your overview' },
   { title: 'My Snapshot', url: '/snapshot', icon: ClipboardCheck, desc: 'Rate your 30 days' },
-  { title: 'The Consultant', url: '/consultant', icon: MessageSquare, desc: 'AI guidance' },
+  { title: 'The Consultant', url: '/consultant', icon: MessageSquare, desc: 'AI mentor' },
   { title: 'Community', url: '/community', icon: Users, desc: 'Brothers & events' },
 ];
 
@@ -49,49 +49,46 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="p-5 border-b border-sidebar-border">
-        <div className="flex items-center gap-3">
+      {/* Logo Area — generous, centered, prominent */}
+      <SidebarHeader className="border-b border-sidebar-border">
+        <div className={`flex flex-col items-center justify-center transition-all duration-300 ${collapsed ? 'py-4 px-2' : 'py-6 px-5'}`}>
           <img
             src={ironForumsLogo}
             alt="Iron Forums"
-            className="h-10 w-auto brightness-0 invert"
+            className={`brightness-0 invert transition-all duration-300 ${collapsed ? 'h-8 w-8' : 'h-14 w-auto max-w-[180px]'}`}
           />
           {!collapsed && (
-            <div className="flex flex-col">
-              <span className="text-lg font-heading font-bold tracking-tight text-sidebar-foreground">
-                Iron Forums
-              </span>
-              <span className="text-xs font-body tracking-[0.15em] uppercase text-sidebar-primary">
-                Connect · Sharpen · Grow
-              </span>
-            </div>
+            <span className="text-[10px] font-body tracking-[0.2em] uppercase text-sidebar-primary mt-2.5 opacity-80">
+              Connect · Sharpen · Grow
+            </span>
           )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="pt-3 px-2">
+      {/* Navigation */}
+      <SidebarContent className="pt-4 px-2.5">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-0.5">
               {mainNav.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
                     tooltip={item.title}
-                    className="min-h-[52px]"
+                    className="min-h-[48px]"
                   >
                     <NavLink
                       to={item.url}
                       end={item.url === '/'}
-                      className="hover:bg-sidebar-accent transition-colors rounded-lg px-3 py-3"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
+                      className="hover:bg-sidebar-accent/60 transition-all duration-200 rounded-xl px-3 py-2.5"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold shadow-sm"
                     >
-                      <item.icon className="h-6 w-6 shrink-0" />
+                      <item.icon className="h-5 w-5 shrink-0 opacity-80" />
                       {!collapsed && (
-                        <div className="flex flex-col">
-                          <span className="font-body text-base font-semibold leading-tight">{item.title}</span>
-                          <span className="font-body text-xs text-sidebar-foreground/50 leading-tight">{item.desc}</span>
+                        <div className="flex flex-col ml-0.5">
+                          <span className="font-body text-[15px] font-semibold leading-tight">{item.title}</span>
+                          <span className="font-body text-[11px] text-sidebar-foreground/40 leading-tight">{item.desc}</span>
                         </div>
                       )}
                     </NavLink>
@@ -103,10 +100,10 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {hasMinRole('facilitator') && (
-          <SidebarGroup className="mt-4">
-            <div className="px-3 mb-2">
+          <SidebarGroup className="mt-6">
+            <div className="px-3 mb-1.5">
               {!collapsed && (
-                <span className="text-[11px] font-body font-semibold uppercase tracking-[0.15em] text-sidebar-foreground/40">
+                <span className="text-[10px] font-body font-semibold uppercase tracking-[0.18em] text-sidebar-foreground/30">
                   Management
                 </span>
               )}
@@ -119,18 +116,18 @@ export function AppSidebar() {
                       asChild
                       isActive={isActive(item.url)}
                       tooltip={item.title}
-                      className="min-h-[52px]"
+                      className="min-h-[48px]"
                     >
                       <NavLink
                         to={item.url}
-                        className="hover:bg-sidebar-accent transition-colors rounded-lg px-3 py-3"
-                        activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
+                        className="hover:bg-sidebar-accent/60 transition-all duration-200 rounded-xl px-3 py-2.5"
+                        activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold shadow-sm"
                       >
-                        <item.icon className="h-6 w-6 shrink-0" />
+                        <item.icon className="h-5 w-5 shrink-0 opacity-80" />
                         {!collapsed && (
-                          <div className="flex flex-col">
-                            <span className="font-body text-base font-semibold leading-tight">{item.title}</span>
-                            <span className="font-body text-xs text-sidebar-foreground/50 leading-tight">{item.desc}</span>
+                          <div className="flex flex-col ml-0.5">
+                            <span className="font-body text-[15px] font-semibold leading-tight">{item.title}</span>
+                            <span className="font-body text-[11px] text-sidebar-foreground/40 leading-tight">{item.desc}</span>
                           </div>
                         )}
                       </NavLink>
@@ -143,29 +140,34 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="p-3 border-t border-sidebar-border space-y-1">
+      {/* Footer — user profile & sign out */}
+      <SidebarFooter className="p-2.5 border-t border-sidebar-border space-y-0.5">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="My Profile" className="min-h-[52px]">
+            <SidebarMenuButton asChild tooltip="My Profile" className="min-h-[48px]">
               <NavLink
                 to="/profile"
-                className="hover:bg-sidebar-accent transition-colors rounded-lg px-3 py-3"
+                className="hover:bg-sidebar-accent/60 transition-all duration-200 rounded-xl px-3 py-2.5"
                 activeClassName="bg-sidebar-accent text-sidebar-primary"
               >
-                <UserCircle className="h-6 w-6 shrink-0" />
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="" className="h-7 w-7 rounded-full object-cover shrink-0" />
+                ) : (
+                  <UserCircle className="h-5 w-5 shrink-0 opacity-80" />
+                )}
                 {!collapsed && (
-                  <div className="flex flex-col flex-1">
-                    <span className="text-base font-body font-semibold leading-tight">{profile?.full_name || 'My Profile'}</span>
-                    <span className="text-xs font-body text-sidebar-foreground/50 leading-tight">{profile?.chapter}</span>
+                  <div className="flex flex-col flex-1 ml-0.5">
+                    <span className="text-[15px] font-body font-semibold leading-tight truncate">{profile?.full_name || 'My Profile'}</span>
+                    <span className="text-[11px] font-body text-sidebar-foreground/40 leading-tight truncate">{profile?.chapter || profile?.company_name || ''}</span>
                   </div>
                 )}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Sign Out" onClick={logout} className="min-h-[48px]">
-              <LogOut className="h-5 w-5 shrink-0" />
-              {!collapsed && <span className="font-body text-base">Sign Out</span>}
+            <SidebarMenuButton tooltip="Sign Out" onClick={logout} className="min-h-[44px] hover:bg-sidebar-accent/60 transition-all duration-200 rounded-xl">
+              <LogOut className="h-5 w-5 shrink-0 opacity-60" />
+              {!collapsed && <span className="font-body text-[15px] opacity-80">Sign Out</span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

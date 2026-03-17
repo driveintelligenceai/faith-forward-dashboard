@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ROLE_LABELS, ROLE_COLORS } from '@/types';
 import type { UserRole } from '@/types';
 import { Badge } from '@/components/ui/badge';
+import ironForumsLogo from '@/assets/iron-forums-logo.svg';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -14,25 +15,36 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-16 flex items-center justify-between border-b bg-card px-5 sm:px-8 shrink-0">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger className="h-10 w-10" />
-              <div className="h-6 w-px bg-border hidden sm:block" />
-              <span className="text-base font-body font-semibold text-muted-foreground hidden sm:block">
-                Iron Forums Dashboard
+          {/* Top bar — minimal, functional */}
+          <header className="h-14 sm:h-16 flex items-center justify-between border-b border-border/60 bg-card/80 backdrop-blur-sm px-4 sm:px-6 lg:px-8 shrink-0 sticky top-0 z-10">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger className="h-9 w-9 rounded-lg" />
+              {/* Mobile logo — visible when sidebar is hidden */}
+              <img
+                src={ironForumsLogo}
+                alt="Iron Forums"
+                className="h-7 w-auto sm:hidden"
+              />
+              <div className="h-5 w-px bg-border/60 hidden sm:block" />
+              <span className="text-sm font-body font-medium text-muted-foreground/70 hidden sm:block tracking-wide">
+                Iron Forums
               </span>
             </div>
-            {profile && (
-              <Badge className={`${ROLE_COLORS[(profile.role || 'member') as UserRole]} font-body text-sm font-semibold border-0 px-3 py-1`}>
-                {ROLE_LABELS[(profile.role || 'member') as UserRole]}
-              </Badge>
-            )}
+            <div className="flex items-center gap-3">
+              {profile && (
+                <Badge className={`${ROLE_COLORS[(profile.role || 'member') as UserRole]} font-body text-xs sm:text-sm font-semibold border-0 px-2.5 sm:px-3 py-0.5 sm:py-1`}>
+                  {ROLE_LABELS[(profile.role || 'member') as UserRole]}
+                </Badge>
+              )}
+            </div>
           </header>
+
+          {/* Main content area — responsive padding */}
           <main className="flex-1 overflow-auto">
-            <div className="p-5 sm:p-8 lg:p-10 max-w-7xl mx-auto w-full">
+            <div className="px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10 max-w-7xl mx-auto w-full">
               {children}
             </div>
           </main>
