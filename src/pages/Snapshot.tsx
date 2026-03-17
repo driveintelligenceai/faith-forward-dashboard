@@ -866,7 +866,7 @@ function CategoryScoringCard({
             </div>
             <div>
               <p className="text-sm font-heading font-bold text-foreground">James</p>
-              <p className="text-xs font-body text-muted-foreground">Your AI Mentor</p>
+              <p className="text-xs font-body text-muted-foreground">Your Accountability Partner</p>
             </div>
           </div>
 
