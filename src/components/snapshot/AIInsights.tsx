@@ -84,7 +84,7 @@ function generateDemoInsights(): InsightBlock[] {
     {
       id: 'pattern',
       emoji: '💡',
-      title: 'The real pattern: you give everything to work, and everyone else gets what\'s left.',
+      title: "The real pattern: you give everything to work, and everyone else gets what's left.",
       body: `Jonathan, here's what I see across 12 months: you pour into the business, especially sales. It grows. But marriage, health, and your spiritual life pay the price.\n\nYou're not failing — you're **overextending**. And the men who thrive long-term in this brotherhood are the ones who learn that *less travel and more presence* isn't a business risk — it's the foundation everything else stands on.\n\n> *"For what does it profit a man to gain the whole world and forfeit his soul?" — Mark 8:36*\n\nI believe in you, brother. The question isn't whether you *can* change — it's whether you'll choose to. And I think you will.`,
     },
   ];
