@@ -138,6 +138,5 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
         </div>
       </div>
     </div>
-    </div>
   );
 }
