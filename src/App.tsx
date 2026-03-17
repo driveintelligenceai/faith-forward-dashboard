@@ -11,6 +11,7 @@ import Consultant from "./pages/Consultant";
 import Community from "./pages/Community";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
+import Membership from "./pages/Membership";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/membership" element={<ProtectedRoute><Membership /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

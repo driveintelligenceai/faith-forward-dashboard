@@ -6,6 +6,7 @@ import {
   Shield,
   UserCircle,
   LogOut,
+  CreditCard,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
@@ -30,6 +31,7 @@ const mainNav = [
   { title: 'My Snapshot', url: '/snapshot', icon: ClipboardCheck, desc: 'Rate your 30 days' },
   { title: 'The Consultant', url: '/consultant', icon: MessageSquare, desc: 'AI mentor' },
   { title: 'Community', url: '/community', icon: Users, desc: 'Brothers & events' },
+  { title: 'Membership', url: '/membership', icon: CreditCard, desc: 'Dues & billing' },
 ];
 
 const adminNav = [

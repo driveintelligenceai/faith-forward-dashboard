@@ -230,25 +230,6 @@ export default function Profile() {
           </CardContent>
         </Card>
 
-        {/* Membership */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3 font-heading text-2xl">
-              <CreditCard className="h-6 w-6 text-secondary" /> Membership
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between p-6 rounded-xl bg-muted/50">
-              <div>
-                <p className="font-heading font-bold text-xl">Active Member</p>
-                <p className="text-base font-body text-muted-foreground mt-1">
-                  Member since {(profile as any)?.joined_date ? new Date((profile as any).joined_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—'}
-                </p>
-              </div>
-              <Badge className="bg-score-high/20 text-score-high font-body font-semibold text-base border-0 px-4 py-1.5">Active</Badge>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </DashboardLayout>
   );
