@@ -1,0 +1,102 @@
+export type UserRole = 'hq_admin' | 'facilitator' | 'member' | 'guest';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  chapter: string;
+  avatarUrl?: string;
+  joinedDate: string;
+}
+
+export interface SnapshotCategory {
+  id: string;
+  name: string;
+  group: 'personal' | 'business';
+  scriptureRef: string;
+  hasSpouseRating?: boolean;
+  hasChildRating?: boolean;
+}
+
+export interface SnapshotRating {
+  categoryId: string;
+  score: number;
+  spouseScore?: number;
+  childScore?: number;
+}
+
+export interface Snapshot {
+  id: string;
+  userId: string;
+  date: string;
+  purposeStatement: string;
+  quarterlyGoal: string;
+  majorIssue: string;
+  ratings: SnapshotRating[];
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
+export interface Chapter {
+  id: string;
+  name: string;
+  city: string;
+  state: string;
+  memberCount: number;
+  facilitatorName: string;
+  meetingDay: string;
+  meetingTime: string;
+}
+
+export interface ForumEvent {
+  id: string;
+  title: string;
+  date: string;
+  location: string;
+  description: string;
+  chapterId: string;
+  attendees: string[];
+  maxAttendees: number;
+}
+
+export interface Post {
+  id: string;
+  authorId: string;
+  authorName: string;
+  title: string;
+  content: string;
+  date: string;
+  replies: number;
+  category: string;
+}
+
+export interface Member {
+  id: string;
+  name: string;
+  role: UserRole;
+  chapter: string;
+  joinedDate: string;
+  avatarUrl?: string;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  authorName: string;
+  chapterId?: string;
+}
+
+export const ROLE_LABELS: Record<UserRole, string> = {
+  hq_admin: 'HQ Admin',
+  facilitator: 'Chapter Facilitator',
+  member: 'Member',
+  guest: 'Guest',
+};
