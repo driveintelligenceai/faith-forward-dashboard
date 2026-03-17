@@ -612,7 +612,7 @@ export default function Onboarding() {
       </div>
 
       {/* ──── RIGHT: AI COMPANION ──── */}
-      <div className="w-full lg:w-[400px] xl:w-[440px] border-t lg:border-t-0 lg:border-l bg-card flex flex-col h-[50vh] lg:h-screen">
+      <div className="w-full lg:w-[400px] xl:w-[440px] border-t lg:border-t-0 lg:border-l bg-card flex flex-col h-[40vh] sm:h-[45vh] lg:h-screen">
         {/* Header */}
         <div className="px-4 py-3 border-b bg-primary/5">
           <div className="flex items-center gap-2">
