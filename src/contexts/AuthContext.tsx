@@ -24,6 +24,8 @@ interface Profile {
   state: string | null;
   bio: string | null;
   phone: string | null;
+  onboarding_completed: boolean;
+  snapshot_type: string;
 }
 
 interface AuthContextType {
