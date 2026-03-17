@@ -488,39 +488,83 @@ export default function Snapshot() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* RESULTS TAB */}
+              {/* RESULTS TAB — with month navigation */}
               <TabsContent value="results">
                 <div className="space-y-6">
+                  {/* Month navigation bar */}
+                  <div className="flex items-center justify-between">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setViewingIdx(i => Math.min(i + 1, allSnapshots.length - 1))}
+                      disabled={viewingIdx >= allSnapshots.length - 1 || isPlaying}
+                      className="font-body gap-1 min-h-[40px]"
+                    >
+                      <ChevronLeft className="h-4 w-4" /> Older
+                    </Button>
+                    <div className="text-center">
+                      <p className="text-sm font-heading font-bold text-foreground">{viewingMonthLabel}</p>
+                      <p className="text-xs font-body text-muted-foreground">
+                        {viewingIdx === 0 ? 'Latest snapshot' : `${viewingIdx + 1} of ${allSnapshots.length}`}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setViewingIdx(i => Math.max(i - 1, 0))}
+                      disabled={viewingIdx <= 0 || isPlaying}
+                      className="font-body gap-1 min-h-[40px]"
+                    >
+                      Newer <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    {/* Score card */}
                     <Card className="border-secondary/20 bg-secondary/5">
                       <CardContent className="p-6 sm:p-8 text-center">
-                        <p className="text-6xl sm:text-7xl font-heading font-bold text-secondary">{avgScore}</p>
+                        <p className="text-6xl sm:text-7xl font-heading font-bold text-secondary transition-all duration-300" key={viewingAvg}>{viewingAvg}</p>
                         <p className="text-sm font-body text-muted-foreground mt-2">Overall Score · {categories.length} categories</p>
-                        {previousRatings && (
+                        {viewingPrevRatings && (
                           <p className="text-xs font-body text-muted-foreground mt-1">
                             {(() => {
-                              const prevAvg = categories.reduce((s, c) => s + (previousRatings[c.id]?.score ?? 5), 0) / categories.length;
-                              const delta = parseFloat(avgScore) - prevAvg;
-                              return delta > 0 ? `↑ Up ${delta.toFixed(1)} from last month` : delta < 0 ? `↓ Down ${Math.abs(delta).toFixed(1)} from last month` : 'Same as last month';
+                              const prevAvg = categories.reduce((s, c) => s + (viewingPrevRatings[c.id]?.score ?? 5), 0) / categories.length;
+                              const delta = parseFloat(viewingAvg) - prevAvg;
+                              return delta > 0 ? `↑ Up ${delta.toFixed(1)} from previous month` : delta < 0 ? `↓ Down ${Math.abs(delta).toFixed(1)} from previous month` : 'Same as previous month';
                             })()}
                           </p>
                         )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-4 font-body text-sm gap-1.5"
-                          onClick={() => toast({ title: 'Coming Soon', description: 'Sharing with your Snapshot Group is on the way.' })}
-                        >
-                          <Share2 className="h-4 w-4" /> Share with my Group
-                        </Button>
+                        {viewingIdx === 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-4 font-body text-sm gap-1.5"
+                            onClick={() => toast({ title: 'Coming Soon', description: 'Sharing with your Snapshot Group is on the way.' })}
+                          >
+                            <Share2 className="h-4 w-4" /> Share with my Group
+                          </Button>
+                        )}
                       </CardContent>
                     </Card>
 
+                    {/* Radar chart with play button */}
                     <Card>
                       <CardContent className="p-4 sm:p-6">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs font-body text-muted-foreground">{viewingMonthLabel}</p>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsPlaying(p => !p)}
+                            className="font-body text-xs gap-1 min-h-[32px] text-secondary hover:text-secondary"
+                          >
+                            {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                            {isPlaying ? 'Pause' : 'Play 12 months'}
+                          </Button>
+                        </div>
                         <div className="h-[250px] sm:h-[280px] w-full">
                           <ResponsiveContainer width="100%" height="100%">
-                            <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
+                            <RadarChart data={viewingRadarData} cx="50%" cy="50%" outerRadius="70%">
                               <PolarGrid stroke="hsl(213 15% 82%)" />
                               <PolarAngleAxis dataKey="category" tick={{ fontSize: 11, fontFamily: 'Quicksand' }} />
                               <PolarRadiusAxis angle={90} domain={[0, 10]} tick={{ fontSize: 10, fontFamily: 'Quicksand' }} />
@@ -532,6 +576,7 @@ export default function Snapshot() {
                     </Card>
                   </div>
 
+                  {/* Category breakdown — updates with viewing month */}
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-lg font-heading">Category Breakdown</CardTitle>
@@ -539,11 +584,11 @@ export default function Snapshot() {
                     <CardContent>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {categories.map(cat => {
-                          const score = ratings[cat.id]?.score ?? 5;
-                          const prevScore = previousRatings?.[cat.id]?.score;
+                          const score = viewingRatings[cat.id]?.score ?? 5;
+                          const prevScore = viewingPrevRatings?.[cat.id]?.score;
                           const delta = prevScore !== undefined ? score - prevScore : null;
                           return (
-                            <div key={cat.id} className={`flex items-center justify-between p-3 rounded-lg ${getScoreBorder(score)}`}>
+                            <div key={cat.id} className={`flex items-center justify-between p-3 rounded-lg transition-all duration-300 ${getScoreBorder(score)}`}>
                               <span className="text-sm font-heading font-bold truncate mr-2">{cat.name}</span>
                               <div className="flex items-center gap-1.5 shrink-0">
                                 {delta !== null && delta !== 0 && (
@@ -571,14 +616,18 @@ export default function Snapshot() {
                 />
               </TabsContent>
 
-              {/* HISTORY TAB */}
+              {/* HISTORY TAB — trend lines + per-category detail */}
               <TabsContent value="history">
                 <div className="space-y-6">
+                  {/* Trend line chart at top */}
+                  <TrendLineChart snapshots={allSnapshots} categories={categories} />
+
+                  {/* Per-category heatmap detail */}
                   <Card className="border-secondary/20">
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-lg font-heading font-bold">12-Month Journey</p>
+                          <p className="text-lg font-heading font-bold">Category Detail</p>
                           <p className="text-sm font-body text-muted-foreground mt-0.5">
                             Tap any month to see what happened. Look for your <span className="text-secondary font-semibold">life notes</span>.
                           </p>
