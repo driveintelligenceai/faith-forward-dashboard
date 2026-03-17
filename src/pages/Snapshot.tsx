@@ -152,6 +152,7 @@ export default function Snapshot() {
                   {trend > 0 ? '↑' : '↓'} {Math.abs(trend)} from last
                 </p>
               )}
+              <CategorySparkline categoryId={cat.id} snapshots={allSnapshots} />
             </div>
           </div>
         </CardHeader>
