@@ -15,6 +15,7 @@ import {
   Target,
   Megaphone,
   ArrowRight,
+  Users,
 } from 'lucide-react';
 
 function getScoreColor(score: number) {
@@ -53,112 +54,113 @@ export default function Index() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-10">
         {/* Welcome */}
         <div>
-          <h1 className="text-3xl sm:text-4xl font-heading font-bold tracking-tight text-primary">
+          <h1 className="text-4xl sm:text-5xl font-heading font-bold tracking-tight text-primary">
             Welcome back, {user?.name?.split(' ')[0]}
           </h1>
-          <p className="text-base font-body text-muted-foreground mt-2">
+          <p className="text-lg font-body text-muted-foreground mt-3">
             Your Iron Forums dashboard — <span className="text-secondary font-semibold">Connect</span> · <span className="text-secondary font-semibold">Sharpen</span> · <span className="text-secondary font-semibold">Grow</span>
           </p>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* At-A-Glance Score Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <Card className="border-l-4 border-l-secondary">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-body font-medium text-muted-foreground">Average Score</p>
-                  <p className={`text-4xl font-heading font-bold mt-1 ${getScoreColor(avgScore)}`}>
-                    {avgScore}
-                  </p>
-                </div>
-                <Target className="h-9 w-9 text-secondary/30" />
-              </div>
+            <CardContent className="p-6">
+              <p className="text-base font-body font-medium text-muted-foreground">Overall Score</p>
+              <p className={`text-5xl font-heading font-bold mt-2 ${getScoreColor(avgScore)}`}>
+                {avgScore}
+              </p>
+              <p className="text-sm font-body text-muted-foreground mt-1">out of 10</p>
             </CardContent>
           </Card>
 
           <Card className="border-l-4 border-l-score-high">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-body font-medium text-muted-foreground">Top Strength</p>
-                  <p className="text-base font-body font-semibold mt-1">{topCategory?.name}</p>
-                  <p className={`text-3xl font-heading font-bold ${getScoreColor(topArea?.score ?? 0)}`}>
-                    {topArea?.score}/10
-                  </p>
-                </div>
-                <TrendingUp className="h-9 w-9 text-score-high/30" />
-              </div>
+            <CardContent className="p-6">
+              <p className="text-base font-body font-medium text-muted-foreground">Your Top Strength</p>
+              <p className="text-xl font-heading font-bold mt-2">{topCategory?.name}</p>
+              <p className={`text-4xl font-heading font-bold mt-1 ${getScoreColor(topArea?.score ?? 0)}`}>
+                {topArea?.score}<span className="text-lg text-muted-foreground">/10</span>
+              </p>
             </CardContent>
           </Card>
 
           <Card className="border-l-4 border-l-score-low">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-body font-medium text-muted-foreground">Needs Attention</p>
-                  <p className="text-base font-body font-semibold mt-1">{weakCategory?.name}</p>
-                  <p className={`text-3xl font-heading font-bold ${getScoreColor(weakArea?.score ?? 0)}`}>
-                    {weakArea?.score}/10
-                  </p>
-                </div>
-                <TrendingDown className="h-9 w-9 text-score-low/30" />
-              </div>
+            <CardContent className="p-6">
+              <p className="text-base font-body font-medium text-muted-foreground">Needs Attention</p>
+              <p className="text-xl font-heading font-bold mt-2">{weakCategory?.name}</p>
+              <p className={`text-4xl font-heading font-bold mt-1 ${getScoreColor(weakArea?.score ?? 0)}`}>
+                {weakArea?.score}<span className="text-lg text-muted-foreground">/10</span>
+              </p>
             </CardContent>
           </Card>
 
           <Card className="border-l-4 border-l-primary">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-body font-medium text-muted-foreground">Role</p>
-                  <p className="text-base font-body font-semibold mt-1">
-                    {user ? ROLE_LABELS[user.role] : '—'}
-                  </p>
-                  <p className="text-sm font-body text-muted-foreground">{user?.chapter}</p>
-                </div>
-                {user && (
-                  <Badge className={`${ROLE_COLORS[user.role]} text-xs font-body border-0`}>
-                    Active
-                  </Badge>
-                )}
-              </div>
+            <CardContent className="p-6">
+              <p className="text-base font-body font-medium text-muted-foreground">Your Role</p>
+              <p className="text-xl font-heading font-bold mt-2">
+                {user ? ROLE_LABELS[user.role] : '—'}
+              </p>
+              <p className="text-base font-body text-muted-foreground mt-1">{user?.chapter}</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Card className="cursor-pointer hover:shadow-md hover:border-secondary/40 transition-all" onClick={() => navigate('/snapshot')}>
-            <CardContent className="p-6 flex items-center gap-5">
-              <div className="h-14 w-14 rounded-lg bg-primary flex items-center justify-center shrink-0">
-                <ClipboardCheck className="h-7 w-7 text-primary-foreground" />
+        {/* Big Action Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <Card
+            className="cursor-pointer hover:shadow-lg hover:border-secondary/40 transition-all group"
+            onClick={() => navigate('/snapshot')}
+          >
+            <CardContent className="p-7 flex flex-col items-center text-center gap-4">
+              <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ClipboardCheck className="h-8 w-8 text-primary-foreground" />
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-heading font-bold text-lg">Take Your Snapshot</h3>
-                <p className="text-sm font-body text-muted-foreground mt-0.5">
-                  Rate your last 30 days across all life categories
+              <div>
+                <h3 className="font-heading font-bold text-xl">Take Your Snapshot</h3>
+                <p className="text-base font-body text-muted-foreground mt-1">
+                  Rate your last 30 days
                 </p>
               </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground shrink-0" />
+              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-secondary transition-colors" />
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-md hover:border-secondary/40 transition-all" onClick={() => navigate('/consultant')}>
-            <CardContent className="p-6 flex items-center gap-5">
-              <div className="h-14 w-14 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                <MessageSquare className="h-7 w-7 text-secondary-foreground" />
+          <Card
+            className="cursor-pointer hover:shadow-lg hover:border-secondary/40 transition-all group"
+            onClick={() => navigate('/consultant')}
+          >
+            <CardContent className="p-7 flex flex-col items-center text-center gap-4">
+              <div className="h-16 w-16 rounded-2xl bg-secondary flex items-center justify-center group-hover:scale-110 transition-transform">
+                <MessageSquare className="h-8 w-8 text-secondary-foreground" />
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-heading font-bold text-lg">Talk to The Consultant</h3>
-                <p className="text-sm font-body text-muted-foreground mt-0.5">
-                  Get AI-powered guidance for your growth areas
+              <div>
+                <h3 className="font-heading font-bold text-xl">Talk to The Consultant</h3>
+                <p className="text-base font-body text-muted-foreground mt-1">
+                  Get AI-powered guidance
                 </p>
               </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground shrink-0" />
+              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-secondary transition-colors" />
+            </CardContent>
+          </Card>
+
+          <Card
+            className="cursor-pointer hover:shadow-lg hover:border-secondary/40 transition-all group"
+            onClick={() => navigate('/community')}
+          >
+            <CardContent className="p-7 flex flex-col items-center text-center gap-4">
+              <div className="h-16 w-16 rounded-2xl bg-primary/80 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Users className="h-8 w-8 text-primary-foreground" />
+              </div>
+              <div>
+                <h3 className="font-heading font-bold text-xl">Community Hub</h3>
+                <p className="text-base font-body text-muted-foreground mt-1">
+                  Brothers, events & chapters
+                </p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-secondary transition-colors" />
             </CardContent>
           </Card>
         </div>
@@ -166,22 +168,21 @@ export default function Index() {
         {/* Announcements */}
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-2">
-              <Megaphone className="h-5 w-5 text-secondary" />
-              <CardTitle className="text-xl font-heading">Announcements</CardTitle>
+            <div className="flex items-center gap-3">
+              <Megaphone className="h-6 w-6 text-secondary" />
+              <CardTitle className="text-2xl font-heading">Announcements</CardTitle>
             </div>
-            <CardDescription className="font-body">Latest updates from Iron Forums</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
             {MOCK_ANNOUNCEMENTS.map((a) => (
-              <div key={a.id} className="border-b last:border-0 pb-4 last:pb-0">
+              <div key={a.id} className="border-b last:border-0 pb-5 last:pb-0">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h4 className="font-heading font-semibold text-base">{a.title}</h4>
-                    <p className="text-sm font-body text-muted-foreground mt-1">{a.content}</p>
+                    <h4 className="font-heading font-bold text-lg">{a.title}</h4>
+                    <p className="text-base font-body text-muted-foreground mt-1">{a.content}</p>
                   </div>
-                  <span className="text-xs font-body text-muted-foreground whitespace-nowrap">
-                    {new Date(a.date).toLocaleDateString()}
+                  <span className="text-sm font-body text-muted-foreground whitespace-nowrap">
+                    {new Date(a.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </span>
                 </div>
               </div>
@@ -192,11 +193,11 @@ export default function Index() {
         {/* Recent Snapshots */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl font-heading">Recent Snapshots</CardTitle>
-            <CardDescription className="font-body">Your progress over time</CardDescription>
+            <CardTitle className="text-2xl font-heading">Recent Snapshots</CardTitle>
+            <CardDescription className="text-base font-body">Your progress over time</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {MOCK_SNAPSHOTS.map((s) => {
                 const avg =
                   Math.round(
@@ -205,20 +206,21 @@ export default function Index() {
                 return (
                   <div
                     key={s.id}
-                    className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                    className="flex items-center justify-between p-5 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                    onClick={() => navigate('/snapshot')}
                   >
                     <div>
-                      <p className="font-heading font-semibold">
+                      <p className="font-heading font-bold text-lg">
                         {new Date(s.date).toLocaleDateString('en-US', {
                           month: 'long',
                           year: 'numeric',
                         })}
                       </p>
-                      <p className="text-sm font-body text-muted-foreground">{s.quarterlyGoal}</p>
+                      <p className="text-base font-body text-muted-foreground mt-0.5">{s.quarterlyGoal}</p>
                     </div>
                     <div className="text-right">
-                      <p className={`text-2xl font-heading font-bold ${getScoreColor(avg)}`}>{avg}</p>
-                      <p className="text-xs font-body text-muted-foreground">avg score</p>
+                      <p className={`text-3xl font-heading font-bold ${getScoreColor(avg)}`}>{avg}</p>
+                      <p className="text-sm font-body text-muted-foreground">avg score</p>
                     </div>
                   </div>
                 );
