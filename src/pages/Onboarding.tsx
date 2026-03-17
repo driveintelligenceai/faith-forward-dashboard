@@ -428,7 +428,7 @@ export default function Onboarding() {
                   <span className="text-3xl font-heading font-bold text-primary">{currentScore}</span>
                 </div>
 
-                <div className="grid grid-cols-10 gap-1.5">
+                <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
                     <button
                       key={n}
