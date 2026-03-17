@@ -27,7 +27,7 @@ interface Profile {
 }
 
 interface AuthContextType {
-  user: null;
+  user: { id: string } | null;
   profile: Profile | null;
   session: null;
   isAuthenticated: boolean;
