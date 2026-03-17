@@ -23,12 +23,19 @@ export function MobileCompanionSheet({
 }: MobileCompanionSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[70vh] p-0 rounded-t-2xl">
+      <SheetContent
+        side="bottom"
+        className="h-[75vh] p-0 rounded-t-3xl border-t border-border/40 shadow-2xl"
+      >
         <SheetHeader className="sr-only">
-          <SheetTitle>AI Companion</SheetTitle>
-          <SheetDescription>Your AI-powered snapshot scoring assistant</SheetDescription>
+          <SheetTitle>Your Snapshot Mentor</SheetTitle>
+          <SheetDescription>A personal reflection space with your mentor, James</SheetDescription>
         </SheetHeader>
-        <div className="h-full">
+        {/* Swipe handle */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-border/60" />
+        </div>
+        <div className="h-[calc(100%-20px)]">
           <SnapshotCompanion
             currentCategory={currentCategory}
             ratings={ratings}

@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Bot, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { ArrowUp, BookOpen } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import type { ChatMessage, SnapshotCategory, SnapshotRating, Snapshot } from '@/types';
 import ReactMarkdown from 'react-markdown';
 import { streamChat } from '@/lib/ai-stream';
@@ -37,7 +36,6 @@ function buildContext(
       parts.push(`Previous month score: ${prev.score}/10 (change: ${(rating?.score ?? 5) - prev.score})`);
     }
 
-    // Historical trend from real snapshots
     if (allSnapshots && allSnapshots.length > 1) {
       const historyScores = allSnapshots.slice(0, 6).map(s => {
         const r = s.ratings.find(r => r.categoryId === category.id);
@@ -47,7 +45,6 @@ function buildContext(
     }
   }
 
-  // Summary of all ratings
   const rated = Object.entries(ratings).filter(([, r]) => r.score > 0);
   if (rated.length > 0) {
     const avg = (rated.reduce((s, [, r]) => s + r.score, 0) / rated.length).toFixed(1);
@@ -62,12 +59,15 @@ function buildContext(
   return parts.length > 0 ? `[Snapshot context: ${parts.join('. ')}]` : '';
 }
 
+const MENTOR_NAME = 'James';
+
 export function SnapshotCompanion({ currentCategory, ratings, previousRatings, userName, allSnapshots }: SnapshotCompanionProps) {
+  const firstName = userName.split(' ')[0];
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
       role: 'assistant',
-      content: `Hey ${userName.split(' ')[0]} 👋 I'm here to walk with you through your Snapshot.\n\nTap any category and adjust your score — I'll check in with you about it.\n\n**Take your time. Be honest.**`,
+      content: `${firstName}, glad you're here. Take your time with this — no rush, no judgment.\n\nAs you go through each area, I'll check in with you. Just be honest with yourself.`,
       timestamp: new Date().toISOString(),
     },
   ]);
@@ -75,33 +75,31 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
   const [isStreaming, setIsStreaming] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastCategoryRef = useRef<string | null>(null);
-  const scorePromptsRef = useRef<Set<string>>(new Set()); // Track which categories got a proactive prompt
-  const exchangeCountRef = useRef<Map<string, number>>(new Map()); // 2-prompt max per category
+  const scorePromptsRef = useRef<Set<string>>(new Set());
+  const exchangeCountRef = useRef<Map<string, number>>(new Map());
   const { toast } = useToast();
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
-  // Proactive AI: react when user CHANGES a score (not just navigates)
+  // Proactive AI: react when user selects a category
   useEffect(() => {
     if (!currentCategory || isStreaming) return;
-    
+
     const catId = currentCategory.id;
     const currentScore = ratings[catId]?.score;
     const prevScore = previousRatings?.[catId]?.score;
-    
-    // Only fire once per category, and only when they've actually engaged with it
+
     if (scorePromptsRef.current.has(catId)) return;
     if (catId === lastCategoryRef.current) return;
-    
+
     lastCategoryRef.current = catId;
     scorePromptsRef.current.add(catId);
     exchangeCountRef.current.set(catId, 0);
 
     const context = buildContext(currentCategory, ratings, previousRatings, allSnapshots);
-    
-    // Craft a focused, nurturing question
+
     let prompt: string;
     if (prevScore !== undefined && currentScore !== undefined) {
       const delta = currentScore - prevScore;
@@ -148,8 +146,7 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
   const sendMessage = useCallback(
     async (text: string) => {
       if (!text.trim() || isStreaming) return;
-      
-      // Enforce 2-prompt max per category
+
       if (currentCategory) {
         const count = exchangeCountRef.current.get(currentCategory.id) || 0;
         exchangeCountRef.current.set(currentCategory.id, count + 1);
@@ -166,8 +163,6 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
       setIsStreaming(true);
 
       const context = buildContext(currentCategory, ratings, previousRatings, allSnapshots);
-      
-      // Check if we should wrap up this category
       const exchangeCount = currentCategory ? (exchangeCountRef.current.get(currentCategory.id) || 0) : 0;
       const wrapUpHint = exchangeCount >= 2 ? ' This is the last exchange for this category — give a brief, warm closing acknowledgment and encourage them to move to the next area.' : '';
 
@@ -203,102 +198,107 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
     [currentCategory, ratings, previousRatings, messages, isStreaming, toast, allSnapshots]
   );
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(input);
+    }
+  };
+
   const quickPrompts = currentCategory
-    ? [
-        'Tell me more',
-        'Something happened this month',
-      ]
-    : [
-        'Help me get started',
-        'Where should I focus?',
-      ];
+    ? ['Tell me more', 'Something happened this month']
+    : ['Help me get started', 'Where should I focus?'];
 
   return (
-    <div className="flex flex-col h-full bg-card rounded-lg border shadow-sm">
-      {/* Header */}
-      <div className="px-4 py-3 border-b bg-primary/5 rounded-t-lg shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-            <Bot className="h-4 w-4 text-primary-foreground" />
+    <div className="flex flex-col h-full bg-background">
+      {/* Mentor header — warm, personal */}
+      <div className="px-5 pt-5 pb-3 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-full bg-secondary/20 flex items-center justify-center shrink-0">
+            <BookOpen className="h-5 w-5 text-secondary" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-heading font-bold text-primary">Snapshot Companion</p>
-            <p className="text-xs font-body text-muted-foreground truncate">
-              {currentCategory ? `${currentCategory.name}` : 'Ready to walk with you'}
+            <p className="text-base font-heading font-bold text-foreground">{MENTOR_NAME}</p>
+            <p className="text-xs font-body text-muted-foreground">
+              {currentCategory ? `Reflecting on ${currentCategory.name}` : 'Your Snapshot mentor'}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0">
+      {/* Conversation — journal-style, no chat bubbles */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-3 space-y-5 min-h-0">
         {messages.map((msg) => (
-          <div key={msg.id} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            {msg.role === 'assistant' && (
-              <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center shrink-0 mt-1">
-                <Bot className="h-3 w-3 text-primary-foreground" />
-              </div>
-            )}
-            <div
-              className={`max-w-[85%] rounded-lg px-3 py-2 ${
-                msg.role === 'user'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted/50 border'
-              }`}
-            >
-              {msg.role === 'assistant' ? (
-                <div className="prose prose-sm max-w-none font-body text-sm leading-relaxed [&_p]:mb-1.5 [&_strong]:text-foreground">
+          <div key={msg.id}>
+            {msg.role === 'assistant' ? (
+              <div className="space-y-1">
+                <p className="text-[11px] font-body font-semibold text-secondary uppercase tracking-wider">
+                  {MENTOR_NAME}
+                </p>
+                <div className="font-body text-[15px] leading-relaxed text-foreground/90 [&_p]:mb-2 [&_strong]:text-foreground [&_li]:mb-1">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
-              ) : (
-                <p className="text-sm font-body">{msg.content}</p>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <p className="text-[11px] font-body font-semibold text-muted-foreground uppercase tracking-wider text-right">
+                  You
+                </p>
+                <div className="bg-primary/5 border border-primary/10 rounded-xl px-4 py-3">
+                  <p className="font-body text-[15px] leading-relaxed text-foreground">{msg.content}</p>
+                </div>
+              </div>
+            )}
           </div>
         ))}
         {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
-          <div className="flex gap-2">
-            <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center shrink-0">
-              <Bot className="h-3 w-3 text-primary-foreground" />
-            </div>
-            <div className="bg-muted/50 border rounded-lg px-3 py-2">
-              <div className="flex gap-1.5">
-                <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce" />
-                <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce [animation-delay:0.15s]" />
-                <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce [animation-delay:0.3s]" />
-              </div>
+          <div className="space-y-1">
+            <p className="text-[11px] font-body font-semibold text-secondary uppercase tracking-wider">
+              {MENTOR_NAME}
+            </p>
+            <div className="flex gap-1.5 py-1">
+              <span className="w-1.5 h-1.5 bg-secondary/40 rounded-full animate-bounce" />
+              <span className="w-1.5 h-1.5 bg-secondary/40 rounded-full animate-bounce [animation-delay:0.15s]" />
+              <span className="w-1.5 h-1.5 bg-secondary/40 rounded-full animate-bounce [animation-delay:0.3s]" />
             </div>
           </div>
         )}
       </div>
 
-      {/* Quick prompts */}
-      <div className="px-3 pb-2 flex flex-wrap gap-1.5 shrink-0">
+      {/* Quick prompts — soft pills, not button-like */}
+      <div className="px-5 pb-2 flex flex-wrap gap-2 shrink-0">
         {quickPrompts.map((prompt) => (
           <button
             key={prompt}
             onClick={() => sendMessage(prompt)}
             disabled={isStreaming}
-            className="text-xs font-body font-semibold px-2.5 py-1.5 rounded-full border bg-background hover:bg-secondary/10 hover:border-secondary/40 transition-colors text-muted-foreground disabled:opacity-50 min-h-[32px]"
+            className="text-[13px] font-body px-3.5 py-2 rounded-full border border-border/60 bg-muted/30 hover:bg-secondary/10 hover:border-secondary/30 transition-colors text-foreground/70 disabled:opacity-40 min-h-[44px]"
           >
             {prompt}
           </button>
         ))}
       </div>
 
-      {/* Input */}
-      <div className="p-3 border-t flex gap-2 shrink-0">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Share what's on your heart..."
-          className="text-sm font-body h-10"
-          onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-          disabled={isStreaming}
-        />
-        <Button size="sm" className="h-10 w-10 shrink-0 p-0" onClick={() => sendMessage(input)} disabled={!input.trim() || isStreaming}>
-          <Send className="h-4 w-4" />
-        </Button>
+      {/* Input — open text area, not a chat input */}
+      <div className="px-5 pb-5 pt-2 shrink-0">
+        <div className="relative">
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Share what's on your mind..."
+            className="resize-none pr-12 min-h-[52px] max-h-[120px] text-[15px] font-body rounded-xl border-border/60 bg-muted/20 focus:bg-background focus:border-secondary/40 placeholder:text-muted-foreground/50"
+            onKeyDown={handleKeyDown}
+            disabled={isStreaming}
+            rows={1}
+          />
+          <button
+            onClick={() => sendMessage(input)}
+            disabled={!input.trim() || isStreaming}
+            className="absolute right-2 bottom-2 h-9 w-9 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center disabled:opacity-30 transition-opacity hover:opacity-90"
+          >
+            <ArrowUp className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   );
