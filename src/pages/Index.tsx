@@ -58,7 +58,7 @@ export default function Index() {
         {/* Welcome */}
         <div>
           <h1 className="text-4xl sm:text-5xl font-heading font-bold tracking-tight text-primary">
-            Welcome back, {user?.name?.split(' ')[0]}
+            Welcome back, {(profile?.full_name || 'Brother')?.split(' ')[0]}
           </h1>
           <p className="text-lg font-body text-muted-foreground mt-3">
             Your Iron Forums dashboard — <span className="text-secondary font-semibold">Connect</span> · <span className="text-secondary font-semibold">Sharpen</span> · <span className="text-secondary font-semibold">Grow</span>
