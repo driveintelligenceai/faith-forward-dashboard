@@ -73,7 +73,15 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
   const firstName = (profile.full_name || 'Brother')?.split(' ')[0];
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+      {/* Brand header */}
+      <div className="mb-8 flex flex-col items-center gap-2">
+        <img src={ironForumsLogo} alt="Iron Forums" className="h-10 w-auto" />
+        <p className="text-[0.6rem] font-body tracking-[0.25em] uppercase text-muted-foreground/60 font-semibold">
+          Connect <span className="mx-0.5">»</span> Sharpen <span className="mx-0.5">»</span> Grow
+        </p>
+      </div>
+
       <div className="max-w-lg w-full text-center space-y-8 animate-slide-up-fade">
         {/* Icon */}
         <div className="mx-auto w-20 h-20 rounded-2xl bg-secondary/10 flex items-center justify-center">
@@ -129,6 +137,7 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }
