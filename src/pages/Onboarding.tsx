@@ -232,7 +232,7 @@ export default function Onboarding() {
                 <ul className="space-y-2 text-sm font-body text-muted-foreground">
                   <li className="flex gap-2">
                     <span className="text-secondary font-bold">1.</span>
-                    On the 1st of each month, you'll be asked to complete your Snapshot.
+                    On the 1st of each month, you'll be asked to complete your snapshot.
                   </li>
                   <li className="flex gap-2">
                     <span className="text-secondary font-bold">2.</span>
