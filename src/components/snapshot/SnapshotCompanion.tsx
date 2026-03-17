@@ -6,6 +6,8 @@ import type { ChatMessage, SnapshotCategory, SnapshotRating } from '@/types';
 import ReactMarkdown from 'react-markdown';
 import { streamChat } from '@/lib/ai-stream';
 import { useToast } from '@/hooks/use-toast';
+import { MOCK_SNAPSHOTS } from '@/data/mock-data';
+import { SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
 
 interface SnapshotCompanionProps {
   currentCategory: SnapshotCategory | null;
