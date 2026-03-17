@@ -33,13 +33,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 Iron Forums
               </span>
             </div>
-            <div className="flex items-center gap-3">
-              {profile && (
-                <Badge className={`${ROLE_COLORS[(profile.role || 'member') as UserRole]} font-body text-xs sm:text-sm font-semibold border-0 px-2.5 sm:px-3 py-0.5 sm:py-1`}>
-                  {ROLE_LABELS[(profile.role || 'member') as UserRole]}
-                </Badge>
-              )}
-            </div>
+            {/* Intentionally empty — role shown on dashboard welcome */}
+            <div />
           </header>
 
           {/* Main content area — responsive padding */}

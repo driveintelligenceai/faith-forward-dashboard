@@ -2,11 +2,10 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Bot, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import type { ChatMessage, SnapshotCategory, SnapshotRating } from '@/types';
+import type { ChatMessage, SnapshotCategory, SnapshotRating, Snapshot } from '@/types';
 import ReactMarkdown from 'react-markdown';
 import { streamChat } from '@/lib/ai-stream';
 import { useToast } from '@/hooks/use-toast';
-import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import { SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
 
 interface SnapshotCompanionProps {
@@ -14,12 +13,14 @@ interface SnapshotCompanionProps {
   ratings: Record<string, SnapshotRating>;
   previousRatings?: Record<string, SnapshotRating>;
   userName: string;
+  allSnapshots?: Snapshot[];
 }
 
 function buildContext(
   category: SnapshotCategory | null,
   ratings: Record<string, SnapshotRating>,
-  previousRatings?: Record<string, SnapshotRating>
+  previousRatings?: Record<string, SnapshotRating>,
+  allSnapshots?: Snapshot[]
 ): string {
   const parts: string[] = [];
 
@@ -27,28 +28,26 @@ function buildContext(
     const rating = ratings[category.id];
     const prev = previousRatings?.[category.id];
     parts.push(`Current category: ${category.name} (${category.group})`);
-    parts.push(`Scripture: ${category.scriptureRef}`);
-    if (category.description) parts.push(`Description: ${category.description}`);
     if (rating) {
       parts.push(`Self score: ${rating.score}/10`);
       if (rating.spouseScore !== undefined) parts.push(`Spouse score: ${rating.spouseScore}/10`);
       if (rating.childScore !== undefined) parts.push(`Child score: ${rating.childScore}/10`);
-      if (rating.note) parts.push(`User note: "${rating.note}"`);
-      if (rating.lifeEvent) parts.push(`Life event: "${rating.lifeEvent}"`);
     }
     if (prev) {
       parts.push(`Previous month score: ${prev.score}/10 (change: ${(rating?.score ?? 5) - prev.score})`);
     }
 
-    // Historical trend for this specific category from past snapshots
-    const historyScores = MOCK_SNAPSHOTS.slice(0, 6).map(s => {
-      const r = s.ratings.find(r => r.categoryId === category.id);
-      return r ? `${r.score}` : '-';
-    });
-    parts.push(`6-month history (newest→oldest): [${historyScores.join(', ')}]`);
+    // Historical trend from real snapshots
+    if (allSnapshots && allSnapshots.length > 1) {
+      const historyScores = allSnapshots.slice(0, 6).map(s => {
+        const r = s.ratings.find(r => r.categoryId === category.id);
+        return r ? `${r.score}` : '-';
+      });
+      parts.push(`6-month history (newest→oldest): [${historyScores.join(', ')}]`);
+    }
   }
 
-  // Summary of all ratings in current session
+  // Summary of all ratings
   const rated = Object.entries(ratings).filter(([, r]) => r.score > 0);
   if (rated.length > 0) {
     const avg = (rated.reduce((s, [, r]) => s + r.score, 0) / rated.length).toFixed(1);
@@ -58,41 +57,17 @@ function buildContext(
       return cat?.name || id;
     });
     if (low.length) parts.push(`Low areas (≤4): ${low.join(', ')}`);
-    const high = rated.filter(([, r]) => r.score >= 8).map(([id]) => {
-      const cat = SNAPSHOT_CATEGORIES.find(c => c.id === id);
-      return cat?.name || id;
-    });
-    if (high.length) parts.push(`Strong areas (≥8): ${high.join(', ')}`);
-
-    // Flag perception gaps
-    const gaps = rated.filter(([, r]) => {
-      if (r.spouseScore !== undefined) return Math.abs(r.score - r.spouseScore) >= 3;
-      return false;
-    });
-    if (gaps.length) {
-      parts.push(`⚠️ Perception gaps: ${gaps.map(([id, r]) => {
-        const cat = SNAPSHOT_CATEGORIES.find(c => c.id === id);
-        return `${cat?.name || id} (self: ${r.score}, spouse: ${r.spouseScore})`;
-      }).join('; ')}`);
-    }
-  }
-
-  // Add latest snapshot context
-  const latest = MOCK_SNAPSHOTS[0];
-  if (latest) {
-    parts.push(`Current quarterly goal: "${latest.quarterlyGoal}"`);
-    parts.push(`Major issue: "${latest.majorIssue}"`);
   }
 
   return parts.length > 0 ? `[Snapshot context: ${parts.join('. ')}]` : '';
 }
 
-export function SnapshotCompanion({ currentCategory, ratings, previousRatings, userName }: SnapshotCompanionProps) {
+export function SnapshotCompanion({ currentCategory, ratings, previousRatings, userName, allSnapshots }: SnapshotCompanionProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
       role: 'assistant',
-      content: `Welcome, ${userName.split(' ')[0]}. I'm your Snapshot Companion — here to walk with you through an honest 30-day reflection.\n\nThis isn't a test. It's a mirror. Be real with yourself and with God.\n\n> *"As iron sharpens iron, so one man sharpens another." — Proverbs 27:17*\n\nStart by filling in your **Purpose Statement** and **Quarterly Goal**, then work through each category. I'll be right here.\n\n**Take your time. Pray as you go.**`,
+      content: `Hey ${userName.split(' ')[0]} 👋 I'm here to walk with you through your Snapshot.\n\nTap any category and adjust your score — I'll check in with you about it.\n\n**Take your time. Be honest.**`,
       timestamp: new Date().toISOString(),
     },
   ]);
@@ -100,19 +75,46 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
   const [isStreaming, setIsStreaming] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastCategoryRef = useRef<string | null>(null);
+  const scorePromptsRef = useRef<Set<string>>(new Set()); // Track which categories got a proactive prompt
+  const exchangeCountRef = useRef<Map<string, number>>(new Map()); // 2-prompt max per category
   const { toast } = useToast();
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
-  // React to category changes with real AI
+  // Proactive AI: react when user CHANGES a score (not just navigates)
   useEffect(() => {
-    if (!currentCategory || currentCategory.id === lastCategoryRef.current || isStreaming) return;
-    lastCategoryRef.current = currentCategory.id;
+    if (!currentCategory || isStreaming) return;
+    
+    const catId = currentCategory.id;
+    const currentScore = ratings[catId]?.score;
+    const prevScore = previousRatings?.[catId]?.score;
+    
+    // Only fire once per category, and only when they've actually engaged with it
+    if (scorePromptsRef.current.has(catId)) return;
+    if (catId === lastCategoryRef.current) return;
+    
+    lastCategoryRef.current = catId;
+    scorePromptsRef.current.add(catId);
+    exchangeCountRef.current.set(catId, 0);
 
-    const context = buildContext(currentCategory, ratings, previousRatings);
-    const prompt = `The user just navigated to the "${currentCategory.name}" category. ${context}. Give a brief, contextual prompt to help them reflect on and rate this area honestly.`;
+    const context = buildContext(currentCategory, ratings, previousRatings, allSnapshots);
+    
+    // Craft a focused, nurturing question
+    let prompt: string;
+    if (prevScore !== undefined && currentScore !== undefined) {
+      const delta = currentScore - prevScore;
+      if (delta > 0) {
+        prompt = `The user just selected "${currentCategory.name}" and their score is ${currentScore}/10 (up from ${prevScore} last month). ${context}. Ask ONE warm, brief question about what improved. Keep it to 2 sentences max. Be genuinely happy for them.`;
+      } else if (delta < 0) {
+        prompt = `The user just selected "${currentCategory.name}" and their score is ${currentScore}/10 (down from ${prevScore} last month). ${context}. Ask ONE gentle, caring question about what happened. Keep it to 2 sentences max. Be supportive, not analytical.`;
+      } else {
+        prompt = `The user just selected "${currentCategory.name}" and their score is ${currentScore}/10 (same as last month). ${context}. Give a brief 1-2 sentence reflection prompt. Be warm and encouraging.`;
+      }
+    } else {
+      prompt = `The user just selected "${currentCategory.name}" with a score of ${currentScore ?? 5}/10. ${context}. Ask ONE simple, warm question: "What's behind that number for you this month?" Keep it to 2 sentences max.`;
+    }
 
     setIsStreaming(true);
     let assistantSoFar = '';
@@ -120,10 +122,10 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
 
     streamChat({
       messages: [
-        ...messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+        ...messages.slice(-6).map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
         { role: 'user' as const, content: prompt },
       ],
-      mode: 'snapshot',
+      mode: 'snapshot_scoring',
       onDelta: (chunk) => {
         assistantSoFar += chunk;
         const currentContent = assistantSoFar;
@@ -132,7 +134,7 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
           if (last?.id === assistantId) {
             return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: currentContent } : m);
           }
-          return [...prev, { id: assistantId, role: 'assistant', content: currentContent, timestamp: new Date().toISOString(), categoryContext: currentCategory.id }];
+          return [...prev, { id: assistantId, role: 'assistant', content: currentContent, timestamp: new Date().toISOString() }];
         });
       },
       onDone: () => setIsStreaming(false),
@@ -141,11 +143,18 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
         toast({ title: 'Connection Issue', description: error, variant: 'destructive' });
       },
     });
-  }, [currentCategory]);
+  }, [currentCategory?.id]);
 
   const sendMessage = useCallback(
     async (text: string) => {
       if (!text.trim() || isStreaming) return;
+      
+      // Enforce 2-prompt max per category
+      if (currentCategory) {
+        const count = exchangeCountRef.current.get(currentCategory.id) || 0;
+        exchangeCountRef.current.set(currentCategory.id, count + 1);
+      }
+
       const userMsg: ChatMessage = {
         id: Date.now().toString(),
         role: 'user',
@@ -156,10 +165,15 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
       setInput('');
       setIsStreaming(true);
 
-      const context = buildContext(currentCategory, ratings, previousRatings);
+      const context = buildContext(currentCategory, ratings, previousRatings, allSnapshots);
+      
+      // Check if we should wrap up this category
+      const exchangeCount = currentCategory ? (exchangeCountRef.current.get(currentCategory.id) || 0) : 0;
+      const wrapUpHint = exchangeCount >= 2 ? ' This is the last exchange for this category — give a brief, warm closing acknowledgment and encourage them to move to the next area.' : '';
+
       const aiMessages = [
-        ...messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
-        { role: 'user' as const, content: `${context}\n\n${text}` },
+        ...messages.slice(-8).map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+        { role: 'user' as const, content: `${context}${wrapUpHint}\n\n${text}` },
       ];
 
       let assistantSoFar = '';
@@ -167,7 +181,7 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
 
       await streamChat({
         messages: aiMessages,
-        mode: 'snapshot',
+        mode: 'snapshot_scoring',
         onDelta: (chunk) => {
           assistantSoFar += chunk;
           const currentContent = assistantSoFar;
@@ -176,7 +190,7 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
             if (last?.id === assistantId) {
               return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: currentContent } : m);
             }
-            return [...prev, { id: assistantId, role: 'assistant', content: currentContent, timestamp: new Date().toISOString(), categoryContext: currentCategory?.id }];
+            return [...prev, { id: assistantId, role: 'assistant', content: currentContent, timestamp: new Date().toISOString() }];
           });
         },
         onDone: () => setIsStreaming(false),
@@ -186,66 +200,54 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
         },
       });
     },
-    [currentCategory, ratings, previousRatings, messages, isStreaming, toast]
+    [currentCategory, ratings, previousRatings, messages, isStreaming, toast, allSnapshots]
   );
 
   const quickPrompts = currentCategory
     ? [
-        `Why did I rate ${currentCategory.name} this way?`,
-        'Something significant happened this month',
-        'Challenge me on this score',
-        'What does Scripture say?',
+        'Tell me more',
+        'Something happened this month',
       ]
     : [
-        'Help me with my purpose statement',
-        "I'm struggling right now",
-        'Something big happened this month',
+        'Help me get started',
         'Where should I focus?',
       ];
 
   return (
     <div className="flex flex-col h-full bg-card rounded-lg border shadow-sm">
       {/* Header */}
-      <div className="px-4 py-3 border-b bg-primary/5 rounded-t-lg">
+      <div className="px-4 py-3 border-b bg-primary/5 rounded-t-lg shrink-0">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+          <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shrink-0">
             <Bot className="h-4 w-4 text-primary-foreground" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-heading font-bold text-primary">Snapshot Companion</p>
-            <p className="text-xs font-body text-muted-foreground">
-              {currentCategory ? `Discussing: ${currentCategory.name}` : 'Ready to walk with you'} · AI-Powered
+            <p className="text-xs font-body text-muted-foreground truncate">
+              {currentCategory ? `${currentCategory.name}` : 'Ready to walk with you'}
             </p>
           </div>
-          {currentCategory && (
-            <div className="ml-auto">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary/15 text-secondary text-xs font-body font-semibold">
-                <Sparkles className="h-3 w-3" />
-                {currentCategory.scriptureRef}
-              </span>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0">
         {messages.map((msg) => (
-          <div key={msg.id} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+          <div key={msg.id} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             {msg.role === 'assistant' && (
-              <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center shrink-0 mt-1">
-                <Bot className="h-3.5 w-3.5 text-primary-foreground" />
+              <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center shrink-0 mt-1">
+                <Bot className="h-3 w-3 text-primary-foreground" />
               </div>
             )}
             <div
-              className={`max-w-[85%] rounded-lg px-3.5 py-2.5 ${
+              className={`max-w-[85%] rounded-lg px-3 py-2 ${
                 msg.role === 'user'
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted/50 border'
               }`}
             >
               {msg.role === 'assistant' ? (
-                <div className="prose prose-sm max-w-none font-body text-sm leading-relaxed [&_h1]:font-heading [&_h2]:font-heading [&_h3]:font-heading [&_strong]:text-foreground [&_blockquote]:border-secondary [&_blockquote]:text-muted-foreground [&_blockquote]:text-xs [&_p]:mb-2 [&_ol]:mb-2 [&_ul]:mb-2">
+                <div className="prose prose-sm max-w-none font-body text-sm leading-relaxed [&_p]:mb-1.5 [&_strong]:text-foreground">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
               ) : (
@@ -255,11 +257,11 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
           </div>
         ))}
         {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
-          <div className="flex gap-2.5">
-            <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center shrink-0">
-              <Bot className="h-3.5 w-3.5 text-primary-foreground" />
+          <div className="flex gap-2">
+            <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center shrink-0">
+              <Bot className="h-3 w-3 text-primary-foreground" />
             </div>
-            <div className="bg-muted/50 border rounded-lg px-3.5 py-2.5">
+            <div className="bg-muted/50 border rounded-lg px-3 py-2">
               <div className="flex gap-1.5">
                 <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce" />
                 <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce [animation-delay:0.15s]" />
@@ -271,13 +273,13 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
       </div>
 
       {/* Quick prompts */}
-      <div className="px-3 pb-2 flex flex-wrap gap-1.5">
+      <div className="px-3 pb-2 flex flex-wrap gap-1.5 shrink-0">
         {quickPrompts.map((prompt) => (
           <button
             key={prompt}
             onClick={() => sendMessage(prompt)}
             disabled={isStreaming}
-            className="text-xs font-body font-semibold px-2.5 py-1 rounded-full border bg-background hover:bg-secondary/10 hover:border-secondary/40 transition-colors text-muted-foreground disabled:opacity-50"
+            className="text-xs font-body font-semibold px-2.5 py-1.5 rounded-full border bg-background hover:bg-secondary/10 hover:border-secondary/40 transition-colors text-muted-foreground disabled:opacity-50 min-h-[32px]"
           >
             {prompt}
           </button>
@@ -285,16 +287,16 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
       </div>
 
       {/* Input */}
-      <div className="p-3 border-t flex gap-2">
+      <div className="p-3 border-t flex gap-2 shrink-0">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Talk to your Snapshot Companion..."
-          className="text-sm font-body h-9"
+          placeholder="Share what's on your heart..."
+          className="text-sm font-body h-10"
           onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
           disabled={isStreaming}
         />
-        <Button size="sm" className="h-9 px-3 shrink-0" onClick={() => sendMessage(input)} disabled={!input.trim() || isStreaming}>
+        <Button size="sm" className="h-10 w-10 shrink-0 p-0" onClick={() => sendMessage(input)} disabled={!input.trim() || isStreaming}>
           <Send className="h-4 w-4" />
         </Button>
       </div>
