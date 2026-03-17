@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import type { UserRole } from '@/types';
+import type { Session, User } from '@supabase/supabase-js';
 
 interface Profile {
   id: string;
@@ -27,9 +29,9 @@ interface Profile {
 }
 
 interface AuthContextType {
-  user: { id: string } | null;
+  user: User | null;
   profile: Profile | null;
-  session: null;
+  session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   logout: () => void;
@@ -68,20 +70,66 @@ const DEMO_PROFILE: Profile = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Auto-login as demo user on mount
-  useEffect(() => {
-    setProfile(DEMO_PROFILE);
-    setIsLoading(false);
-  }, []);
-
-  const logout = () => {
-    window.location.reload();
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    if (data) {
+      setProfile(data as unknown as Profile);
+    }
   };
 
-  const refreshProfile = async () => {};
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+
+        if (currentSession?.user) {
+          // Use setTimeout to avoid Supabase client deadlock
+          setTimeout(() => fetchProfile(currentSession.user.id), 0);
+        } else {
+          // No session — fall back to demo for now
+          setProfile(DEMO_PROFILE);
+        }
+        setIsLoading(false);
+      }
+    );
+
+    // THEN check existing session
+    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
+      if (existingSession?.user) {
+        setSession(existingSession);
+        setUser(existingSession.user);
+        fetchProfile(existingSession.user.id);
+      } else {
+        // No session — demo fallback
+        setProfile(DEMO_PROFILE);
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+    setUser(null);
+    setProfile(DEMO_PROFILE);
+  };
+
+  const refreshProfile = async () => {
+    if (user) await fetchProfile(user.id);
+  };
 
   const userRole = (profile?.role ?? 'member') as UserRole;
   const hasRole = (role: UserRole) => userRole === role;
@@ -92,9 +140,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user: profile ? { id: profile.user_id } : null,
+        user,
         profile,
-        session: null,
+        session,
         isAuthenticated: !!profile,
         isLoading,
         logout,
