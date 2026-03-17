@@ -51,16 +51,16 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
-        <div className={`flex flex-col items-center justify-center transition-all duration-300 ${collapsed ? 'py-4 px-2' : 'py-8 px-6'}`}>
+        <div className={`flex flex-col items-center justify-center transition-all duration-300 ${collapsed ? 'py-5 px-2' : 'py-10 px-5'}`}>
           <img
             src={ironForumsLogo}
             alt="Iron Forums"
-            className={`brightness-0 invert transition-all duration-300 ${collapsed ? 'h-9 w-9' : 'h-20 w-auto max-w-[200px]'}`}
+            className={`brightness-0 invert transition-all duration-300 ${collapsed ? 'h-12 w-12' : 'h-28 w-auto max-w-[240px]'}`}
           />
           {!collapsed && (
-            <span className="text-xs font-body tracking-[0.22em] uppercase text-sidebar-primary mt-3 font-semibold">
-              Connect &nbsp;»&nbsp; Sharpen &nbsp;»&nbsp; Grow
-            </span>
+            <p className="text-[0.7rem] font-body tracking-[0.28em] uppercase text-sidebar-primary mt-4 font-bold text-center leading-relaxed">
+              Connect <span className="text-sidebar-foreground/40">»</span> Sharpen <span className="text-sidebar-foreground/40">»</span> Grow
+            </p>
           )}
         </div>
       </SidebarHeader>
