@@ -6,6 +6,8 @@ import type { ChatMessage, SnapshotCategory, SnapshotRating } from '@/types';
 import ReactMarkdown from 'react-markdown';
 import { streamChat } from '@/lib/ai-stream';
 import { useToast } from '@/hooks/use-toast';
+import { MOCK_SNAPSHOTS } from '@/data/mock-data';
+import { SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
 
 interface SnapshotCompanionProps {
   currentCategory: SnapshotCategory | null;
@@ -26,6 +28,7 @@ function buildContext(
     const prev = previousRatings?.[category.id];
     parts.push(`Current category: ${category.name} (${category.group})`);
     parts.push(`Scripture: ${category.scriptureRef}`);
+    if (category.description) parts.push(`Description: ${category.description}`);
     if (rating) {
       parts.push(`Self score: ${rating.score}/10`);
       if (rating.spouseScore !== undefined) parts.push(`Spouse score: ${rating.spouseScore}/10`);
@@ -34,19 +37,51 @@ function buildContext(
       if (rating.lifeEvent) parts.push(`Life event: "${rating.lifeEvent}"`);
     }
     if (prev) {
-      parts.push(`Previous score: ${prev.score}/10 (change: ${(rating?.score ?? 5) - prev.score})`);
+      parts.push(`Previous month score: ${prev.score}/10 (change: ${(rating?.score ?? 5) - prev.score})`);
     }
+
+    // Historical trend for this specific category from past snapshots
+    const historyScores = MOCK_SNAPSHOTS.slice(0, 6).map(s => {
+      const r = s.ratings.find(r => r.categoryId === category.id);
+      return r ? `${r.score}` : '-';
+    });
+    parts.push(`6-month history (newest→oldest): [${historyScores.join(', ')}]`);
   }
 
-  // Summary of all ratings
+  // Summary of all ratings in current session
   const rated = Object.entries(ratings).filter(([, r]) => r.score > 0);
   if (rated.length > 0) {
     const avg = (rated.reduce((s, [, r]) => s + r.score, 0) / rated.length).toFixed(1);
-    parts.push(`Overall average: ${avg}/10 across ${rated.length} categories`);
-    const low = rated.filter(([, r]) => r.score <= 4).map(([id]) => id);
+    parts.push(`Session average: ${avg}/10 across ${rated.length} categories`);
+    const low = rated.filter(([, r]) => r.score <= 4).map(([id]) => {
+      const cat = SNAPSHOT_CATEGORIES.find(c => c.id === id);
+      return cat?.name || id;
+    });
     if (low.length) parts.push(`Low areas (≤4): ${low.join(', ')}`);
-    const high = rated.filter(([, r]) => r.score >= 8).map(([id]) => id);
+    const high = rated.filter(([, r]) => r.score >= 8).map(([id]) => {
+      const cat = SNAPSHOT_CATEGORIES.find(c => c.id === id);
+      return cat?.name || id;
+    });
     if (high.length) parts.push(`Strong areas (≥8): ${high.join(', ')}`);
+
+    // Flag perception gaps
+    const gaps = rated.filter(([, r]) => {
+      if (r.spouseScore !== undefined) return Math.abs(r.score - r.spouseScore) >= 3;
+      return false;
+    });
+    if (gaps.length) {
+      parts.push(`⚠️ Perception gaps: ${gaps.map(([id, r]) => {
+        const cat = SNAPSHOT_CATEGORIES.find(c => c.id === id);
+        return `${cat?.name || id} (self: ${r.score}, spouse: ${r.spouseScore})`;
+      }).join('; ')}`);
+    }
+  }
+
+  // Add latest snapshot context
+  const latest = MOCK_SNAPSHOTS[0];
+  if (latest) {
+    parts.push(`Current quarterly goal: "${latest.quarterlyGoal}"`);
+    parts.push(`Major issue: "${latest.majorIssue}"`);
   }
 
   return parts.length > 0 ? `[Snapshot context: ${parts.join('. ')}]` : '';
@@ -179,7 +214,7 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
           <div>
             <p className="text-sm font-heading font-bold text-primary">Snapshot Companion</p>
             <p className="text-xs font-body text-muted-foreground">
-              {currentCategory ? `Discussing: ${currentCategory.name}` : 'Ready to walk with you'} · GPT-5
+              {currentCategory ? `Discussing: ${currentCategory.name}` : 'Ready to walk with you'} · AI-Powered
             </p>
           </div>
           {currentCategory && (
