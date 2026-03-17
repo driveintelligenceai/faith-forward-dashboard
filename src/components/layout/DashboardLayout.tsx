@@ -1,5 +1,10 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
+import { Button } from '@/components/ui/button';
+import { ClipboardCheck, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useSnapshots } from '@/hooks/use-snapshots';
+import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import ironForumsLogo from '@/assets/iron-forums-logo.svg';
 
 interface DashboardLayoutProps {
@@ -7,17 +12,25 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const navigate = useNavigate();
+  const { snapshots: dbSnapshots } = useSnapshots();
+  const allSnapshots = dbSnapshots.length > 0 ? dbSnapshots : MOCK_SNAPSHOTS;
+
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const hasCurrentMonthSnapshot = allSnapshots.some((s) => s.date.startsWith(currentMonth));
+  const isFirstOfMonth = now.getDate() === 1;
+  const snapshotDue = isFirstOfMonth && !hasCurrentMonthSnapshot;
 
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Top bar — minimal, functional */}
+          {/* Top bar */}
           <header className="h-14 sm:h-16 flex items-center justify-between border-b border-border/60 bg-card/80 backdrop-blur-sm px-4 sm:px-6 lg:px-8 shrink-0 sticky top-0 z-10">
             <div className="flex items-center gap-3">
               <SidebarTrigger className="h-10 w-10 rounded-lg" />
-              {/* Mobile logo — visible when sidebar is hidden */}
               <img
                 src={ironForumsLogo}
                 alt="Iron Forums"
@@ -28,10 +41,34 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 Iron Forums
               </span>
             </div>
-            <div />
+
+            <Button
+              size="sm"
+              variant={snapshotDue ? 'default' : 'outline'}
+              className={`font-body text-xs sm:text-sm gap-1.5 ${
+                snapshotDue
+                  ? 'bg-secondary hover:bg-secondary/90 text-secondary-foreground'
+                  : 'border-border'
+              }`}
+              onClick={() => navigate('/snapshot')}
+            >
+              {snapshotDue ? (
+                <>
+                  <ClipboardCheck className="h-4 w-4" />
+                  <span className="hidden sm:inline">Take Your Snapshot</span>
+                  <span className="sm:hidden">Snapshot</span>
+                </>
+              ) : (
+                <>
+                  <Eye className="h-4 w-4" />
+                  <span className="hidden sm:inline">View Current Snapshot</span>
+                  <span className="sm:hidden">Snapshot</span>
+                </>
+              )}
+            </Button>
           </header>
 
-          {/* Main content area — responsive padding */}
+          {/* Main content area */}
           <main className="flex-1 overflow-auto">
             <div className="px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10 max-w-7xl mx-auto w-full">
               {children}
