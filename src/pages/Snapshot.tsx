@@ -233,7 +233,7 @@ export default function Snapshot() {
         {/* Header */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
           <div>
-            <h1 className="text-2xl sm:text-4xl font-heading font-bold tracking-tight text-primary">
+            <h1 className="text-xl sm:text-3xl font-heading font-bold tracking-tight text-primary">
               {SNAPSHOT_TYPE_LABELS[snapshotType]}
             </h1>
             <p className="text-sm sm:text-base font-body text-muted-foreground mt-1">
