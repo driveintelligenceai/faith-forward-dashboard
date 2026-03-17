@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { SnapshotGate } from "@/components/SnapshotGate";
-import Index from "./pages/Index";
+import Hub from "./pages/Hub";
 import Snapshot from "./pages/Snapshot";
 import Onboarding from "./pages/Onboarding";
 import Auth from "./pages/Auth";
