@@ -117,9 +117,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     await supabase.auth.signOut();
     setProfile(null);
+    setDemoMode(false);
   };
 
-  const userRole = (profile?.role ?? 'member') as UserRole;
+  const [demoMode, setDemoMode] = useState(false);
+  const DEMO_PROFILE: Profile = {
+    id: 'demo',
+    user_id: 'demo',
+    full_name: 'David Mitchell',
+    email: 'david@ironforums.org',
+    avatar_url: null,
+    chapter: 'Nashville Chapter',
+    role: 'ceo',
+    linkedin_id: null,
+    linkedin_url: null,
+    linkedin_headline: null,
+    linkedin_company: null,
+    linkedin_title: null,
+    linkedin_bio: null,
+    linkedin_connected_at: null,
+    company_name: 'Mitchell Ventures',
+    company_title: 'CEO & Founder',
+    city: 'Alpharetta',
+    state: 'Georgia',
+    bio: null,
+    phone: null,
+  };
+
+  const loginAsDemo = () => {
+    setDemoMode(true);
+    setProfile(DEMO_PROFILE);
+    setIsLoading(false);
+  };
+
+  const activeProfile = demoMode ? DEMO_PROFILE : profile;
+
+  const userRole = (activeProfile?.role ?? 'member') as UserRole;
   const hasRole = (role: UserRole) => userRole === role;
   const hasMinRole = (role: UserRole) => {
     return ROLE_HIERARCHY.indexOf(userRole) >= ROLE_HIERARCHY.indexOf(role);
@@ -129,13 +162,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        profile,
+        profile: activeProfile,
         session,
-        isAuthenticated: !!session,
+        isAuthenticated: !!session || demoMode,
         isLoading,
         login,
         signup,
         loginWithGoogle,
+        loginAsDemo,
         logout,
         hasRole,
         hasMinRole,
