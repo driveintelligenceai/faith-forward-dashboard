@@ -1,9 +1,5 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
-import { useAuth } from '@/contexts/AuthContext';
-import { ROLE_LABELS, ROLE_COLORS } from '@/types';
-import type { UserRole } from '@/types';
-import { Badge } from '@/components/ui/badge';
 import ironForumsLogo from '@/assets/iron-forums-logo.svg';
 
 interface DashboardLayoutProps {
