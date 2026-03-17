@@ -51,24 +51,29 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
           <img
             src={ironForumsLogo}
             alt="Iron Forums"
-            className="h-8 w-auto brightness-0 invert"
+            className="h-9 w-auto brightness-0 invert"
           />
           {!collapsed && (
-            <span className="text-lg font-bold tracking-tight text-sidebar-foreground">
-              Iron Forums
-            </span>
+            <div className="flex flex-col">
+              <span className="text-base font-heading font-bold tracking-tight text-sidebar-foreground">
+                IronForums
+              </span>
+              <span className="text-[10px] font-body tracking-[0.2em] uppercase text-sidebar-primary">
+                Connect · Sharpen · Grow
+              </span>
+            </div>
           )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="pt-2">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/50 uppercase text-xs tracking-wider">
+          <SidebarGroupLabel className="text-sidebar-foreground/40 uppercase text-[10px] tracking-[0.15em] font-body font-semibold">
             {!collapsed && 'Navigation'}
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -83,11 +88,11 @@ export function AppSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.url === '/'}
-                      className="hover:bg-sidebar-accent"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                      className="hover:bg-sidebar-accent transition-colors"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
                     >
                       <item.icon className="h-5 w-5" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && <span className="font-body text-sm">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -98,7 +103,7 @@ export function AppSidebar() {
 
         {hasMinRole('facilitator') && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-sidebar-foreground/50 uppercase text-xs tracking-wider">
+            <SidebarGroupLabel className="text-sidebar-foreground/40 uppercase text-[10px] tracking-[0.15em] font-body font-semibold">
               {!collapsed && 'Management'}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -112,11 +117,11 @@ export function AppSidebar() {
                     >
                       <NavLink
                         to={item.url}
-                        className="hover:bg-sidebar-accent"
-                        activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        className="hover:bg-sidebar-accent transition-colors"
+                        activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
                       >
                         <item.icon className="h-5 w-5" />
-                        {!collapsed && <span>{item.title}</span>}
+                        {!collapsed && <span className="font-body text-sm">{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -127,21 +132,21 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="p-3">
+      <SidebarFooter className="p-3 border-t border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Profile">
               <NavLink
                 to="/profile"
-                className="hover:bg-sidebar-accent"
+                className="hover:bg-sidebar-accent transition-colors"
                 activeClassName="bg-sidebar-accent text-sidebar-primary"
               >
                 <UserCircle className="h-5 w-5" />
                 {!collapsed && (
                   <div className="flex flex-1 items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium">{user?.name}</span>
-                      <span className="text-xs text-sidebar-foreground/50">{user?.chapter}</span>
+                      <span className="text-sm font-body font-semibold">{user?.name}</span>
+                      <span className="text-xs font-body text-sidebar-foreground/50">{user?.chapter}</span>
                     </div>
                     <ChevronRight className="h-4 w-4 text-sidebar-foreground/30" />
                   </div>
@@ -152,7 +157,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton tooltip="Logout" onClick={logout}>
               <LogOut className="h-5 w-5" />
-              {!collapsed && <span>Logout</span>}
+              {!collapsed && <span className="font-body text-sm">Logout</span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

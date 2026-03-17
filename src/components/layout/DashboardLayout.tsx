@@ -1,7 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { useAuth } from '@/contexts/AuthContext';
-import { ROLE_LABELS } from '@/types';
+import { ROLE_LABELS, ROLE_COLORS } from '@/types';
 import { Badge } from '@/components/ui/badge';
 
 interface DashboardLayoutProps {
@@ -16,16 +16,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center justify-between border-b bg-card px-4 shrink-0">
+          <header className="h-14 flex items-center justify-between border-b bg-card px-4 sm:px-6 shrink-0">
             <div className="flex items-center gap-3">
               <SidebarTrigger />
-              <div className="h-5 w-px bg-border" />
-              <span className="text-sm font-medium text-muted-foreground hidden sm:block">
+              <div className="h-5 w-px bg-border hidden sm:block" />
+              <span className="text-sm font-body font-semibold text-muted-foreground hidden sm:block">
                 Iron Forums Dashboard
               </span>
             </div>
             {user && (
-              <Badge variant="secondary" className="bg-secondary/20 text-secondary font-medium">
+              <Badge className={`${ROLE_COLORS[user.role]} font-body text-xs font-semibold border-0`}>
                 {ROLE_LABELS[user.role]}
               </Badge>
             )}

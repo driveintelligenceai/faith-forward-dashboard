@@ -1,4 +1,4 @@
-export type UserRole = 'hq_admin' | 'facilitator' | 'member' | 'guest';
+export type UserRole = 'ceo' | 'executive' | 'facilitator' | 'member';
 
 export interface User {
   id: string;
@@ -95,8 +95,15 @@ export interface Announcement {
 }
 
 export const ROLE_LABELS: Record<UserRole, string> = {
-  hq_admin: 'HQ Admin',
+  ceo: 'CEO',
+  executive: 'Founder / Executive',
   facilitator: 'Chapter Facilitator',
   member: 'Member',
-  guest: 'Guest',
+};
+
+export const ROLE_COLORS: Record<UserRole, string> = {
+  ceo: 'bg-secondary text-secondary-foreground',
+  executive: 'bg-primary text-primary-foreground',
+  facilitator: 'bg-primary/80 text-primary-foreground',
+  member: 'bg-muted text-muted-foreground',
 };

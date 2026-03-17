@@ -12,50 +12,53 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-4">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center space-y-4 pb-2">
           <div className="flex justify-center">
-            <img src={ironForumsLogo} alt="Iron Forums" className="h-16 w-auto" />
+            <img src={ironForumsLogo} alt="Iron Forums" className="h-20 w-auto" />
           </div>
           <div>
-            <CardTitle className="text-2xl">Welcome Back</CardTitle>
-            <CardDescription className="text-base mt-1">
+            <CardTitle className="text-3xl font-heading font-bold text-primary">Welcome Back</CardTitle>
+            <CardDescription className="text-base font-body mt-2">
               Sign in to your Iron Forums dashboard
             </CardDescription>
+            <p className="text-xs font-body text-secondary font-semibold tracking-wide mt-1">
+              Connect · Sharpen · Grow
+            </p>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5 pt-4">
           <div className="space-y-2">
-            <Label className="text-base">Email</Label>
+            <Label className="text-base font-heading font-semibold">Email</Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="email"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 h-12 text-base"
+                className="pl-11 h-12 text-base font-body"
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label className="text-base">Password</Label>
+            <Label className="text-base font-heading font-semibold">Password</Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 h-12 text-base"
+                className="pl-11 h-12 text-base font-body"
               />
             </div>
           </div>
-          <Button className="w-full h-12 text-base" size="lg">
+          <Button className="w-full h-12 text-base font-heading font-bold" size="lg">
             <LogIn className="h-5 w-5 mr-2" />
             Sign In
           </Button>
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-center text-sm font-body text-muted-foreground">
             Authentication will be connected in the next phase.
           </p>
         </CardContent>

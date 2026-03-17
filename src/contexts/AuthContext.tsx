@@ -10,13 +10,13 @@ interface AuthContextType {
   hasMinRole: (role: UserRole) => boolean;
 }
 
-const ROLE_HIERARCHY: UserRole[] = ['guest', 'member', 'facilitator', 'hq_admin'];
+const ROLE_HIERARCHY: UserRole[] = ['member', 'facilitator', 'executive', 'ceo'];
 
 const MOCK_USER: User = {
   id: '1',
   name: 'David Mitchell',
   email: 'david@ironforums.org',
-  role: 'hq_admin',
+  role: 'ceo',
   chapter: 'Nashville Chapter',
   joinedDate: '2023-06-15',
 };

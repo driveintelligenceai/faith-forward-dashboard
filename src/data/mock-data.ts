@@ -86,8 +86,8 @@ export const MOCK_POSTS: Post[] = [
 ];
 
 export const MOCK_MEMBERS: Member[] = [
-  { id: '1', name: 'David Mitchell', role: 'hq_admin', chapter: 'Nashville Chapter', joinedDate: '2023-06-15' },
-  { id: '2', name: 'James Walker', role: 'facilitator', chapter: 'Nashville Chapter', joinedDate: '2023-08-01' },
+  { id: '1', name: 'David Mitchell', role: 'ceo', chapter: 'Nashville Chapter', joinedDate: '2023-06-15' },
+  { id: '2', name: 'James Walker', role: 'executive', chapter: 'Nashville Chapter', joinedDate: '2023-08-01' },
   { id: '3', name: 'Michael Harris', role: 'facilitator', chapter: 'Atlanta Chapter', joinedDate: '2023-09-15' },
   { id: '4', name: 'Robert Chen', role: 'facilitator', chapter: 'Dallas Chapter', joinedDate: '2024-01-10' },
   { id: '5', name: 'Steven Brooks', role: 'facilitator', chapter: 'Charlotte Chapter', joinedDate: '2024-03-20' },
