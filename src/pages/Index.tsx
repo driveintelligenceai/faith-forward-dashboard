@@ -36,7 +36,9 @@ function getScoreBg(score: number) {
 export default function Index() {
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const latestSnapshot = MOCK_SNAPSHOTS[0];
+  const { snapshots: dbSnapshots } = useSnapshots();
+  const allSnapshots = dbSnapshots.length > 0 ? dbSnapshots : MOCK_SNAPSHOTS;
+  const latestSnapshot = allSnapshots[0];
 
   const avgScore = latestSnapshot
     ? Math.round(
