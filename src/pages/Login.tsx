@@ -73,13 +73,13 @@ export default function Login() {
         <div className="relative w-full">
           <Button
             variant="outline"
-            className="w-full h-14 text-base sm:text-lg font-heading font-semibold gap-3 rounded-xl bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/15"
+            className="w-full h-14 text-base sm:text-lg font-heading font-semibold gap-3 rounded-xl bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/15 pr-24"
             disabled
           >
             <Linkedin className="h-5 w-5 sm:h-6 sm:w-6" />
             Sign in with LinkedIn
           </Button>
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-body text-primary-foreground/50">
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-body text-primary-foreground/40 uppercase tracking-wider">
             Coming Soon
           </span>
         </div>
