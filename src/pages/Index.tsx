@@ -1,19 +1,24 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import { SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
 import { useSnapshots } from '@/hooks/use-snapshots';
 import { ROLE_LABELS } from '@/types';
 import type { UserRole } from '@/types';
 import { useNavigate } from 'react-router-dom';
+import { PulseAlerts } from '@/components/dashboard/PulseAlerts';
+import { JourneyTimeline } from '@/components/dashboard/JourneyTimeline';
+import { ActionItems } from '@/components/dashboard/ActionItems';
 import {
   ClipboardCheck,
-  ChevronRight,
   TrendingUp,
   TrendingDown,
   Minus,
   ArrowRight,
+  CheckCircle2,
 } from 'lucide-react';
 
 export default function Index() {
@@ -47,64 +52,64 @@ export default function Index() {
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const hasThisMonthSnapshot = latestSnapshot && latestSnapshot.date.startsWith(currentMonth);
+  const monthName = now.toLocaleDateString('en-US', { month: 'long' });
 
   const firstName = (profile?.full_name || 'Brother')?.split(' ')[0];
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 sm:space-y-8">
-        {/* Welcome + Role */}
-        <div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold tracking-tight text-primary">
-            Welcome back, {firstName}
-          </h1>
-          <p className="text-sm sm:text-base font-body text-muted-foreground mt-1">
-            {profile ? ROLE_LABELS[(profile.role || 'member') as UserRole] : ''}{profile?.chapter ? ` · ${profile.chapter}` : ''}
-          </p>
+      <div className="space-y-8 sm:space-y-10 max-w-4xl">
+
+        {/* ── 1. Welcome + Status ── */}
+        <div className="space-y-5">
+          <div className="flex flex-wrap items-baseline gap-3">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold tracking-tight text-primary">
+              Welcome back, {firstName}
+            </h1>
+            {profile && (
+              <Badge variant="outline" className="text-xs font-body border-primary/20 text-primary">
+                {ROLE_LABELS[(profile.role || 'member') as UserRole]}
+              </Badge>
+            )}
+          </div>
+
+          {hasThisMonthSnapshot ? (
+            <div
+              className="flex items-center gap-3 cursor-pointer group"
+              onClick={() => navigate('/snapshot')}
+            >
+              <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+              <p className="font-body text-base text-muted-foreground group-hover:text-foreground transition-colors">
+                {monthName} Snapshot complete —{' '}
+                <span className="text-primary font-semibold underline underline-offset-2">Review your results</span>
+              </p>
+            </div>
+          ) : (
+            <Button
+              size="lg"
+              className="h-14 px-8 text-base font-heading font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-sm"
+              onClick={() => navigate('/snapshot')}
+            >
+              <ClipboardCheck className="h-5 w-5 mr-2.5" />
+              Take Your {monthName} Snapshot
+              <ArrowRight className="h-4 w-4 ml-2.5" />
+            </Button>
+          )}
         </div>
 
-        {/* Hero CTA — Take Your Snapshot */}
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-md group ${
-            hasThisMonthSnapshot
-              ? 'border-primary/20 bg-primary/5'
-              : 'border-secondary bg-secondary/10 shadow-sm'
-          }`}
-          onClick={() => navigate('/snapshot')}
-        >
-          <CardContent className="p-5 sm:p-7">
-            <div className="flex items-center gap-4 sm:gap-5">
-              <div className={`h-14 w-14 sm:h-16 sm:w-16 rounded-2xl flex items-center justify-center shrink-0 ${
-                hasThisMonthSnapshot ? 'bg-primary/10' : 'bg-secondary'
-              }`}>
-                <ClipboardCheck className={`h-7 w-7 sm:h-8 sm:w-8 ${
-                  hasThisMonthSnapshot ? 'text-primary' : 'text-secondary-foreground'
-                }`} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-lg sm:text-xl font-heading font-bold text-foreground">
-                  {hasThisMonthSnapshot
-                    ? 'March Snapshot Complete'
-                    : 'Time for Your March Snapshot'}
-                </h2>
-                <p className="text-sm font-body text-muted-foreground mt-0.5">
-                  {hasThisMonthSnapshot
-                    ? 'View your results, trends, and AI insights →'
-                    : 'Rate your last 30 days. Be honest — this is between you and God.'}
-                </p>
-              </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground/40 group-hover:text-secondary transition-colors shrink-0" />
-            </div>
-          </CardContent>
-        </Card>
+        {/* ── 2. Pulse — AI Pattern Alerts ── */}
+        <PulseAlerts snapshots={allSnapshots} />
 
-        {/* Quick Stats Row */}
+        {/* ── 3. Your Journey — Monthly Scorecard Grid ── */}
+        <JourneyTimeline snapshots={allSnapshots} />
+
+        {/* ── 4. Quick Stats Row ── */}
         <div className="grid grid-cols-3 gap-3 sm:gap-4">
           <Card className="cursor-pointer hover:shadow-sm transition-shadow" onClick={() => navigate('/snapshot')}>
-            <CardContent className="p-4 sm:p-5">
-              <p className="text-xs sm:text-sm font-body text-muted-foreground">Overall</p>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <p className="text-3xl sm:text-4xl font-heading font-bold text-primary">{avgScore}</p>
+            <CardContent className="p-4">
+              <p className="text-xs font-body text-muted-foreground uppercase tracking-wider">Overall</p>
+              <div className="flex items-baseline gap-1.5 mt-1.5">
+                <span className="text-3xl font-heading font-bold text-primary">{avgScore}</span>
                 {avgDelta !== null && (
                   <span className={`inline-flex items-center text-xs font-body font-bold ${
                     avgDelta > 0 ? 'text-primary' : avgDelta < 0 ? 'text-destructive' : 'text-muted-foreground'
@@ -118,33 +123,24 @@ export default function Index() {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 sm:p-5">
-              <p className="text-xs sm:text-sm font-body text-muted-foreground">Strongest</p>
-              <p className="text-sm sm:text-base font-heading font-bold mt-1 truncate">{topCategory?.name ?? '—'}</p>
+            <CardContent className="p-4">
+              <p className="text-xs font-body text-muted-foreground uppercase tracking-wider">Strongest</p>
+              <p className="text-sm font-heading font-bold mt-1.5 truncate">{topCategory?.name ?? '—'}</p>
               <p className="text-xs font-body text-muted-foreground">{topArea?.score ?? '—'}/10</p>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 sm:p-5">
-              <p className="text-xs sm:text-sm font-body text-muted-foreground">Focus Area</p>
-              <p className="text-sm sm:text-base font-heading font-bold mt-1 truncate">{weakCategory?.name ?? '—'}</p>
+            <CardContent className="p-4">
+              <p className="text-xs font-body text-muted-foreground uppercase tracking-wider">Focus Area</p>
+              <p className="text-sm font-heading font-bold mt-1.5 truncate">{weakCategory?.name ?? '—'}</p>
               <p className="text-xs font-body text-muted-foreground">{weakArea?.score ?? '—'}/10</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Snapshots on record */}
-        <Card className="cursor-pointer hover:shadow-sm transition-shadow" onClick={() => navigate('/snapshot')}>
-          <CardContent className="p-4 sm:p-5 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-heading font-bold">{allSnapshots.length} Snapshots on Record</p>
-              <p className="text-xs font-body text-muted-foreground mt-0.5">
-                View your full history, trends, and AI insights
-              </p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground/40" />
-          </CardContent>
-        </Card>
+        {/* ── 5. Action Items ── */}
+        <ActionItems />
+
       </div>
     </DashboardLayout>
   );
