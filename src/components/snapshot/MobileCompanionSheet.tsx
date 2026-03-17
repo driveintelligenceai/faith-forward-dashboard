@@ -1,4 +1,4 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { SnapshotCompanion } from './SnapshotCompanion';
 import type { SnapshotCategory, SnapshotRating, Snapshot } from '@/types';
 
