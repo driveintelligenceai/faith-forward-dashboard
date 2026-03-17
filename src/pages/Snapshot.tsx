@@ -14,7 +14,7 @@ import { useSnapshots } from '@/hooks/use-snapshots';
 import { useReminders } from '@/hooks/use-reminders';
 import { getRoleSnapshotType, SNAPSHOT_TYPE_LABELS } from '@/types';
 import type { SnapshotRating, SnapshotType, SnapshotCategory, UserRole } from '@/types';
-import { Save, History, Activity, Eye, Pencil, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Share2, Bell, BookOpen, MessageSquare, Play, Pause } from 'lucide-react';
+import { Save, History, Activity, Eye, Pencil, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Share2, Bell, BookOpen, MessageSquare, Play, Pause, Compass } from 'lucide-react';
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer,
