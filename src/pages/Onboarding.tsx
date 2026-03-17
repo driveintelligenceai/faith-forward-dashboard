@@ -240,7 +240,7 @@ export default function Onboarding() {
                   </li>
                   <li className="flex gap-2">
                     <span className="text-secondary font-bold">3.</span>
-                    Your AI mentor James will guide you with insights and encouragement.
+                    James, your accountability partner, will guide you with insights and encouragement.
                   </li>
                   <li className="flex gap-2">
                     <span className="text-secondary font-bold">4.</span>

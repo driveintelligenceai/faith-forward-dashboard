@@ -113,7 +113,7 @@ export function AIInsights({ snapshots, categories, userName }: AIInsightsProps)
       return;
     }
 
-    // Real users would get AI-generated insights here
+    // Real users would get mentor-generated insights here
     const content = generateDemoInsights();
     setInsights(content);
     sessionStorage.setItem(CACHE_KEY, JSON.stringify({ content, timestamp: Date.now() }));

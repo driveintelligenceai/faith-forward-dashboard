@@ -24,7 +24,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 className="h-10 w-auto sm:hidden"
               />
               <div className="h-5 w-px bg-border/60 hidden sm:block" />
-              <span className="text-sm font-body font-medium text-muted-foreground/70 hidden sm:block tracking-wide">
+              <span className="text-sm font-heading font-semibold text-muted-foreground/70 hidden sm:block tracking-wide">
                 Iron Forums
               </span>
             </div>

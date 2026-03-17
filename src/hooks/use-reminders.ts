@@ -12,7 +12,7 @@ function isoDate(daysFromNow: number): string {
 const SEED_REMINDERS: Reminder[] = [
   {
     id: 'demo-1',
-    text: 'Follow up with Andrew Klein about AI marketing',
+    text: 'Follow up with Andrew Klein about marketing strategy',
     categoryId: 'marketing',
     dueDate: isoDate(3),
     completed: false,

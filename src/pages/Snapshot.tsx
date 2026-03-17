@@ -721,7 +721,7 @@ function CategoryScoringCard({
   const score = rating?.score ?? 5;
   const firstName = userName.split(' ')[0];
 
-  // Mentor AI state
+  // Mentor state
   const [mentorMsg, setMentorMsg] = useState('');
   const [mentorInput, setMentorInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);

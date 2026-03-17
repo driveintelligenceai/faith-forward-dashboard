@@ -134,7 +134,7 @@ export function PulseAlerts({ snapshots }: { snapshots: Snapshot[] }) {
     <div className="space-y-4">
       <div>
         <h2 className="text-lg sm:text-xl font-heading font-bold text-foreground">Pulse</h2>
-        <p className="text-sm font-body text-muted-foreground">Patterns the AI noticed in your journey</p>
+        <p className="text-sm font-body text-muted-foreground">Patterns your mentor noticed in your journey</p>
       </div>
       <div className="space-y-3">
         {alerts.map((alert, i) => (
