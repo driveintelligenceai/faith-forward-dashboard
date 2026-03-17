@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,18 +60,60 @@ export default function Consultant() {
     'Help me set better quarterly goals',
   ];
 
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '0',
-      role: 'assistant',
-      content: `**Welcome back, ${userName.split(' ')[0]}.** I'm The Consultant — your AI-powered guide rooted in Christian leadership principles.\n\nI've reviewed your last **${allSnapshots.length} months** of Snapshot data. I can see your trends, your wins, and the areas that need honest attention.\n\n${weakAreas.length > 0 ? `Right now, your areas needing the most attention are **${weakAreas.join(', ')}**. ` : ''}${strongAreas.length > 0 ? `You're strong in **${strongAreas.join(', ')}** — let's protect that. ` : ''}\n\n${latestSnapshot ? `Your current major issue: *"${latestSnapshot.majorIssue}"*\n\n` : ''}> *"As iron sharpens iron, so one man sharpens another." — Proverbs 27:17*\n\nWhat's on your mind today? I can dig into any area of your Snapshot, challenge your thinking, or help you strategize.`,
-      timestamp: new Date().toISOString(),
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Load past chat history from DB
+  useEffect(() => {
+    const loadHistory = async () => {
+      if (!user) {
+        setHistoryLoaded(true);
+        return;
+      }
+      const { data } = await supabase
+        .from('chat_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('mode', 'consultant')
+        .order('created_at', { ascending: true });
+
+      if (data && data.length > 0) {
+        const restored: ChatMessage[] = data.map((row, i) => ({
+          id: row.id || i.toString(),
+          role: row.role as 'user' | 'assistant',
+          content: row.content,
+          timestamp: row.created_at,
+        }));
+        setMessages(restored);
+      } else {
+        // No history — show welcome
+        setMessages([{
+          id: '0',
+          role: 'assistant',
+          content: `**Welcome back, ${userName.split(' ')[0]}.** I'm The Consultant — your AI-powered guide rooted in Christian leadership principles.\n\nI've reviewed your last **${allSnapshots.length} months** of Snapshot data. I can see your trends, your wins, and the areas that need honest attention.\n\n${weakAreas.length > 0 ? `Right now, your areas needing the most attention are **${weakAreas.join(', ')}**. ` : ''}${strongAreas.length > 0 ? `You're strong in **${strongAreas.join(', ')}** — let's protect that. ` : ''}\n\n${latestSnapshot ? `Your current major issue: *"${latestSnapshot.majorIssue}"*\n\n` : ''}> *"As iron sharpens iron, so one man sharpens another." — Proverbs 27:17*\n\nWhat's on your mind today?`,
+          timestamp: new Date().toISOString(),
+        }]);
+      }
+      setHistoryLoaded(true);
+    };
+    loadHistory();
+  }, [user]);
+
+  // Persist a message to chat_history
+  const persistMessage = useCallback(async (role: string, content: string) => {
+    if (!user) return;
+    await supabase.from('chat_history').insert({
+      user_id: user.id,
+      role,
+      content,
+      mode: 'consultant',
+    });
+  }, [user]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
@@ -88,17 +131,17 @@ export default function Consultant() {
     setInput('');
     setIsStreaming(true);
 
-    // Build messages with full snapshot profile context injected in the first user turn
+    // Persist user message
+    persistMessage('user', text);
+
     const aiMessages = messages
       .filter(m => m.role === 'user' || m.role === 'assistant')
-      .map((m, i) => ({
+      .map((m) => ({
         role: m.role as 'user' | 'assistant',
         content: m.content,
       }));
 
-    // Inject profile context with every message so AI always has full picture
     const contextualMessage = `[SNAPSHOT DATA — USE THIS TO PERSONALIZE YOUR RESPONSE]\n${profileContext}\n[END SNAPSHOT DATA]\n\nUser message: ${text}`;
-
     aiMessages.push({ role: 'user' as const, content: contextualMessage });
 
     let assistantSoFar = '';
@@ -118,7 +161,11 @@ export default function Consultant() {
           return [...prev, { id: assistantId, role: 'assistant', content: currentContent, timestamp: new Date().toISOString() }];
         });
       },
-      onDone: () => setIsStreaming(false),
+      onDone: () => {
+        setIsStreaming(false);
+        // Persist assistant response
+        if (assistantSoFar) persistMessage('assistant', assistantSoFar);
+      },
       onError: (error) => {
         setIsStreaming(false);
         toast({ title: 'Connection Issue', description: error, variant: 'destructive' });
