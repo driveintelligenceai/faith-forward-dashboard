@@ -58,7 +58,10 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border p-0">
-        <div className={`flex flex-col items-center justify-center transition-all duration-300 ${collapsed ? 'py-3 px-1' : 'py-3 px-4'}`}>
+        <div
+          className={`flex flex-col items-center justify-center transition-all duration-300 cursor-pointer ${collapsed ? 'py-3 px-1' : 'py-3 px-4'}`}
+          onClick={() => navigate('/hub')}
+        >
           <img
             src={ironForumsLogo}
             alt="Iron Forums"
