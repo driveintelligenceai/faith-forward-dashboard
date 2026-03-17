@@ -97,7 +97,7 @@ export default function Index() {
           )}
         </div>
 
-        {/* ── 2. Pulse — AI Pattern Alerts ── */}
+        {/* ── 2. Pulse — Mentor Pattern Alerts ── */}
         <PulseAlerts snapshots={allSnapshots} />
 
         {/* ── 3. Your Journey — Monthly Scorecard Grid ── */}

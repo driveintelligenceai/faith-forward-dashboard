@@ -87,7 +87,7 @@ export function ActionItems() {
                     {relativeDue(item.dueDate)}
                   </span>
                   {item.source === 'ai' && (
-                    <span className="text-xs font-body text-secondary">✦ AI suggested</span>
+                    <span className="text-xs font-body text-secondary">✦ Mentor suggested</span>
                   )}
                 </div>
               </div>

@@ -115,7 +115,7 @@ export default function Snapshot() {
         setShowSaveSuccess(false);
         setMode('review');
       }, 1600);
-      // Generate AI-suggested reminders for declining categories
+      // Generate mentor-suggested reminders for declining categories
       const suggestions: {text: string; categoryId: string}[] = [];
       if (previousRatings) {
         categories.forEach(cat => {
@@ -453,7 +453,7 @@ export default function Snapshot() {
         {/* ═══════════════════════════════════════════════════════ */}
         {mode === 'review' && (
           <>
-            {/* AI Suggestion cards after save */}
+            {/* Mentor suggestion cards after save */}
             {aiSuggestions.length > 0 && (
               <Card className="border-secondary/30 bg-secondary/5">
                 <CardContent className="p-4 sm:p-5 space-y-3">
@@ -721,7 +721,7 @@ function CategoryScoringCard({
   const score = rating?.score ?? 5;
   const firstName = userName.split(' ')[0];
 
-  // Mentor AI state
+  // Mentor state
   const [mentorMsg, setMentorMsg] = useState('');
   const [mentorInput, setMentorInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
@@ -866,7 +866,7 @@ function CategoryScoringCard({
             </div>
             <div>
               <p className="text-sm font-heading font-bold text-foreground">James</p>
-              <p className="text-xs font-body text-muted-foreground">Your AI Mentor</p>
+              <p className="text-xs font-body text-muted-foreground">Your Accountability Partner</p>
             </div>
           </div>
 
