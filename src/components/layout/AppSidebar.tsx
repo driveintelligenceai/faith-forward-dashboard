@@ -27,6 +27,7 @@ export function AppSidebar() {
   const { state, isMobile } = useSidebar();
   const collapsed = state === 'collapsed' && !isMobile;
   const location = useLocation();
+  const navigate = useNavigate();
   const { profile, logout } = useAuth();
   const { getOverdue } = useReminders();
 
