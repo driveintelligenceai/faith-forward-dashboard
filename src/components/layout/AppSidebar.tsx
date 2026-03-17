@@ -50,6 +50,9 @@ export function AppSidebar() {
   const mainNav = [
     { title: 'Dashboard', url: '/', icon: LayoutDashboard, desc: 'Your overview', badge: false },
     { title: 'My Snapshot', url: '/snapshot', icon: ClipboardCheck, desc: 'Rate your 30 days', badge: showSnapshotBadge },
+    { title: 'Community', url: '/community', icon: Users, desc: 'Your forum brothers', badge: false },
+    { title: 'Leadership', url: '/leadership', icon: Award, desc: 'Growth & mentoring', badge: false },
+    { title: 'Events', url: '/events', icon: CalendarDays, desc: 'Meetings & gatherings', badge: false },
   ];
 
   return (
