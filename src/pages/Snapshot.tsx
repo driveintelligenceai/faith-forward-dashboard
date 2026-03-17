@@ -171,33 +171,29 @@ export default function Snapshot() {
           </div>
 
           {cat.hasSpouseRating && (
-            <div className="space-y-3 pt-3 border-t border-dashed">
+            <div className="space-y-2 pt-2 border-t border-border/30">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-body font-semibold text-muted-foreground">Spouse's Rating</Label>
-                <span className={`text-2xl font-heading font-bold ${getScoreColor(rating?.spouseScore ?? 5)}`}>
-                  {rating?.spouseScore ?? 5}
-                </span>
+                <Label className="text-sm font-body text-muted-foreground">Spouse's Rating</Label>
+                <span className="text-sm font-body text-muted-foreground">{rating?.spouseScore ?? 5}/10</span>
               </div>
               <Slider
                 value={[rating?.spouseScore ?? 5]}
                 onValueChange={([v]) => updateRating(cat.id, 'spouseScore', v)}
-                min={1} max={10} step={1} className="py-2"
+                min={1} max={10} step={1} className="py-1"
               />
             </div>
           )}
 
           {cat.hasChildRating && (
-            <div className="space-y-3 pt-3 border-t border-dashed">
+            <div className="space-y-2 pt-2 border-t border-border/30">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-body font-semibold text-muted-foreground">Child's Rating</Label>
-                <span className={`text-2xl font-heading font-bold ${getScoreColor(rating?.childScore ?? 5)}`}>
-                  {rating?.childScore ?? 5}
-                </span>
+                <Label className="text-sm font-body text-muted-foreground">Child's Rating</Label>
+                <span className="text-sm font-body text-muted-foreground">{rating?.childScore ?? 5}/10</span>
               </div>
               <Slider
                 value={[rating?.childScore ?? 5]}
                 onValueChange={([v]) => updateRating(cat.id, 'childScore', v)}
-                min={1} max={10} step={1} className="py-2"
+                min={1} max={10} step={1} className="py-1"
               />
             </div>
           )}
