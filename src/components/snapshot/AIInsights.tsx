@@ -193,10 +193,10 @@ export function AIInsights({ snapshots, categories, userName }: AIInsightsProps)
     return (
       <Card>
         <CardContent className="p-6 text-center">
-          <Lightbulb className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="font-heading font-bold text-muted-foreground">Need More Data</p>
+          <Lightbulb className="h-10 w-10 text-secondary/40 mx-auto mb-3" />
+          <p className="font-heading font-bold text-foreground">Your story is just beginning</p>
           <p className="text-sm font-body text-muted-foreground mt-1">
-            Save at least 2 snapshots to unlock trend analysis.
+            Complete your second monthly Snapshot and James will start spotting patterns in your journey.
           </p>
         </CardContent>
       </Card>
