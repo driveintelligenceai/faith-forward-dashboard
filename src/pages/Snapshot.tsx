@@ -78,6 +78,7 @@ export default function Snapshot() {
   const [reminderSheet, setReminderSheet] = useState(false);
   const [reminderDefaults, setReminderDefaults] = useState({ text: '', categoryId: '' });
   const [viewingIdx, setViewingIdx] = useState(0); // 0 = latest snapshot
+  const [activeTab, setActiveTab] = useState('journey');
   const [isPlaying, setIsPlaying] = useState(false);
   const playIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
