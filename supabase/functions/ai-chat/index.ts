@@ -174,6 +174,9 @@ serve(async (req) => {
       case "insights":
         systemPrompt = INSIGHTS_SYSTEM_PROMPT;
         break;
+      case "community":
+        systemPrompt = COMMUNITY_SYSTEM_PROMPT;
+        break;
       default:
         systemPrompt = CONSULTANT_SYSTEM_PROMPT;
     }

@@ -114,7 +114,7 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
               }}
               className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2">
               
-              I'll do it later — take me to the dashboard
+              I'll do it later — take me to the Hub
             </button>
           </div>
         </div>
