@@ -6,6 +6,7 @@ import type { UserRole } from '@/types';
 import { Button } from '@/components/ui/button';
 import { ClipboardCheck, ArrowRight, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import ironForumsLogo from '@/assets/iron-forums-logo.svg';
 
 const DISMISS_KEY = 'snapshot-gate-dismissed';
 
