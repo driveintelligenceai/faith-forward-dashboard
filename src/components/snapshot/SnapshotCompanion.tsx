@@ -27,6 +27,8 @@ function buildContext(
     const rating = ratings[category.id];
     const prev = previousRatings?.[category.id];
     parts.push(`Current category: ${category.name} (${category.group})`);
+    parts.push(`Scripture: ${category.scriptureRef}`);
+    if (category.description) parts.push(`About: ${category.description}`);
     if (rating) {
       parts.push(`Self score: ${rating.score}/10`);
       if (rating.spouseScore !== undefined) parts.push(`Spouse score: ${rating.spouseScore}/10`);
@@ -35,7 +37,6 @@ function buildContext(
     if (prev) {
       parts.push(`Previous month score: ${prev.score}/10 (change: ${(rating?.score ?? 5) - prev.score})`);
     }
-
     if (allSnapshots && allSnapshots.length > 1) {
       const historyScores = allSnapshots.slice(0, 6).map(s => {
         const r = s.ratings.find(r => r.categoryId === category.id);
@@ -60,6 +61,7 @@ function buildContext(
 }
 
 const MENTOR_NAME = 'James';
+const MENTOR_BIO = '20+ years in Christian business leadership';
 
 export function SnapshotCompanion({ currentCategory, ratings, previousRatings, userName, allSnapshots }: SnapshotCompanionProps) {
   const firstName = userName.split(' ')[0];
@@ -83,7 +85,6 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
-  // Proactive AI: react when user selects a category
   useEffect(() => {
     if (!currentCategory || isStreaming) return;
 
@@ -104,11 +105,11 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
     if (prevScore !== undefined && currentScore !== undefined) {
       const delta = currentScore - prevScore;
       if (delta > 0) {
-        prompt = `The user just selected "${currentCategory.name}" and their score is ${currentScore}/10 (up from ${prevScore} last month). ${context}. Ask ONE warm, brief question about what improved. Keep it to 2 sentences max. Be genuinely happy for them.`;
+        prompt = `The user just selected "${currentCategory.name}" and their score is ${currentScore}/10 (up from ${prevScore} last month). ${context}. Ask ONE warm, brief question about what improved. Keep it to 2 sentences max.`;
       } else if (delta < 0) {
-        prompt = `The user just selected "${currentCategory.name}" and their score is ${currentScore}/10 (down from ${prevScore} last month). ${context}. Ask ONE gentle, caring question about what happened. Keep it to 2 sentences max. Be supportive, not analytical.`;
+        prompt = `The user just selected "${currentCategory.name}" and their score is ${currentScore}/10 (down from ${prevScore} last month). ${context}. Ask ONE gentle, caring question about what happened. Keep it to 2 sentences max.`;
       } else {
-        prompt = `The user just selected "${currentCategory.name}" and their score is ${currentScore}/10 (same as last month). ${context}. Give a brief 1-2 sentence reflection prompt. Be warm and encouraging.`;
+        prompt = `The user just selected "${currentCategory.name}" and their score is ${currentScore}/10 (same as last month). ${context}. Give a brief 1-2 sentence reflection prompt.`;
       }
     } else {
       prompt = `The user just selected "${currentCategory.name}" with a score of ${currentScore ?? 5}/10. ${context}. Ask ONE simple, warm question: "What's behind that number for you this month?" Keep it to 2 sentences max.`;
@@ -127,7 +128,7 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
       onDelta: (chunk) => {
         assistantSoFar += chunk;
         const currentContent = assistantSoFar;
-        setMessages((prev) => {
+        setMessages(prev => {
           const last = prev[prev.length - 1];
           if (last?.id === assistantId) {
             return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: currentContent } : m);
@@ -158,7 +159,7 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
         content: text,
         timestamp: new Date().toISOString(),
       };
-      setMessages((prev) => [...prev, userMsg]);
+      setMessages(prev => [...prev, userMsg]);
       setInput('');
       setIsStreaming(true);
 
@@ -180,7 +181,7 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
         onDelta: (chunk) => {
           assistantSoFar += chunk;
           const currentContent = assistantSoFar;
-          setMessages((prev) => {
+          setMessages(prev => {
             const last = prev[prev.length - 1];
             if (last?.id === assistantId) {
               return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: currentContent } : m);
@@ -210,40 +211,44 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
     : ['Help me get started', 'Where should I focus?'];
 
   return (
-    <div className="flex flex-col h-full bg-background">
-      {/* Mentor header — warm, personal */}
-      <div className="px-5 pt-5 pb-3 shrink-0">
+    <div className="flex flex-col h-full bg-card rounded-xl border border-border/60 overflow-hidden">
+      {/* Mentor header */}
+      <div className="px-5 pt-5 pb-3 shrink-0 border-b border-border/40">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-secondary/20 flex items-center justify-center shrink-0">
+          <div className="h-11 w-11 rounded-full bg-secondary/20 flex items-center justify-center shrink-0">
             <BookOpen className="h-5 w-5 text-secondary" />
           </div>
           <div className="min-w-0">
             <p className="text-base font-heading font-bold text-foreground">{MENTOR_NAME}</p>
-            <p className="text-xs font-body text-muted-foreground">
-              {currentCategory ? `Reflecting on ${currentCategory.name}` : 'Your Snapshot mentor'}
-            </p>
+            <p className="text-[11px] font-body text-muted-foreground">{MENTOR_BIO}</p>
           </div>
         </div>
+        {/* Category context */}
+        {currentCategory && (
+          <div className="mt-3 px-3 py-2 rounded-lg bg-muted/50 border border-border/30">
+            <p className="text-xs font-heading font-bold text-foreground">{currentCategory.name}</p>
+            {currentCategory.description && (
+              <p className="text-[11px] font-body text-muted-foreground mt-0.5">{currentCategory.description}</p>
+            )}
+            <p className="text-[10px] font-body text-secondary mt-0.5 italic">{currentCategory.scriptureRef}</p>
+          </div>
+        )}
       </div>
 
-      {/* Conversation — journal-style, no chat bubbles */}
+      {/* Conversation */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-3 space-y-5 min-h-0">
         {messages.map((msg) => (
           <div key={msg.id}>
             {msg.role === 'assistant' ? (
               <div className="space-y-1">
-                <p className="text-[11px] font-body font-semibold text-secondary uppercase tracking-wider">
-                  {MENTOR_NAME}
-                </p>
+                <p className="text-[11px] font-body font-semibold text-secondary uppercase tracking-wider">{MENTOR_NAME}</p>
                 <div className="font-body text-[15px] leading-relaxed text-foreground/90 [&_p]:mb-2 [&_strong]:text-foreground [&_li]:mb-1">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
               </div>
             ) : (
               <div className="space-y-1">
-                <p className="text-[11px] font-body font-semibold text-muted-foreground uppercase tracking-wider text-right">
-                  You
-                </p>
+                <p className="text-[11px] font-body font-semibold text-muted-foreground uppercase tracking-wider text-right">You</p>
                 <div className="bg-primary/5 border border-primary/10 rounded-xl px-4 py-3">
                   <p className="font-body text-[15px] leading-relaxed text-foreground">{msg.content}</p>
                 </div>
@@ -253,9 +258,7 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
         ))}
         {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
           <div className="space-y-1">
-            <p className="text-[11px] font-body font-semibold text-secondary uppercase tracking-wider">
-              {MENTOR_NAME}
-            </p>
+            <p className="text-[11px] font-body font-semibold text-secondary uppercase tracking-wider">{MENTOR_NAME}</p>
             <div className="flex gap-1.5 py-1">
               <span className="w-1.5 h-1.5 bg-secondary/40 rounded-full animate-bounce" />
               <span className="w-1.5 h-1.5 bg-secondary/40 rounded-full animate-bounce [animation-delay:0.15s]" />
@@ -265,9 +268,9 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
         )}
       </div>
 
-      {/* Quick prompts — soft pills, not button-like */}
+      {/* Quick prompts */}
       <div className="px-5 pb-2 flex flex-wrap gap-2 shrink-0">
-        {quickPrompts.map((prompt) => (
+        {quickPrompts.map(prompt => (
           <button
             key={prompt}
             onClick={() => sendMessage(prompt)}
@@ -279,7 +282,7 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
         ))}
       </div>
 
-      {/* Input — open text area, not a chat input */}
+      {/* Input */}
       <div className="px-5 pb-5 pt-2 shrink-0">
         <div className="relative">
           <Textarea
