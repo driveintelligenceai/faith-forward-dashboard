@@ -48,6 +48,7 @@ export default function Snapshot() {
   const { toast } = useToast();
   const { profile } = useAuth();
   const { snapshots: dbSnapshots, isLoading, isSaving, saveSnapshot } = useSnapshots();
+  const { addReminder } = useReminders();
   const defaultType = profile ? getRoleSnapshotType((profile.role || 'member') as UserRole) : 'member';
   const [snapshotType, setSnapshotType] = useState<SnapshotType>(defaultType);
   const categories = SNAPSHOT_CONFIGS[snapshotType];
