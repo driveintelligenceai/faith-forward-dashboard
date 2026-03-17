@@ -36,7 +36,7 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
   // Check if current month snapshot exists
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const hasCurrentMonth = snapshots.some(s => s.date.startsWith(currentMonth));
+  const hasCurrentMonth = snapshots.some((s) => s.date.startsWith(currentMonth));
 
   // Also check mock data fallback — if no DB snapshots, check if demo data covers current month
   // For real users with no snapshots at all, they need to take one
@@ -49,22 +49,22 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
     return (
       <>
         <div className="bg-secondary/10 border-b border-secondary/20 px-4 py-2.5 flex items-center justify-between">
-          <p className="text-sm font-body text-secondary-foreground/80">
+          <p className="text-sm font-body opacity-100 text-primary">
             <span className="font-semibold">Snapshot reminder:</span> You haven't completed your {now.toLocaleDateString('en-US', { month: 'long' })} Snapshot yet.
           </p>
           <Button
             size="sm"
             variant="outline"
             className="text-xs font-body gap-1.5 border-secondary/30 hover:bg-secondary/10"
-            onClick={() => navigate('/snapshot')}
-          >
+            onClick={() => navigate('/snapshot')}>
+            
             <ClipboardCheck className="h-3.5 w-3.5" />
             Take Snapshot
           </Button>
         </div>
         {children}
-      </>
-    );
+      </>);
+
   }
 
   const role = (profile.role || 'member') as UserRole;
@@ -118,8 +118,8 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
           <Button
             size="lg"
             className="w-full sm:w-auto h-14 px-10 text-base font-heading font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground gap-2.5"
-            onClick={() => navigate('/snapshot')}
-          >
+            onClick={() => navigate('/snapshot')}>
+            
             Begin My Snapshot
             <ArrowRight className="h-5 w-5" />
           </Button>
@@ -130,13 +130,13 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
                 sessionStorage.setItem(getDismissKey(), 'true');
                 setDismissed(true);
               }}
-              className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
-            >
+              className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2">
+              
               I'll do it later — take me to the dashboard
             </button>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
