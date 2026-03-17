@@ -7,6 +7,7 @@ import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import { SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
 import { buildSnapshotProfileContext } from '@/lib/snapshot-context';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSnapshots } from '@/hooks/use-snapshots';
 import type { ChatMessage, UserRole } from '@/types';
 import { ROLE_LABELS } from '@/types';
 import { Send, Bot, User, Sparkles } from 'lucide-react';
@@ -16,20 +17,24 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function Consultant() {
   const { profile } = useAuth();
+  const { snapshots: dbSnapshots } = useSnapshots();
   const userName = profile?.full_name || 'Brother';
   const chapter = profile?.chapter || '';
   const role = profile?.role || 'member';
 
+  // Use DB data if available, otherwise fall back to mock
+  const allSnapshots = dbSnapshots.length > 0 ? dbSnapshots : MOCK_SNAPSHOTS;
+
   // Build comprehensive profile context from all snapshot data
   const profileContext = buildSnapshotProfileContext(
-    MOCK_SNAPSHOTS,
+    allSnapshots,
     SNAPSHOT_CATEGORIES,
     userName,
     chapter,
     ROLE_LABELS[role as UserRole] || role
   );
 
-  const latestSnapshot = MOCK_SNAPSHOTS[0];
+  const latestSnapshot = allSnapshots[0];
   const weakAreas = latestSnapshot
     ? latestSnapshot.ratings
         .filter((r) => r.score <= 5)
@@ -58,7 +63,7 @@ export default function Consultant() {
     {
       id: '0',
       role: 'assistant',
-      content: `**Welcome back, ${userName.split(' ')[0]}.** I'm The Consultant — your AI-powered guide rooted in Christian leadership principles.\n\nI've reviewed your last **${MOCK_SNAPSHOTS.length} months** of Snapshot data. I can see your trends, your wins, and the areas that need honest attention.\n\n${weakAreas.length > 0 ? `Right now, your areas needing the most attention are **${weakAreas.join(', ')}**. ` : ''}${strongAreas.length > 0 ? `You're strong in **${strongAreas.join(', ')}** — let's protect that. ` : ''}\n\n${latestSnapshot ? `Your current major issue: *"${latestSnapshot.majorIssue}"*\n\n` : ''}> *"As iron sharpens iron, so one man sharpens another." — Proverbs 27:17*\n\nWhat's on your mind today? I can dig into any area of your Snapshot, challenge your thinking, or help you strategize.`,
+      content: `**Welcome back, ${userName.split(' ')[0]}.** I'm The Consultant — your AI-powered guide rooted in Christian leadership principles.\n\nI've reviewed your last **${allSnapshots.length} months** of Snapshot data. I can see your trends, your wins, and the areas that need honest attention.\n\n${weakAreas.length > 0 ? `Right now, your areas needing the most attention are **${weakAreas.join(', ')}**. ` : ''}${strongAreas.length > 0 ? `You're strong in **${strongAreas.join(', ')}** — let's protect that. ` : ''}\n\n${latestSnapshot ? `Your current major issue: *"${latestSnapshot.majorIssue}"*\n\n` : ''}> *"As iron sharpens iron, so one man sharpens another." — Proverbs 27:17*\n\nWhat's on your mind today? I can dig into any area of your Snapshot, challenge your thinking, or help you strategize.`,
       timestamp: new Date().toISOString(),
     },
   ]);

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MOCK_SNAPSHOTS, MOCK_ANNOUNCEMENTS } from '@/data/mock-data';
 import { SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
+import { useSnapshots } from '@/hooks/use-snapshots';
 import { ROLE_LABELS, ROLE_COLORS } from '@/types';
 import type { UserRole } from '@/types';
 import { useNavigate } from 'react-router-dom';
@@ -35,7 +36,9 @@ function getScoreBg(score: number) {
 export default function Index() {
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const latestSnapshot = MOCK_SNAPSHOTS[0];
+  const { snapshots: dbSnapshots } = useSnapshots();
+  const allSnapshots = dbSnapshots.length > 0 ? dbSnapshots : MOCK_SNAPSHOTS;
+  const latestSnapshot = allSnapshots[0];
 
   const avgScore = latestSnapshot
     ? Math.round(
@@ -203,7 +206,7 @@ export default function Index() {
               <CardDescription className="text-sm sm:text-base font-body">Your progress over time</CardDescription>
             </CardHeader>
             <CardContent className="space-y-0">
-              {MOCK_SNAPSHOTS.map((s, i) => {
+              {allSnapshots.slice(0, 5).map((s, i) => {
                 const avg =
                   Math.round(
                     (s.ratings.reduce((sum, r) => sum + r.score, 0) / s.ratings.length) * 10
@@ -212,7 +215,7 @@ export default function Index() {
                   <div
                     key={s.id}
                     className={`flex items-center justify-between py-3.5 cursor-pointer hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-colors ${
-                      i < MOCK_SNAPSHOTS.length - 1 ? 'border-b border-border/30' : ''
+                      i < Math.min(allSnapshots.length, 5) - 1 ? 'border-b border-border/30' : ''
                     }`}
                     onClick={() => navigate('/snapshot')}
                   >

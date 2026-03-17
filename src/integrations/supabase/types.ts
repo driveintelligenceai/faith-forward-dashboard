@@ -98,6 +98,77 @@ export type Database = {
         }
         Relationships: []
       }
+      snapshot_ratings: {
+        Row: {
+          category_id: string
+          child_score: number | null
+          id: string
+          life_event: string | null
+          note: string | null
+          score: number
+          snapshot_id: string
+          spouse_score: number | null
+        }
+        Insert: {
+          category_id: string
+          child_score?: number | null
+          id?: string
+          life_event?: string | null
+          note?: string | null
+          score?: number
+          snapshot_id: string
+          spouse_score?: number | null
+        }
+        Update: {
+          category_id?: string
+          child_score?: number | null
+          id?: string
+          life_event?: string | null
+          note?: string | null
+          score?: number
+          snapshot_id?: string
+          spouse_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "snapshot_ratings_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      snapshots: {
+        Row: {
+          created_at: string
+          id: string
+          major_issue: string
+          purpose_statement: string
+          quarterly_goal: string
+          snapshot_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          major_issue?: string
+          purpose_statement?: string
+          quarterly_goal?: string
+          snapshot_type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          major_issue?: string
+          purpose_statement?: string
+          quarterly_goal?: string
+          snapshot_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
