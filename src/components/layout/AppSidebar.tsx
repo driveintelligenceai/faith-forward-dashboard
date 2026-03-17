@@ -1,6 +1,9 @@
 import {
   LayoutDashboard,
   ClipboardCheck,
+  Users,
+  Award,
+  CalendarDays,
   LogOut,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
