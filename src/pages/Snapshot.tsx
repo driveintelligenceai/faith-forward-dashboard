@@ -23,15 +23,15 @@ import { useToast } from '@/hooks/use-toast';
 import { SnapshotCompanion } from '@/components/snapshot/SnapshotCompanion';
 
 function getScoreColor(score: number) {
-  if (score >= 7) return 'text-score-high';
-  if (score >= 4) return 'text-score-mid';
-  return 'text-score-low';
+  if (score >= 7) return 'text-primary';
+  if (score >= 4) return 'text-muted-foreground';
+  return 'text-destructive';
 }
 
 function getScoreBg(score: number) {
-  if (score >= 7) return 'border-l-4 border-l-score-high';
-  if (score >= 4) return 'border-l-4 border-l-score-mid';
-  return 'border-l-4 border-l-score-low';
+  if (score >= 7) return 'border-l-4 border-l-primary';
+  if (score >= 4) return 'border-l-4 border-l-muted';
+  return 'border-l-4 border-l-destructive/40';
 }
 
 function getScoreLabel(score: number) {
@@ -156,51 +156,44 @@ export default function Snapshot() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4 pt-0">
-          <div className="space-y-3">
+        <CardContent className="space-y-3 pt-0">
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-body font-semibold text-muted-foreground">Your Rating</Label>
-              <span className="text-sm font-body text-muted-foreground">1 – 10 scale</span>
+              <Label className="text-sm font-body text-muted-foreground">Your Rating</Label>
+              <span className="text-sm font-body text-muted-foreground">{score}/10</span>
             </div>
             <Slider
               value={[score]}
               onValueChange={([v]) => updateRating(cat.id, 'score', v)}
               min={1} max={10} step={1}
-              className="py-2"
+              className="py-1"
             />
-            <div className="flex justify-between text-xs font-body text-muted-foreground">
-              <span>1 poor</span><span>5 average</span><span>10 best ever</span>
-            </div>
           </div>
 
           {cat.hasSpouseRating && (
-            <div className="space-y-3 pt-3 border-t border-dashed">
+            <div className="space-y-2 pt-2 border-t border-border/30">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-body font-semibold text-muted-foreground">Spouse's Rating</Label>
-                <span className={`text-2xl font-heading font-bold ${getScoreColor(rating?.spouseScore ?? 5)}`}>
-                  {rating?.spouseScore ?? 5}
-                </span>
+                <Label className="text-sm font-body text-muted-foreground">Spouse's Rating</Label>
+                <span className="text-sm font-body text-muted-foreground">{rating?.spouseScore ?? 5}/10</span>
               </div>
               <Slider
                 value={[rating?.spouseScore ?? 5]}
                 onValueChange={([v]) => updateRating(cat.id, 'spouseScore', v)}
-                min={1} max={10} step={1} className="py-2"
+                min={1} max={10} step={1} className="py-1"
               />
             </div>
           )}
 
           {cat.hasChildRating && (
-            <div className="space-y-3 pt-3 border-t border-dashed">
+            <div className="space-y-2 pt-2 border-t border-border/30">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-body font-semibold text-muted-foreground">Child's Rating</Label>
-                <span className={`text-2xl font-heading font-bold ${getScoreColor(rating?.childScore ?? 5)}`}>
-                  {rating?.childScore ?? 5}
-                </span>
+                <Label className="text-sm font-body text-muted-foreground">Child's Rating</Label>
+                <span className="text-sm font-body text-muted-foreground">{rating?.childScore ?? 5}/10</span>
               </div>
               <Slider
                 value={[rating?.childScore ?? 5]}
                 onValueChange={([v]) => updateRating(cat.id, 'childScore', v)}
-                min={1} max={10} step={1} className="py-2"
+                min={1} max={10} step={1} className="py-1"
               />
             </div>
           )}
