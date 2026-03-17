@@ -10,7 +10,7 @@ export async function streamChat({
   onError,
 }: {
   messages: Msg[];
-  mode: "consultant" | "snapshot" | "onboarding";
+  mode: "consultant" | "snapshot" | "snapshot_scoring" | "onboarding" | "insights";
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (error: string) => void;
