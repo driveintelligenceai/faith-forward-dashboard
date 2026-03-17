@@ -64,7 +64,7 @@ export function JourneyTimeline({ snapshots }: { snapshots: Snapshot[] }) {
             className={`shrink-0 w-[180px] sm:w-[200px] cursor-pointer hover:shadow-md transition-all snap-start ${
               i === cards.length - 1 ? 'border-secondary shadow-sm' : ''
             }`}
-            onClick={() => navigate('/snapshot')}
+            onClick={() => navigate('/')}
           >
             <CardContent className="p-4 sm:p-5 space-y-3">
               <div>
