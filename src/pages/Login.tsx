@@ -39,6 +39,21 @@ export default function Login() {
     }
   };
 
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password.trim()) return;
+    setLoading(true);
+    const { error } = await login(email, password);
+    if (error) {
+      // If login fails, try signup
+      const { error: signupError } = await signup(email, password, 'Test User');
+      if (signupError) {
+        toast({ title: 'Login failed', description: signupError, variant: 'destructive' });
+      }
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-primary p-6">
       {/* Logo — large and commanding */}
