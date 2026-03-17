@@ -7,13 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SNAPSHOT_CONFIGS } from '@/data/snapshot-categories';
+import { SNAPSHOT_CONFIGS, SNAPSHOT_CATEGORIES } from '@/data/snapshot-categories';
 import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSnapshots } from '@/hooks/use-snapshots';
+import { useReminders } from '@/hooks/use-reminders';
 import { getRoleSnapshotType, SNAPSHOT_TYPE_LABELS } from '@/types';
 import type { SnapshotRating, SnapshotType, SnapshotCategory, UserRole } from '@/types';
-import { Save, History, Loader2, Activity, Eye, Pencil, ArrowLeft, ArrowRight, ChevronRight, Share2, Bell, BookOpen } from 'lucide-react';
+import { Save, History, Loader2, Activity, Eye, Pencil, ArrowLeft, ArrowRight, ChevronRight, Share2, Bell, BookOpen, MessageSquare } from 'lucide-react';
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer,
@@ -21,6 +22,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { AIInsights } from '@/components/snapshot/AIInsights';
 import { CategoryTimeline } from '@/components/snapshot/CategoryTimeline';
+import { SetReminderSheet } from '@/components/dashboard/SetReminderSheet';
 import { streamChat } from '@/lib/ai-stream';
 import ReactMarkdown from 'react-markdown';
 
@@ -46,6 +48,7 @@ export default function Snapshot() {
   const { toast } = useToast();
   const { profile } = useAuth();
   const { snapshots: dbSnapshots, isLoading, isSaving, saveSnapshot } = useSnapshots();
+  const { addReminder } = useReminders();
   const defaultType = profile ? getRoleSnapshotType((profile.role || 'member') as UserRole) : 'member';
   const [snapshotType, setSnapshotType] = useState<SnapshotType>(defaultType);
   const categories = SNAPSHOT_CONFIGS[snapshotType];
@@ -67,6 +70,9 @@ export default function Snapshot() {
   const [purposeStatement, setPurposeStatement] = useState(latestSaved?.purposeStatement ?? '');
   const [quarterlyGoal, setQuarterlyGoal] = useState(latestSaved?.quarterlyGoal ?? '');
   const [majorIssue, setMajorIssue] = useState(latestSaved?.majorIssue ?? '');
+  const [aiSuggestions, setAiSuggestions] = useState<{text: string; categoryId: string}[]>([]);
+  const [reminderSheet, setReminderSheet] = useState(false);
+  const [reminderDefaults, setReminderDefaults] = useState({ text: '', categoryId: '' });
 
   const [ratings, setRatings] = useState<Record<string, SnapshotRating>>(() => {
     const initial: Record<string, SnapshotRating> = {};
@@ -96,7 +102,32 @@ export default function Snapshot() {
     const result = await saveSnapshot(snapshotType, purposeStatement, quarterlyGoal, majorIssue, ratings);
     if (result) {
       setMode('review');
+      // Generate AI-suggested reminders for declining categories
+      const suggestions: {text: string; categoryId: string}[] = [];
+      if (previousRatings) {
+        categories.forEach(cat => {
+          const score = ratings[cat.id]?.score ?? 5;
+          const prev = previousRatings[cat.id]?.score;
+          if (prev && score < prev && score <= 5) {
+            suggestions.push({
+              text: `Take action on ${cat.name} — dropped from ${prev} to ${score}`,
+              categoryId: cat.id,
+            });
+          }
+        });
+      }
+      if (suggestions.length > 0) {
+        setAiSuggestions(suggestions.slice(0, 2));
+      }
     }
+  };
+
+  const acceptSuggestion = (s: {text: string; categoryId: string}) => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    addReminder({ text: s.text, categoryId: s.categoryId, dueDate: d.toISOString().split('T')[0], source: 'ai' });
+    setAiSuggestions(prev => prev.filter(x => x.text !== s.text));
+    toast({ title: 'Reminder added', description: 'Added to your action items.' });
   };
 
   const avgScore = categories.length > 0
@@ -328,141 +359,186 @@ export default function Snapshot() {
         {/* REVIEW MODE                                             */}
         {/* ═══════════════════════════════════════════════════════ */}
         {mode === 'review' && (
-          <Tabs defaultValue="results" className="space-y-4 sm:space-y-6">
-            <TabsList className="p-1.5 sm:p-2 gap-1 sm:gap-2 font-body w-full flex">
-              <TabsTrigger value="results" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
-                <Eye className="h-4 w-4" /> Results
-              </TabsTrigger>
-              <TabsTrigger value="insights" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
-                <Activity className="h-4 w-4" /> Insights
-              </TabsTrigger>
-              <TabsTrigger value="history" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
-                <History className="h-4 w-4" /> History
-              </TabsTrigger>
-            </TabsList>
+          <>
+            {/* AI Suggestion cards after save */}
+            {aiSuggestions.length > 0 && (
+              <Card className="border-secondary/30 bg-secondary/5">
+                <CardContent className="p-4 sm:p-5 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-secondary" />
+                    <p className="font-heading font-bold text-sm text-foreground">James noticed some trends</p>
+                  </div>
+                  {aiSuggestions.map((s, i) => (
+                    <div key={i} className="flex items-center justify-between gap-3 py-2 border-t border-border/30">
+                      <p className="font-body text-sm text-foreground">{s.text}</p>
+                      <div className="flex gap-2 shrink-0">
+                        <Button size="sm" variant="outline" className="text-xs font-body min-h-[36px]" onClick={() => setAiSuggestions(prev => prev.filter(x => x.text !== s.text))}>
+                          Not now
+                        </Button>
+                        <Button size="sm" className="text-xs font-body min-h-[36px] bg-secondary hover:bg-secondary/90 text-secondary-foreground" onClick={() => acceptSuggestion(s)}>
+                          Add reminder
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
-            {/* RESULTS TAB */}
-            <TabsContent value="results">
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                  <Card className="border-secondary/20 bg-secondary/5">
-                    <CardContent className="p-6 sm:p-8 text-center">
-                      <p className="text-6xl sm:text-7xl font-heading font-bold text-secondary">{avgScore}</p>
-                      <p className="text-sm font-body text-muted-foreground mt-2">Overall Score · {categories.length} categories</p>
-                      {previousRatings && (
-                        <p className="text-xs font-body text-muted-foreground mt-1">
-                          {(() => {
-                            const prevAvg = categories.reduce((s, c) => s + (previousRatings[c.id]?.score ?? 5), 0) / categories.length;
-                            const delta = parseFloat(avgScore) - prevAvg;
-                            return delta > 0 ? `↑ Up ${delta.toFixed(1)} from last month` : delta < 0 ? `↓ Down ${Math.abs(delta).toFixed(1)} from last month` : 'Same as last month';
-                          })()}
-                        </p>
-                      )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-4 font-body text-sm gap-1.5"
-                        onClick={() => toast({ title: 'Coming Soon', description: 'Sharing with your Snapshot Group is on the way.' })}
-                      >
-                        <Share2 className="h-4 w-4" /> Share with my Group
-                      </Button>
-                    </CardContent>
-                  </Card>
+            <Tabs defaultValue="results" className="space-y-4 sm:space-y-6">
+              <TabsList className="p-1.5 sm:p-2 gap-1 sm:gap-2 font-body w-full flex">
+                <TabsTrigger value="results" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
+                  <Eye className="h-4 w-4" /> Results
+                </TabsTrigger>
+                <TabsTrigger value="insights" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
+                  <Activity className="h-4 w-4" /> Insights
+                </TabsTrigger>
+                <TabsTrigger value="history" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
+                  <History className="h-4 w-4" /> History
+                </TabsTrigger>
+              </TabsList>
+
+              {/* RESULTS TAB */}
+              <TabsContent value="results">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    <Card className="border-secondary/20 bg-secondary/5">
+                      <CardContent className="p-6 sm:p-8 text-center">
+                        <p className="text-6xl sm:text-7xl font-heading font-bold text-secondary">{avgScore}</p>
+                        <p className="text-sm font-body text-muted-foreground mt-2">Overall Score · {categories.length} categories</p>
+                        {previousRatings && (
+                          <p className="text-xs font-body text-muted-foreground mt-1">
+                            {(() => {
+                              const prevAvg = categories.reduce((s, c) => s + (previousRatings[c.id]?.score ?? 5), 0) / categories.length;
+                              const delta = parseFloat(avgScore) - prevAvg;
+                              return delta > 0 ? `↑ Up ${delta.toFixed(1)} from last month` : delta < 0 ? `↓ Down ${Math.abs(delta).toFixed(1)} from last month` : 'Same as last month';
+                            })()}
+                          </p>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-4 font-body text-sm gap-1.5"
+                          onClick={() => toast({ title: 'Coming Soon', description: 'Sharing with your Snapshot Group is on the way.' })}
+                        >
+                          <Share2 className="h-4 w-4" /> Share with my Group
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardContent className="p-4 sm:p-6">
+                        <div className="h-[250px] sm:h-[280px] w-full">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
+                              <PolarGrid stroke="hsl(213 15% 82%)" />
+                              <PolarAngleAxis dataKey="category" tick={{ fontSize: 11, fontFamily: 'Quicksand' }} />
+                              <PolarRadiusAxis angle={90} domain={[0, 10]} tick={{ fontSize: 10, fontFamily: 'Quicksand' }} />
+                              <Radar name="Score" dataKey="score" stroke="hsl(39 78% 48%)" fill="hsl(39 78% 48%)" fillOpacity={0.25} strokeWidth={2.5} />
+                            </RadarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
 
                   <Card>
-                    <CardContent className="p-4 sm:p-6">
-                      <div className="h-[250px] sm:h-[280px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
-                            <PolarGrid stroke="hsl(213 15% 82%)" />
-                            <PolarAngleAxis dataKey="category" tick={{ fontSize: 11, fontFamily: 'Quicksand' }} />
-                            <PolarRadiusAxis angle={90} domain={[0, 10]} tick={{ fontSize: 10, fontFamily: 'Quicksand' }} />
-                            <Radar name="Score" dataKey="score" stroke="hsl(39 78% 48%)" fill="hsl(39 78% 48%)" fillOpacity={0.25} strokeWidth={2.5} />
-                          </RadarChart>
-                        </ResponsiveContainer>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg font-heading">Category Breakdown</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {categories.map(cat => {
+                          const score = ratings[cat.id]?.score ?? 5;
+                          const prevScore = previousRatings?.[cat.id]?.score;
+                          const delta = prevScore !== undefined ? score - prevScore : null;
+                          return (
+                            <div key={cat.id} className={`flex items-center justify-between p-3 rounded-lg ${getScoreBorder(score)}`}>
+                              <span className="text-sm font-heading font-bold truncate mr-2">{cat.name}</span>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {delta !== null && delta !== 0 && (
+                                  <span className={`text-xs font-body font-bold ${delta > 0 ? 'text-primary' : 'text-destructive'}`}>
+                                    {delta > 0 ? '+' : ''}{delta}
+                                  </span>
+                                )}
+                                <span className={`text-xl font-heading font-bold ${getScoreColor(score)}`}>{score}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </CardContent>
                   </Card>
                 </div>
+              </TabsContent>
 
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg font-heading">Category Breakdown</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {categories.map(cat => {
-                        const score = ratings[cat.id]?.score ?? 5;
-                        const prevScore = previousRatings?.[cat.id]?.score;
-                        const delta = prevScore !== undefined ? score - prevScore : null;
-                        return (
-                          <div key={cat.id} className={`flex items-center justify-between p-3 rounded-lg ${getScoreBorder(score)}`}>
-                            <span className="text-sm font-heading font-bold truncate mr-2">{cat.name}</span>
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              {delta !== null && delta !== 0 && (
-                                <span className={`text-xs font-body font-bold ${delta > 0 ? 'text-primary' : 'text-destructive'}`}>
-                                  {delta > 0 ? '+' : ''}{delta}
-                                </span>
-                              )}
-                              <span className={`text-xl font-heading font-bold ${getScoreColor(score)}`}>{score}</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
+              {/* INSIGHTS TAB */}
+              <TabsContent value="insights">
+                <AIInsights
+                  snapshots={allSnapshots}
+                  categories={categories}
+                  userName={profile?.full_name ?? 'Brother'}
+                />
+              </TabsContent>
 
-            {/* INSIGHTS TAB */}
-            <TabsContent value="insights">
-              <AIInsights
-                snapshots={allSnapshots}
-                categories={categories}
-                userName={profile?.full_name ?? 'Brother'}
-              />
-            </TabsContent>
-
-            {/* HISTORY TAB */}
-            <TabsContent value="history">
-              <div className="space-y-6">
-                <Card className="border-secondary/20">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-lg font-heading font-bold">12-Month Journey</p>
-                        <p className="text-sm font-body text-muted-foreground mt-0.5">
-                          Tap any month to see what happened. Look for your <span className="text-secondary font-semibold">life notes</span>.
+              {/* HISTORY TAB */}
+              <TabsContent value="history">
+                <div className="space-y-6">
+                  <Card className="border-secondary/20">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-lg font-heading font-bold">12-Month Journey</p>
+                          <p className="text-sm font-body text-muted-foreground mt-0.5">
+                            Tap any month to see what happened. Look for your <span className="text-secondary font-semibold">life notes</span>.
+                          </p>
+                        </div>
+                        <p className="text-sm font-body text-muted-foreground shrink-0">
+                          {allSnapshots.length} snapshots
                         </p>
                       </div>
-                      <p className="text-sm font-body text-muted-foreground shrink-0">
-                        {allSnapshots.length} snapshots
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
-                {[
-                  { title: 'Spiritual Life', cats: spiritualCategories, color: 'bg-secondary' },
-                  { title: 'Personal Life', cats: personalCategories, color: 'bg-primary' },
-                  { title: 'Professional Life', cats: professionalCategories, color: 'bg-primary/60' },
-                ].map(({ title, cats, color }) => cats.length > 0 && (
-                  <div key={title}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`h-6 w-1.5 rounded-full ${color}`} />
-                      <h2 className="text-lg font-heading font-bold text-primary">{title}</h2>
+                  {[
+                    { title: 'Spiritual Life', cats: spiritualCategories, color: 'bg-secondary' },
+                    { title: 'Personal Life', cats: personalCategories, color: 'bg-primary' },
+                    { title: 'Professional Life', cats: professionalCategories, color: 'bg-primary/60' },
+                  ].map(({ title, cats, color }) => cats.length > 0 && (
+                    <div key={title}>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className={`h-6 w-1.5 rounded-full ${color}`} />
+                        <h2 className="text-lg font-heading font-bold text-primary">{title}</h2>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {cats.map(cat => (
+                          <div key={cat.id} className="space-y-1">
+                            <CategoryTimeline category={cat} snapshots={allSnapshots} />
+                            <button
+                              onClick={() => {
+                                setReminderDefaults({ text: `Improve ${cat.name} this month`, categoryId: cat.id });
+                                setReminderSheet(true);
+                              }}
+                              className="inline-flex items-center gap-1 text-xs font-body text-muted-foreground hover:text-primary transition-colors ml-1 min-h-[32px]"
+                            >
+                              <Bell className="h-3 w-3" /> Set reminder
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {cats.map(cat => (
-                        <CategoryTimeline key={cat.id} category={cat} snapshots={allSnapshots} />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <SetReminderSheet
+              open={reminderSheet}
+              onOpenChange={setReminderSheet}
+              defaultText={reminderDefaults.text}
+              defaultCategoryId={reminderDefaults.categoryId}
+            />
+          </>
         )}
       </div>
     </DashboardLayout>

@@ -6,6 +6,8 @@ import {
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useReminders } from '@/hooks/use-reminders';
+import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import ironForumsLogo from '@/assets/iron-forums-logo.svg';
 
 import {
@@ -21,21 +23,30 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-const mainNav = [
-  { title: 'Dashboard', url: '/', icon: LayoutDashboard, desc: 'Your overview' },
-  { title: 'My Snapshot', url: '/snapshot', icon: ClipboardCheck, desc: 'Rate your 30 days' },
-];
-
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const location = useLocation();
   const { profile, logout } = useAuth();
+  const { getOverdue } = useReminders();
+
+  // Notification logic
+  const now = new Date();
+  const isPast15th = now.getDate() > 15;
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const hasThisMonthSnapshot = MOCK_SNAPSHOTS[0]?.date.startsWith(currentMonth);
+  const overdueCount = getOverdue().length;
+  const showSnapshotBadge = (isPast15th && !hasThisMonthSnapshot) || overdueCount > 0;
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };
+
+  const mainNav = [
+    { title: 'Dashboard', url: '/', icon: LayoutDashboard, desc: 'Your overview', badge: false },
+    { title: 'My Snapshot', url: '/snapshot', icon: ClipboardCheck, desc: 'Rate your 30 days', badge: showSnapshotBadge },
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -72,7 +83,12 @@ export function AppSidebar() {
                       className="hover:bg-sidebar-accent/60 transition-all duration-200 rounded-xl px-3 py-2.5"
                       activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold shadow-sm"
                     >
-                      <item.icon className="h-5 w-5 shrink-0 opacity-80" />
+                      <div className="relative shrink-0">
+                        <item.icon className="h-5 w-5 opacity-80" />
+                        {item.badge && (
+                          <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-sidebar-background" />
+                        )}
+                      </div>
                       {!collapsed && (
                         <div className="flex flex-col ml-0.5">
                           <span className="font-body text-base font-semibold leading-tight">{item.title}</span>
