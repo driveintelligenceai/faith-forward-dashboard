@@ -48,16 +48,17 @@ export function SnapshotGate({ children }: SnapshotGateProps) {
   if (dismissed) {
     return (
       <>
-        <div className="bg-secondary/10 border-b border-secondary/20 px-4 py-2.5 flex items-center justify-between">
-          <p className="text-sm font-body opacity-100 text-primary">
-            <span className="font-semibold">Snapshot reminder:</span> You haven't completed your {now.toLocaleDateString('en-US', { month: 'long' })} Snapshot yet.
+        <div className="bg-secondary/10 border-b border-secondary/20 px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2 min-h-[44px]">
+          <p className="text-xs sm:text-sm font-body opacity-100 text-primary leading-snug">
+            <span className="font-semibold">Reminder:</span>{' '}
+            <span className="hidden sm:inline">You haven't completed your {now.toLocaleDateString('en-US', { month: 'long' })} Snapshot yet.</span>
+            <span className="sm:hidden">{now.toLocaleDateString('en-US', { month: 'long' })} Snapshot pending.</span>
           </p>
           <Button
             size="sm"
             variant="outline"
-            className="text-xs font-body gap-1.5 border-secondary/30 hover:bg-secondary/10"
+            className="text-xs font-body gap-1.5 border-secondary/30 hover:bg-secondary/10 shrink-0"
             onClick={() => navigate('/snapshot')}>
-            
             <ClipboardCheck className="h-3.5 w-3.5" />
             Take Snapshot
           </Button>

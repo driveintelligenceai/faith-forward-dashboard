@@ -1,6 +1,9 @@
 import {
   LayoutDashboard,
   ClipboardCheck,
+  Users,
+  Award,
+  CalendarDays,
   LogOut,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
@@ -47,6 +50,9 @@ export function AppSidebar() {
   const mainNav = [
     { title: 'Dashboard', url: '/', icon: LayoutDashboard, desc: 'Your overview', badge: false },
     { title: 'My Snapshot', url: '/snapshot', icon: ClipboardCheck, desc: 'Rate your 30 days', badge: showSnapshotBadge },
+    { title: 'Community', url: '/community', icon: Users, desc: 'Your forum brothers', badge: false },
+    { title: 'Leadership', url: '/leadership', icon: Award, desc: 'Growth & mentoring', badge: false },
+    { title: 'Events', url: '/events', icon: CalendarDays, desc: 'Meetings & gatherings', badge: false },
   ];
 
   return (
@@ -59,7 +65,7 @@ export function AppSidebar() {
             className={`brightness-0 invert transition-all duration-300 object-contain ${collapsed ? 'h-8 w-8' : 'w-[85%] max-w-[220px] h-auto'}`}
           />
           {!collapsed && (
-            <p className="text-[0.65rem] font-body tracking-[0.3em] uppercase text-sidebar-primary mt-2.5 font-bold text-center whitespace-nowrap">
+            <p className="text-[0.7rem] font-body tracking-[0.25em] uppercase text-sidebar-primary mt-1.5 font-bold text-center whitespace-nowrap">
               Connect <span className="text-sidebar-foreground/30 mx-0.5">»</span> Sharpen <span className="text-sidebar-foreground/30 mx-0.5">»</span> Grow
             </p>
           )}
