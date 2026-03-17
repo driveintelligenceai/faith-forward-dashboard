@@ -98,10 +98,16 @@ export default function Snapshot() {
     setRatings((prev) => ({ ...prev, [catId]: { ...prev[catId], [field]: value } }));
   };
 
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+
   const handleSave = async () => {
     const result = await saveSnapshot(snapshotType, purposeStatement, quarterlyGoal, majorIssue, ratings);
     if (result) {
-      setMode('review');
+      setShowSaveSuccess(true);
+      setTimeout(() => {
+        setShowSaveSuccess(false);
+        setMode('review');
+      }, 1600);
       // Generate AI-suggested reminders for declining categories
       const suggestions: {text: string; categoryId: string}[] = [];
       if (previousRatings) {
@@ -149,8 +155,8 @@ export default function Snapshot() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-            <p className="font-body text-muted-foreground">Loading your Snapshot history...</p>
+            <div className="h-16 w-16 mx-auto rounded-2xl shimmer-gold" />
+            <p className="font-body text-muted-foreground">Preparing your Snapshot experience...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -218,7 +224,7 @@ export default function Snapshot() {
 
             {/* Step 0: Foundation */}
             {step === 0 && (
-              <Card className="border-secondary/20">
+              <Card className="border-secondary/20 animate-slide-up-fade">
                 <CardContent className="p-6 sm:p-8 space-y-6">
                   <div className="text-center space-y-2 pb-2">
                     <h2 className="text-xl sm:text-2xl font-heading font-bold text-primary">
@@ -271,27 +277,47 @@ export default function Snapshot() {
               </Card>
             )}
 
-            {/* Steps 1..N: Category Cards */}
+            {/* Steps 1..N: Category Cards — animated transition */}
             {step >= 1 && step <= categories.length && (
-              <CategoryScoringCard
-                category={categories[step - 1]}
-                rating={ratings[categories[step - 1].id]}
-                previousRating={previousRatings?.[categories[step - 1].id]}
-                onUpdateRating={(field, value) => updateRating(categories[step - 1].id, field, value)}
-                userName={profile?.full_name ?? 'Brother'}
-                allSnapshots={allSnapshots}
-                ratings={ratings}
-                previousRatings={previousRatings}
-              />
+              <div key={`cat-${categories[step - 1].id}`} className="animate-slide-up-fade">
+                <CategoryScoringCard
+                  category={categories[step - 1]}
+                  rating={ratings[categories[step - 1].id]}
+                  previousRating={previousRatings?.[categories[step - 1].id]}
+                  onUpdateRating={(field, value) => updateRating(categories[step - 1].id, field, value)}
+                  userName={profile?.full_name ?? 'Brother'}
+                  allSnapshots={allSnapshots}
+                  ratings={ratings}
+                  previousRatings={previousRatings}
+                />
+              </div>
+            )}
+
+            {/* Save success overlay */}
+            {showSaveSuccess && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-slide-up-fade">
+                <div className="text-center space-y-4">
+                  <div className="relative mx-auto w-20 h-20">
+                    <div className="absolute inset-0 rounded-full bg-secondary/20 animate-confetti-burst" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <svg viewBox="0 0 24 24" className="h-12 w-12 text-secondary" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" className="animate-check-draw" style={{ strokeDasharray: 24, strokeDashoffset: 0 }} />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="text-xl font-heading font-bold text-primary">Snapshot Saved</p>
+                  <p className="text-sm font-body text-muted-foreground">Well done, brother. Keep showing up.</p>
+                </div>
+              </div>
             )}
 
             {/* Final Step: Summary */}
             {step === totalSteps - 1 && (
-              <Card className="border-secondary/20">
+              <Card className="border-secondary/20 animate-slide-up-fade">
                 <CardContent className="p-6 sm:p-8 space-y-6">
                   <div className="text-center space-y-2">
                     <h2 className="text-xl sm:text-2xl font-heading font-bold text-primary">Your Snapshot Summary</h2>
-                    <p className="text-5xl font-heading font-bold text-secondary">{avgScore}</p>
+                    <p className="text-5xl font-heading font-bold text-secondary score-transition">{avgScore}</p>
                     <p className="text-sm font-body text-muted-foreground">Overall Average · {categories.length} categories</p>
                   </div>
 
@@ -319,11 +345,14 @@ export default function Snapshot() {
                   <Button
                     size="lg"
                     onClick={handleSave}
-                    disabled={isSaving}
+                    disabled={isSaving || showSaveSuccess}
                     className="w-full h-14 text-base font-heading font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground gap-2"
                   >
-                    {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
-                    {isSaving ? 'Saving...' : 'Save My Snapshot'}
+                    {isSaving ? (
+                      <><div className="h-5 w-5 rounded-full shimmer-gold" /> Saving...</>
+                    ) : (
+                      <><Save className="h-5 w-5" /> Save My Snapshot</>
+                    )}
                   </Button>
                 </CardContent>
               </Card>
@@ -639,20 +668,21 @@ function CategoryScoringCard({
           )}
         </div>
 
-        {/* Score display */}
+        {/* Score display — animates on change */}
         <div className="text-center">
-          <div className={`inline-flex items-center justify-center h-24 w-24 rounded-2xl ${getScoreBg(score)} transition-colors`}>
-            <span className={`text-5xl font-heading font-bold ${getScoreColor(score)} transition-colors`}>{score}</span>
+          <div className={`inline-flex items-center justify-center h-24 w-24 rounded-2xl ${getScoreBg(score)} transition-all duration-300`}>
+            <span className={`text-5xl font-heading font-bold ${getScoreColor(score)} score-transition`} key={score}>{score}</span>
           </div>
         </div>
 
-        {/* Main slider */}
+        {/* Main slider — extra-large thumb for touch */}
         <div className="space-y-3 px-2">
           <Slider
             value={[score]}
             onValueChange={([v]) => onUpdateRating('score', v)}
             min={1} max={10} step={1}
-            className="py-2 [&_[role=slider]]:h-7 [&_[role=slider]]:w-7"
+            aria-label={`Rate ${category.name} from 1 to 10`}
+            className="py-2 [&_[role=slider]]:h-8 [&_[role=slider]]:w-8 [&_[role=slider]]:border-secondary [&_[role=slider]]:shadow-md"
           />
           <div className="flex justify-between text-xs font-body text-muted-foreground">
             <span>1 = worst it's been</span>

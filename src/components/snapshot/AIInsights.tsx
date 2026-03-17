@@ -193,10 +193,10 @@ export function AIInsights({ snapshots, categories, userName }: AIInsightsProps)
     return (
       <Card>
         <CardContent className="p-6 text-center">
-          <Lightbulb className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="font-heading font-bold text-muted-foreground">Need More Data</p>
+          <Lightbulb className="h-10 w-10 text-secondary/40 mx-auto mb-3" />
+          <p className="font-heading font-bold text-foreground">Your story is just beginning</p>
           <p className="text-sm font-body text-muted-foreground mt-1">
-            Save at least 2 snapshots to unlock trend analysis.
+            Complete your second monthly Snapshot and James will start spotting patterns in your journey.
           </p>
         </CardContent>
       </Card>
@@ -217,12 +217,14 @@ export function AIInsights({ snapshots, categories, userName }: AIInsightsProps)
       <CardContent>
         {isLoading && (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-secondary" />
-            <span className="ml-2 text-sm font-body text-muted-foreground">Analyzing your data...</span>
+            <div className="h-8 w-32 rounded-lg shimmer-gold" />
+            <span className="ml-3 text-sm font-body text-muted-foreground">James is studying your journey...</span>
           </div>
         )}
         {!isLoading && !insights && (
-          <p className="text-sm font-body text-muted-foreground py-4">No insights available yet.</p>
+          <p className="text-sm font-body text-muted-foreground py-4 text-center">
+            Your insights will appear here once James has enough data to work with.
+          </p>
         )}
         {insights && (
           <div className="prose prose-sm max-w-none font-body text-sm leading-relaxed [&_h1]:font-heading [&_h2]:font-heading [&_h2]:text-base [&_h2]:mt-0 [&_h2]:mb-4 [&_h3]:font-heading [&_strong]:text-foreground [&_li]:mb-1.5 [&_p]:mb-3">

@@ -151,6 +151,23 @@
       0 1px 3px 0 hsl(213 15% 82% / 0.12),
       0 1px 2px -1px hsl(213 15% 82% / 0.12);
   }
+
+  /* Gold shimmer for premium loading states */
+  .shimmer-gold {
+    background: linear-gradient(
+      90deg,
+      hsl(39 78% 48% / 0.15) 0%,
+      hsl(39 78% 48% / 0.35) 50%,
+      hsl(39 78% 48% / 0.15) 100%
+    );
+    background-size: 200% 100%;
+    animation: gold-shimmer 2s ease-in-out infinite;
+  }
+
+  /* Score transition */
+  .score-transition {
+    transition: color 0.3s ease, transform 0.15s ease;
+  }
 }
 
 /* Smooth page transitions */
@@ -168,5 +185,19 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  @keyframes gold-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* Hide scrollbar for horizontal scroll */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
