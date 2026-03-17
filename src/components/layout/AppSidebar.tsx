@@ -24,8 +24,8 @@ import {
 } from '@/components/ui/sidebar';
 
 export function AppSidebar() {
-  const { state } = useSidebar();
-  const collapsed = state === 'collapsed';
+  const { state, isMobile } = useSidebar();
+  const collapsed = state === 'collapsed' && !isMobile;
   const location = useLocation();
   const { profile, logout } = useAuth();
   const { getOverdue } = useReminders();
