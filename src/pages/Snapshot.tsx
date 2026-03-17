@@ -271,18 +271,20 @@ export default function Snapshot() {
               </Card>
             )}
 
-            {/* Steps 1..N: Category Cards */}
+            {/* Steps 1..N: Category Cards — animated transition */}
             {step >= 1 && step <= categories.length && (
-              <CategoryScoringCard
-                category={categories[step - 1]}
-                rating={ratings[categories[step - 1].id]}
-                previousRating={previousRatings?.[categories[step - 1].id]}
-                onUpdateRating={(field, value) => updateRating(categories[step - 1].id, field, value)}
-                userName={profile?.full_name ?? 'Brother'}
-                allSnapshots={allSnapshots}
-                ratings={ratings}
-                previousRatings={previousRatings}
-              />
+              <div key={`cat-${categories[step - 1].id}`} className="animate-slide-up-fade">
+                <CategoryScoringCard
+                  category={categories[step - 1]}
+                  rating={ratings[categories[step - 1].id]}
+                  previousRating={previousRatings?.[categories[step - 1].id]}
+                  onUpdateRating={(field, value) => updateRating(categories[step - 1].id, field, value)}
+                  userName={profile?.full_name ?? 'Brother'}
+                  allSnapshots={allSnapshots}
+                  ratings={ratings}
+                  previousRatings={previousRatings}
+                />
+              </div>
             )}
 
             {/* Final Step: Summary */}
