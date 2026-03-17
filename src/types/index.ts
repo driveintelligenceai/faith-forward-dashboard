@@ -1,5 +1,7 @@
 export type UserRole = 'ceo' | 'executive' | 'facilitator' | 'member';
 
+export type SnapshotType = 'member' | 'leader' | 'advisor' | 'nonprofit';
+
 export interface User {
   id: string;
   name: string;
@@ -8,15 +10,17 @@ export interface User {
   chapter: string;
   avatarUrl?: string;
   joinedDate: string;
+  snapshotType?: SnapshotType;
 }
 
 export interface SnapshotCategory {
   id: string;
   name: string;
-  group: 'personal' | 'business';
+  group: 'personal' | 'professional' | 'spiritual';
   scriptureRef: string;
   hasSpouseRating?: boolean;
   hasChildRating?: boolean;
+  description?: string;
 }
 
 export interface SnapshotRating {
@@ -24,11 +28,14 @@ export interface SnapshotRating {
   score: number;
   spouseScore?: number;
   childScore?: number;
+  note?: string;
+  lifeEvent?: string;
 }
 
 export interface Snapshot {
   id: string;
   userId: string;
+  snapshotType: SnapshotType;
   date: string;
   purposeStatement: string;
   quarterlyGoal: string;
@@ -41,6 +48,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
+  categoryContext?: string;
 }
 
 export interface Chapter {
@@ -107,3 +115,19 @@ export const ROLE_COLORS: Record<UserRole, string> = {
   facilitator: 'bg-primary/80 text-primary-foreground',
   member: 'bg-muted text-muted-foreground',
 };
+
+export const SNAPSHOT_TYPE_LABELS: Record<SnapshotType, string> = {
+  member: 'Member Snapshot™',
+  leader: 'Leader Snapshot™',
+  advisor: 'Advisor Snapshot™',
+  nonprofit: 'Nonprofit Snapshot™',
+};
+
+export function getRoleSnapshotType(role: UserRole): SnapshotType {
+  switch (role) {
+    case 'ceo': return 'advisor';
+    case 'executive': return 'advisor';
+    case 'facilitator': return 'leader';
+    case 'member': return 'member';
+  }
+}

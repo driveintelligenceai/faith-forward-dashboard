@@ -4,6 +4,7 @@ export const MOCK_SNAPSHOTS: Snapshot[] = [
   {
     id: '1',
     userId: '1',
+    snapshotType: 'member',
     date: '2026-03-01',
     purposeStatement: 'To lead my family and business with integrity, serving God in all things.',
     quarterlyGoal: 'Increase revenue 15% while maintaining work-life balance.',
@@ -25,6 +26,7 @@ export const MOCK_SNAPSHOTS: Snapshot[] = [
   {
     id: '2',
     userId: '1',
+    snapshotType: 'member',
     date: '2026-02-01',
     purposeStatement: 'To lead my family and business with integrity, serving God in all things.',
     quarterlyGoal: 'Launch new product line by end of Q1.',
@@ -46,6 +48,7 @@ export const MOCK_SNAPSHOTS: Snapshot[] = [
   {
     id: '3',
     userId: '1',
+    snapshotType: 'member',
     date: '2026-01-01',
     purposeStatement: 'To lead my family and business with integrity, serving God in all things.',
     quarterlyGoal: 'Complete leadership training program.',
@@ -105,7 +108,7 @@ export const MOCK_CHAT_MESSAGES: ChatMessage[] = [
   {
     id: '1',
     role: 'assistant',
-    content: `Welcome, brother. I'm here to walk alongside you as you pursue excellence in every area of life — faith, family, and business.\n\nI've reviewed your latest Snapshot. Your **Sales** score of 8 is strong — that discipline is paying off. Let's talk about the areas where you see room for growth.\n\nWhat would you like to focus on today?`,
+    content: `Welcome, brother. I'm here to walk alongside you as you pause, pray, and reflect on the last 30 days.\n\nThis isn't a test — it's a mirror. Be honest with yourself and with God. I'll ask questions, challenge your thinking, and help you see what He might be showing you.\n\n> *"As iron sharpens iron, so one man sharpens another." — Proverbs 27:17*\n\nLet's start with the foundation. How has your **Intimacy with Jesus** been this past month?`,
     timestamp: '2026-03-17T08:00:00Z',
   },
 ];
