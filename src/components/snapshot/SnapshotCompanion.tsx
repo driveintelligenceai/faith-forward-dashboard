@@ -142,7 +142,7 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
         toast({ title: 'Connection Issue', description: error, variant: 'destructive' });
       },
     });
-  }, [currentCategory?.id]);
+  }, [currentCategory?.id, isStreaming]);
 
   const sendMessage = useCallback(
     async (text: string) => {

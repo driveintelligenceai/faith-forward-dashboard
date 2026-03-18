@@ -113,7 +113,7 @@ export default function Snapshot() {
     return prev;
   }, [allSnapshots]);
 
-  const updateRating = (catId: string, field: keyof SnapshotRating, value: number) => {
+  const updateRating = (catId: string, field: keyof SnapshotRating, value: number | string) => {
     setRatings((prev) => ({ ...prev, [catId]: { ...prev[catId], [field]: value } }));
   };
 
@@ -342,17 +342,27 @@ export default function Snapshot() {
                       const score = ratings[cat.id]?.score ?? 5;
                       const prevScore = previousRatings?.[cat.id]?.score;
                       const delta = prevScore !== undefined ? score - prevScore : null;
+                      const lifeEvent = ratings[cat.id]?.lifeEvent;
+                      const note = ratings[cat.id]?.note;
                       return (
-                        <div key={cat.id} className={`flex items-center justify-between p-3 rounded-lg ${getScoreBorder(score)}`}>
-                          <span className="text-sm font-heading font-bold truncate mr-2">{cat.name}</span>
-                          <div className="flex items-center gap-2 shrink-0">
-                            {delta !== null && delta !== 0 && (
-                              <span className={`text-xs font-body font-bold ${delta > 0 ? 'text-primary' : 'text-destructive'}`}>
-                                {delta > 0 ? '+' : ''}{delta}
-                              </span>
-                            )}
-                            <span className={`text-xl font-heading font-bold ${getScoreColor(score)}`}>{score}</span>
+                        <div key={cat.id} className={`p-3 rounded-lg ${getScoreBorder(score)}`}>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-heading font-bold truncate mr-2">{cat.name}</span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {delta !== null && delta !== 0 && (
+                                <span className={`text-xs font-body font-bold ${delta > 0 ? 'text-primary' : 'text-destructive'}`}>
+                                  {delta > 0 ? '+' : ''}{delta}
+                                </span>
+                              )}
+                              <span className={`text-xl font-heading font-bold ${getScoreColor(score)}`}>{score}</span>
+                            </div>
                           </div>
+                          {lifeEvent && (
+                            <p className="text-xs font-body text-muted-foreground mt-1 italic">{lifeEvent}</p>
+                          )}
+                          {note && (
+                            <p className="text-xs font-body text-foreground/70 mt-0.5">{note}</p>
+                          )}
                         </div>
                       );
                     })}
@@ -692,9 +702,9 @@ interface CategoryScoringCardProps {
   category: SnapshotCategory;
   rating: SnapshotRating;
   previousRating?: SnapshotRating;
-  onUpdateRating: (field: keyof SnapshotRating, value: number) => void;
+  onUpdateRating: (field: keyof SnapshotRating, value: number | string) => void;
   userName: string;
-  allSnapshots: any[];
+  allSnapshots: Snapshot[];
   ratings: Record<string, SnapshotRating>;
   previousRatings?: Record<string, SnapshotRating>;
 }
@@ -842,6 +852,30 @@ function CategoryScoringCard({
             />
           </div>
         )}
+
+        {/* Life event & notes */}
+        <div className="space-y-3 pt-3 border-t border-border/30">
+          <div className="space-y-2">
+            <Label className="text-sm font-heading font-semibold text-foreground">What happened this month?</Label>
+            <Textarea
+              value={rating?.lifeEvent ?? ''}
+              onChange={(e) => onUpdateRating('lifeEvent', e.target.value)}
+              placeholder="Any event, conversation, or shift that affected this area..."
+              className="text-sm font-body min-h-[56px] resize-none"
+              rows={2}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm font-heading font-semibold text-foreground">Notes for your facilitator</Label>
+            <Textarea
+              value={rating?.note ?? ''}
+              onChange={(e) => onUpdateRating('note', e.target.value)}
+              placeholder="Anything you want your lead to know about this score..."
+              className="text-sm font-body min-h-[56px] resize-none"
+              rows={2}
+            />
+          </div>
+        </div>
 
         {/* Mentor section */}
         <div className="pt-4 border-t border-border/30 space-y-3">
