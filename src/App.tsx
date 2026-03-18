@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import ComingSoon from "./pages/ComingSoon";
 import Community from "./pages/Community";
 import Events from "./pages/Events";
+import Leadership from "./pages/Leadership";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
 const queryClient = new QueryClient();
 
@@ -55,7 +56,7 @@ function AppRoutes() {
         <Route path="/" element={<Snapshot />} />
         <Route path="/hub" element={<Hub />} />
         <Route path="/community" element={<Community />} />
-        <Route path="/leadership" element={<ComingSoon title="Leadership" />} />
+        <Route path="/leadership" element={<Leadership />} />
         <Route path="/events" element={<Events />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
