@@ -91,6 +91,15 @@ export default function Snapshot() {
 
   // Step-by-step: 0 = foundation, 1..N = categories, N+1 = summary
   const [step, setStep] = useState(forceScore && foundationFilled ? 1 : 0);
+
+  // React to URL param changes (component doesn't remount on same-route navigation)
+  useEffect(() => {
+    if (forceScore && mode !== 'score') {
+      setMode('score');
+      const hasFilled = purposeStatement.trim() || quarterlyGoal.trim() || majorIssue.trim();
+      setStep(hasFilled ? 1 : 0);
+    }
+  }, [forceScore]);
   const totalSteps = categories.length + 2; // foundation + categories + summary
 
   const [aiSuggestions, setAiSuggestions] = useState<{text: string; categoryId: string}[]>([]);
