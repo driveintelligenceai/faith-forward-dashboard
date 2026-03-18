@@ -1,9 +1,10 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { Button } from '@/components/ui/button';
-import { ClipboardCheck, Eye } from 'lucide-react';
+import { ClipboardCheck, Eye, Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSnapshots } from '@/hooks/use-snapshots';
+import { useAuth } from '@/contexts/AuthContext';
 import { MOCK_SNAPSHOTS } from '@/data/mock-data';
 import ironForumsLogo from '@/assets/iron-forums-logo.svg';
 
@@ -13,14 +14,18 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = useNavigate();
+  const { isDemo } = useAuth();
   const { snapshots: dbSnapshots } = useSnapshots();
-  const allSnapshots = dbSnapshots.length > 0 ? dbSnapshots : MOCK_SNAPSHOTS;
+  const allSnapshots = isDemo ? MOCK_SNAPSHOTS : dbSnapshots;
+  const hasAnySnapshot = allSnapshots.length > 0;
 
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const hasCurrentMonthSnapshot = allSnapshots.some((s) => s.date.startsWith(currentMonth));
-  const isFirstOfMonth = now.getDate() === 1;
-  const snapshotDue = isFirstOfMonth && !hasCurrentMonthSnapshot;
+
+  // Button states: no data → "Update Snapshot", has data → "View Snapshot"
+  const needsBaseline = !isDemo && !hasAnySnapshot;
+  const needsCurrentMonth = !isDemo && hasAnySnapshot && !hasCurrentMonthSnapshot;
 
   return (
     <SidebarProvider>
@@ -44,15 +49,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
             <Button
               size="sm"
-              variant={snapshotDue ? 'default' : 'outline'}
-              className={`font-body text-xs sm:text-sm gap-1.5 ${
-                snapshotDue
-                  ? 'bg-secondary hover:bg-secondary/90 text-secondary-foreground'
-                  : 'border-border'
-              }`}
-              onClick={() => navigate(snapshotDue ? '/' : '/?view=current')}
+              className="font-body text-xs sm:text-sm gap-1.5 bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+              onClick={() => navigate(needsBaseline || needsCurrentMonth ? '/' : '/?view=current')}
             >
-              {snapshotDue ? (
+              {needsBaseline ? (
+                <>
+                  <Pencil className="h-4 w-4" />
+                  <span className="hidden sm:inline">Update Snapshot</span>
+                  <span className="sm:hidden">Snapshot</span>
+                </>
+              ) : needsCurrentMonth ? (
                 <>
                   <ClipboardCheck className="h-4 w-4" />
                   <span className="hidden sm:inline">Take Your Snapshot</span>
@@ -61,7 +67,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               ) : (
                 <>
                   <Eye className="h-4 w-4" />
-                  <span className="hidden sm:inline">View Current Snapshot</span>
+                  <span className="hidden sm:inline">View Snapshot</span>
                   <span className="sm:hidden">Snapshot</span>
                 </>
               )}

@@ -211,7 +211,7 @@ export default function Onboarding() {
           </Card>
         )}
 
-        {/* Step 2: Welcome / Confirmation */}
+        {/* Step 2: Baseline Snapshot Intro */}
         {step === 2 && (
           <Card className="border-secondary/20 animate-slide-up-fade">
             <CardContent className="p-6 sm:p-8 space-y-6">
@@ -220,38 +220,38 @@ export default function Onboarding() {
                   <CheckCircle2 className="h-9 w-9 text-secondary" />
                 </div>
                 <h2 className="text-2xl font-heading font-bold text-primary">
-                  You're all set, {fullName.split(' ')[0]}!
+                  One more step, {fullName.split(' ')[0]}
                 </h2>
                 <p className="text-base font-body text-muted-foreground leading-relaxed">
-                  Every month, you'll be prompted to take your <span className="font-semibold text-foreground">{SNAPSHOT_TYPE_LABELS[snapshotType]}</span> — an honest 10-minute check-in across the areas of life that matter most.
+                  Before you dive in, let{'\u2019'}s complete your first <span className="font-semibold text-foreground">{SNAPSHOT_TYPE_LABELS[snapshotType]}</span> — your baseline. This is an honest 10-minute check-in across every area of life that matters.
                 </p>
               </div>
 
               <div className="bg-muted/50 rounded-xl p-5 space-y-3">
-                <h3 className="text-base font-heading font-bold">How it works:</h3>
+                <h3 className="text-base font-heading font-bold">What to expect:</h3>
                 <ul className="space-y-2 text-sm font-body text-muted-foreground">
                   <li className="flex gap-2">
                     <span className="text-secondary font-bold">1.</span>
-                    On the 1st of each month, you'll be asked to complete your snapshot.
+                    Share your purpose, quarterly goal, and a prayer request.
                   </li>
                   <li className="flex gap-2">
                     <span className="text-secondary font-bold">2.</span>
-                    Rate each area of life honestly on a 1-10 scale.
+                    Rate each area of your life honestly on a 1-10 scale.
                   </li>
                   <li className="flex gap-2">
                     <span className="text-secondary font-bold">3.</span>
-                    James, your accountability partner, will guide you with insights and encouragement.
+                    James, your AI accountability partner, will walk alongside you with encouragement.
                   </li>
                   <li className="flex gap-2">
                     <span className="text-secondary font-bold">4.</span>
-                    Track your growth over time and share with your Forum brothers.
+                    Submit to your facilitator — this becomes your starting point for growth.
                   </li>
                 </ul>
               </div>
 
               <blockquote className="text-base font-body italic text-muted-foreground border-l-2 border-secondary/40 pl-4">
-                "As iron sharpens iron, so one man sharpens another."
-                <span className="block text-xs mt-1 not-italic">— Proverbs 27:17</span>
+                {'\u201C'}As iron sharpens iron, so one man sharpens another.{'\u201D'}
+                <span className="block text-xs mt-1 not-italic">{'\u2014'} Proverbs 27:17 (NIV)</span>
               </blockquote>
 
               <div className="flex gap-3">
@@ -265,7 +265,7 @@ export default function Onboarding() {
                   onClick={isDemo ? handleDemoComplete : handleComplete}
                   disabled={isSaving}
                 >
-                  {isSaving ? 'Saving...' : "Let's Go"}
+                  {isSaving ? 'Saving...' : 'Begin My Baseline Snapshot'}
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </div>

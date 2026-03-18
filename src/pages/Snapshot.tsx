@@ -15,7 +15,17 @@ import { useSnapshots } from '@/hooks/use-snapshots';
 import { useReminders } from '@/hooks/use-reminders';
 import { getRoleSnapshotType, SNAPSHOT_TYPE_LABELS } from '@/types';
 import type { SnapshotRating, SnapshotType, SnapshotCategory, UserRole } from '@/types';
-import { Save, History, Activity, Eye, Pencil, ArrowLeft, ArrowRight, Bell, BookOpen, MessageSquare, Compass } from 'lucide-react';
+import { Save, History, Activity, Eye, Pencil, ArrowLeft, ArrowRight, Bell, BookOpen, MessageSquare, Compass, ChevronRight, Send } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { AIInsights } from '@/components/snapshot/AIInsights';
 import { CategoryTimeline } from '@/components/snapshot/CategoryTimeline';
@@ -80,6 +90,8 @@ export default function Snapshot() {
   const viewCurrent = searchParams.get('view') === 'current';
   const [activeTab, setActiveTab] = useState(viewCurrent ? 'current' : 'journey');
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
+  const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
+  const [isFinalized, setIsFinalized] = useState(false);
 
   const [ratings, setRatings] = useState<Record<string, SnapshotRating>>(() => {
     const initial: Record<string, SnapshotRating> = {};
@@ -108,12 +120,15 @@ export default function Snapshot() {
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
   const handleSave = async () => {
+    setShowConfirmSubmit(false);
     const result = await saveSnapshot(snapshotType, purposeStatement, quarterlyGoal, majorIssue, ratings);
     if (result) {
+      setIsFinalized(true);
       setShowSaveSuccess(true);
       setTimeout(() => {
         setShowSaveSuccess(false);
         setMode('review');
+        setActiveTab('current');
       }, 1600);
       // Generate mentor-suggested reminders for declining categories
       const suggestions: {text: string; categoryId: string}[] = [];
@@ -180,7 +195,7 @@ export default function Snapshot() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            {hasCurrentMonth && (
+            {hasCurrentMonth && !isFinalized && (
               <Button
                 variant="outline"
                 size="sm"
@@ -306,8 +321,8 @@ export default function Snapshot() {
                       </svg>
                     </div>
                   </div>
-                  <p className="text-xl font-heading font-bold text-primary">Snapshot Saved</p>
-                  <p className="text-sm font-body text-muted-foreground">Well done, brother. Keep showing up.</p>
+                  <p className="text-xl font-heading font-bold text-primary">Snapshot Submitted</p>
+                  <p className="text-sm font-body text-muted-foreground">Well done, brother. Your lead has been notified.</p>
                 </div>
               </div>
             )}
@@ -345,14 +360,14 @@ export default function Snapshot() {
 
                   <Button
                     size="lg"
-                    onClick={handleSave}
+                    onClick={() => setShowConfirmSubmit(true)}
                     disabled={isSaving || showSaveSuccess}
                     className="w-full h-14 text-base font-heading font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground gap-2"
                   >
                     {isSaving ? (
-                      <><div className="h-5 w-5 rounded-full shimmer-gold" /> Saving...</>
+                      <><div className="h-5 w-5 rounded-full shimmer-gold" /> Submitting...</>
                     ) : (
-                      <><Save className="h-5 w-5" /> Save My Snapshot</>
+                      <><Send className="h-5 w-5" /> Submit to My Lead</>
                     )}
                   </Button>
                 </CardContent>
@@ -635,6 +650,35 @@ export default function Snapshot() {
             />
           </>
         )}
+        {/* Submit confirmation dialog */}
+        <AlertDialog open={showConfirmSubmit} onOpenChange={setShowConfirmSubmit}>
+          <AlertDialogContent className="max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-xl font-heading font-bold text-primary">
+                Submit Your Snapshot?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-base font-body text-muted-foreground space-y-2">
+                <span className="block">
+                  Once submitted, your Snapshot will be sent to your chapter facilitator and cannot be edited.
+                </span>
+                <span className="block font-semibold text-foreground">
+                  Overall Score: {avgScore} across {categories.length} categories
+                </span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="font-heading font-bold min-h-[44px]">
+                Go Back & Edit
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleSave}
+                className="font-heading font-bold min-h-[44px] bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+              >
+                Yes, Submit to My Lead
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </DashboardLayout>
   );

@@ -7,9 +7,9 @@ import type { SnapshotCategory, SnapshotType } from '@/types';
 // ─── MEMBER SNAPSHOT ───
 const MEMBER_CATEGORIES: SnapshotCategory[] = [
   { id: 'intimacyWithJesus', name: 'Intimacy with Jesus', group: 'spiritual', scriptureRef: 'Matt. 22:37-38', description: 'Your personal walk with Christ — prayer life, time in the Word, obedience.' },
-  { id: 'marriageSelf', name: 'Marriage (You)', group: 'personal', scriptureRef: 'Mark 10:8-10', description: 'The health of your covenant relationship. How connected are you?' },
+  { id: 'marriageSelf', name: 'Marriage (You)', group: 'personal', scriptureRef: 'Mark 10:8-10', description: 'The health of your covenant relationship. How connected are you?', hasSpouseRating: true },
   { id: 'marriageSpouse', name: 'Marriage (Spouse)', group: 'personal', scriptureRef: 'Mark 10:8-10', description: 'How your spouse would rate the health of your marriage.' },
-  { id: 'parentingSelf', name: 'Parenting & Children (You)', group: 'personal', scriptureRef: 'Prov. 22:6', description: 'Your intentionality and presence as a father.' },
+  { id: 'parentingSelf', name: 'Parenting & Children (You)', group: 'personal', scriptureRef: 'Prov. 22:6', description: 'Your intentionality and presence as a father.', hasChildRating: true },
   { id: 'parentingChild', name: 'Parenting & Children (Child)', group: 'personal', scriptureRef: 'Prov. 22:6', description: 'How your child would rate your presence and engagement.' },
   { id: 'staff', name: 'Staff', group: 'professional', scriptureRef: '1 Thess. 5:14', description: 'How well you are leading and developing your team.' },
   { id: 'sales', name: 'Sales', group: 'professional', scriptureRef: 'Matt. 25:21', description: 'Revenue generation, pipeline health, and stewardship of opportunity.' },
@@ -24,9 +24,9 @@ const MEMBER_CATEGORIES: SnapshotCategory[] = [
 // ─── LEADER SNAPSHOT ───
 const LEADER_CATEGORIES: SnapshotCategory[] = [
   { id: 'intimacyWithJesus', name: 'Intimacy with Jesus', group: 'spiritual', scriptureRef: 'Matt. 22:37-38', description: 'Your personal walk with Christ — prayer life, time in the Word, obedience.' },
-  { id: 'marriageSelf', name: 'Marriage (You)', group: 'personal', scriptureRef: 'Mark 10:8-10', description: 'The health of your covenant relationship.' },
+  { id: 'marriageSelf', name: 'Marriage (You)', group: 'personal', scriptureRef: 'Mark 10:8-10', description: 'The health of your covenant relationship.', hasSpouseRating: true },
   { id: 'marriageSpouse', name: 'Marriage (Spouse)', group: 'personal', scriptureRef: 'Mark 10:8-10', description: 'How your spouse would rate the health of your marriage.' },
-  { id: 'parentingSelf', name: 'Parenting & Children (You)', group: 'personal', scriptureRef: 'Prov. 22:6', description: 'Your intentionality and presence as a father.' },
+  { id: 'parentingSelf', name: 'Parenting & Children (You)', group: 'personal', scriptureRef: 'Prov. 22:6', description: 'Your intentionality and presence as a father.', hasChildRating: true },
   { id: 'parentingChild', name: 'Parenting & Children (Child)', group: 'personal', scriptureRef: 'Prov. 22:6', description: 'How your child would rate your presence and engagement.' },
   { id: 'leadership', name: 'Leadership', group: 'professional', scriptureRef: '1 Peter 5:2-3', description: 'Your effectiveness leading your chapter and organization.' },
   { id: 'teamManagement', name: 'Team Management', group: 'professional', scriptureRef: 'Phil. 2:3-4', description: 'How well you develop, empower, and serve those you lead.' },
@@ -39,9 +39,9 @@ const LEADER_CATEGORIES: SnapshotCategory[] = [
 // ─── IRON PULSE (ADVISOR) ───
 const ADVISOR_CATEGORIES: SnapshotCategory[] = [
   { id: 'intimacyWithJesus', name: 'Intimacy with Jesus', group: 'spiritual', scriptureRef: 'Matt. 22:37-38', description: 'Your personal walk with Christ — prayer life, time in the Word, obedience.' },
-  { id: 'marriageSelf', name: 'Marriage (You)', group: 'personal', scriptureRef: 'Mark 10:8-10', description: 'The health of your covenant relationship.' },
+  { id: 'marriageSelf', name: 'Marriage (You)', group: 'personal', scriptureRef: 'Mark 10:8-10', description: 'The health of your covenant relationship.', hasSpouseRating: true },
   { id: 'marriageSpouse', name: 'Marriage (Spouse)', group: 'personal', scriptureRef: 'Mark 10:8-10', description: 'How your spouse would rate the health of your marriage.' },
-  { id: 'parentingSelf', name: 'Parenting & Children (You)', group: 'personal', scriptureRef: 'Prov. 22:6', description: 'Your intentionality and presence as a father.' },
+  { id: 'parentingSelf', name: 'Parenting & Children (You)', group: 'personal', scriptureRef: 'Prov. 22:6', description: 'Your intentionality and presence as a father.', hasChildRating: true },
   { id: 'parentingChild', name: 'Parenting & Children (Child)', group: 'personal', scriptureRef: 'Prov. 22:6', description: 'How your child would rate your presence and engagement.' },
   { id: 'mentoring', name: 'Mentoring', group: 'spiritual', scriptureRef: '2 Tim. 2:2', description: 'How faithfully you are investing in the next generation of leaders.' },
   { id: 'lifeLessons', name: 'Life Lessons Learned', group: 'spiritual', scriptureRef: '1 John 3:16', description: 'Wisdom gained through experience, failure, and the grace of God.' },
@@ -54,9 +54,9 @@ const ADVISOR_CATEGORIES: SnapshotCategory[] = [
 // ─── NONPROFIT SNAPSHOT ───
 const NONPROFIT_CATEGORIES: SnapshotCategory[] = [
   { id: 'intimacyWithJesus', name: 'Intimacy with Jesus', group: 'spiritual', scriptureRef: 'Matt. 22:37-38', description: 'Your personal walk with Christ — prayer life, time in the Word, obedience.' },
-  { id: 'marriageSelf', name: 'Marriage (You)', group: 'personal', scriptureRef: 'Mark 10:8-10', description: 'The health of your covenant relationship.' },
+  { id: 'marriageSelf', name: 'Marriage (You)', group: 'personal', scriptureRef: 'Mark 10:8-10', description: 'The health of your covenant relationship.', hasSpouseRating: true },
   { id: 'marriageSpouse', name: 'Marriage (Spouse)', group: 'personal', scriptureRef: 'Mark 10:8-10', description: 'How your spouse would rate the health of your marriage.' },
-  { id: 'parentingSelf', name: 'Parenting & Children (You)', group: 'personal', scriptureRef: 'Prov. 22:6', description: 'Your intentionality and presence as a father.' },
+  { id: 'parentingSelf', name: 'Parenting & Children (You)', group: 'personal', scriptureRef: 'Prov. 22:6', description: 'Your intentionality and presence as a father.', hasChildRating: true },
   { id: 'parentingChild', name: 'Parenting & Children (Child)', group: 'personal', scriptureRef: 'Prov. 22:6', description: 'How your child would rate your presence and engagement.' },
   { id: 'staff', name: 'Staff & Volunteers', group: 'professional', scriptureRef: '1 Thess. 5:14', description: 'How well you are leading, supporting, and developing your team.' },
   { id: 'sales', name: 'Growth & Impact', group: 'professional', scriptureRef: 'Matt. 25:21', description: 'Effectiveness in fulfilling your mission and reaching more people.' },
