@@ -10,7 +10,6 @@ import Snapshot from "./pages/Snapshot";
 import Onboarding from "./pages/Onboarding";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import ComingSoon from "./pages/ComingSoon";
 import Community from "./pages/Community";
 import Events from "./pages/Events";
 import Leadership from "./pages/Leadership";
