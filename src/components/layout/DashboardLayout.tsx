@@ -50,7 +50,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   ? 'bg-secondary hover:bg-secondary/90 text-secondary-foreground'
                   : 'border-border'
               }`}
-              onClick={() => navigate('/')}
+              onClick={() => navigate(snapshotDue ? '/' : '/?view=current')}
             >
               {snapshotDue ? (
                 <>

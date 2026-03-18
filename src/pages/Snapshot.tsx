@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -50,6 +51,7 @@ export default function Snapshot() {
   const { toast } = useToast();
   const { profile } = useAuth();
   const { snapshots: dbSnapshots, isLoading, isSaving, saveSnapshot } = useSnapshots();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { addReminder } = useReminders();
   const defaultType = profile ? getRoleSnapshotType((profile.role || 'member') as UserRole) : 'member';
   const [snapshotType, setSnapshotType] = useState<SnapshotType>(defaultType);
@@ -75,7 +77,8 @@ export default function Snapshot() {
   const [aiSuggestions, setAiSuggestions] = useState<{text: string; categoryId: string}[]>([]);
   const [reminderSheet, setReminderSheet] = useState(false);
   const [reminderDefaults, setReminderDefaults] = useState({ text: '', categoryId: '' });
-  const [activeTab, setActiveTab] = useState('journey');
+  const viewCurrent = searchParams.get('view') === 'current';
+  const [activeTab, setActiveTab] = useState(viewCurrent ? 'current' : 'journey');
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
 
   const [ratings, setRatings] = useState<Record<string, SnapshotRating>>(() => {
@@ -412,8 +415,11 @@ export default function Snapshot() {
               </Card>
             )}
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-2 sm:space-y-3">
+            <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); if (v !== 'current') setSearchParams({}); }} className="space-y-2 sm:space-y-3">
               <TabsList className="p-1 sm:p-1.5 gap-0 font-body w-full flex">
+                <TabsTrigger value="current" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
+                  <Eye className="h-4 w-4" /> Current
+                </TabsTrigger>
                 <TabsTrigger value="journey" className="flex-1 gap-1.5 font-body font-semibold text-xs sm:text-base px-2 sm:px-5 py-2 sm:py-2.5 min-h-[44px]">
                   <Compass className="h-4 w-4" /> Journey
                 </TabsTrigger>
@@ -424,6 +430,85 @@ export default function Snapshot() {
                   <History className="h-4 w-4" /> History
                 </TabsTrigger>
               </TabsList>
+
+              {/* CURRENT TAB — latest month's scores at a glance */}
+              <TabsContent value="current">
+                <div className="space-y-4">
+                  {latestSaved && (
+                    <>
+                      <Card className="border-secondary/20 bg-secondary/5">
+                        <CardContent className="p-6 sm:p-8 text-center">
+                          <p className="text-xs font-body text-muted-foreground uppercase tracking-wide mb-1">
+                            {new Date(latestSaved.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                          </p>
+                          <p className="text-6xl sm:text-7xl font-heading font-bold text-secondary">{avgScore}</p>
+                          <p className="text-sm font-body text-muted-foreground mt-2">Overall Score · {categories.length} categories</p>
+                          {previousRatings && (
+                            <p className="text-xs font-body text-muted-foreground mt-1">
+                              {(() => {
+                                const prevAvg = categories.reduce((s, c) => s + (previousRatings[c.id]?.score ?? 5), 0) / categories.length;
+                                const delta = parseFloat(avgScore) - prevAvg;
+                                return delta > 0 ? `↑ Up ${delta.toFixed(1)} from previous month` : delta < 0 ? `↓ Down ${Math.abs(delta).toFixed(1)} from previous month` : 'Same as previous month';
+                              })()}
+                            </p>
+                          )}
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardContent className="p-4 sm:p-6">
+                          <h3 className="text-lg font-heading font-bold text-primary mb-3">Category Scores</h3>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                            {categories.map(cat => {
+                              const score = ratings[cat.id]?.score ?? 5;
+                              const prevScore = previousRatings?.[cat.id]?.score;
+                              const delta = prevScore !== undefined ? score - prevScore : null;
+                              return (
+                                <div key={cat.id} className={`flex items-center justify-between p-3 rounded-lg ${getScoreBorder(score)}`}>
+                                  <span className="text-sm font-heading font-bold truncate mr-2">{cat.name}</span>
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    {delta !== null && delta !== 0 && (
+                                      <span className={`text-xs font-body font-bold ${delta > 0 ? 'text-primary' : 'text-destructive'}`}>
+                                        {delta > 0 ? '+' : ''}{delta}
+                                      </span>
+                                    )}
+                                    <span className={`text-xl font-heading font-bold ${getScoreColor(score)}`}>{score}</span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {latestSaved.purposeStatement && (
+                        <Card>
+                          <CardContent className="p-4 sm:p-6 space-y-3">
+                            {latestSaved.purposeStatement && (
+                              <div>
+                                <p className="text-xs font-heading font-bold text-muted-foreground uppercase tracking-wide">Purpose</p>
+                                <p className="text-sm font-body text-foreground mt-0.5">{latestSaved.purposeStatement}</p>
+                              </div>
+                            )}
+                            {latestSaved.quarterlyGoal && (
+                              <div>
+                                <p className="text-xs font-heading font-bold text-muted-foreground uppercase tracking-wide">Quarterly Goal</p>
+                                <p className="text-sm font-body text-foreground mt-0.5">{latestSaved.quarterlyGoal}</p>
+                              </div>
+                            )}
+                            {latestSaved.majorIssue && (
+                              <div>
+                                <p className="text-xs font-heading font-bold text-muted-foreground uppercase tracking-wide">Prayer Request</p>
+                                <p className="text-sm font-body text-foreground mt-0.5">{latestSaved.majorIssue}</p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      )}
+                    </>
+                  )}
+                </div>
+              </TabsContent>
 
               {/* JOURNEY TAB — hero: radar + chat side-by-side */}
               <TabsContent value="journey">
