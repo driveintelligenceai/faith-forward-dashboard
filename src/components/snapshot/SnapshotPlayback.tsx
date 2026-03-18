@@ -165,17 +165,17 @@ export function SnapshotPlayback({ snapshots, categories }: SnapshotPlaybackProp
         {/* Playback controls */}
         <div className="mt-1 space-y-1">
           {/* Timeline dots */}
-          <div className="flex items-center gap-0.5 justify-center">
+          <div className="flex items-center gap-1 justify-center">
             {chronological.map((snap, i) => (
               <button
                 key={snap.id}
                 onClick={() => { setIsPlaying(false); setCurrentIdx(i); }}
-                className={`rounded-full transition-all duration-200 ${
+                className={`rounded-full transition-all duration-300 ${
                   i === currentIdx
-                    ? 'h-2.5 w-2.5 bg-secondary shadow-sm animate-pulse'
+                    ? 'h-2 w-2 bg-secondary'
                     : i < currentIdx
-                    ? 'h-1.5 w-1.5 bg-secondary/40'
-                    : 'h-1.5 w-1.5 bg-border'
+                    ? 'h-1.5 w-1.5 bg-secondary/30'
+                    : 'h-1.5 w-1.5 bg-border/60'
                 }`}
                 aria-label={new Date(snap.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
               />
