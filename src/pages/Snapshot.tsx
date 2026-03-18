@@ -74,20 +74,28 @@ export default function Snapshot() {
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const hasCurrentMonth = latestSaved && latestSaved.date.startsWith(currentMonth);
 
+  // URL params: ?mode=score forces score mode, ?view=current shows current tab
+  const forceScore = searchParams.get('mode') === 'score';
+  const viewCurrent = searchParams.get('view') === 'current';
+
   // Mode: 'score' or 'review'
-  const [mode, setMode] = useState<'score' | 'review'>(hasCurrentMonth ? 'review' : 'score');
+  const [mode, setMode] = useState<'score' | 'review'>(forceScore || !hasCurrentMonth ? 'score' : 'review');
 
-  // Step-by-step: 0 = foundation, 1..N = categories, N+1 = summary
-  const [step, setStep] = useState(0);
-  const totalSteps = categories.length + 2; // foundation + categories + summary
-
+  // Pre-fill foundation fields from latest saved data
   const [purposeStatement, setPurposeStatement] = useState(latestSaved?.purposeStatement ?? '');
   const [quarterlyGoal, setQuarterlyGoal] = useState(latestSaved?.quarterlyGoal ?? '');
   const [majorIssue, setMajorIssue] = useState(latestSaved?.majorIssue ?? '');
+
+  // If forced to score mode and foundation is already filled, skip to first category
+  const foundationFilled = purposeStatement.trim() || quarterlyGoal.trim() || majorIssue.trim();
+
+  // Step-by-step: 0 = foundation, 1..N = categories, N+1 = summary
+  const [step, setStep] = useState(forceScore && foundationFilled ? 1 : 0);
+  const totalSteps = categories.length + 2; // foundation + categories + summary
+
   const [aiSuggestions, setAiSuggestions] = useState<{text: string; categoryId: string}[]>([]);
   const [reminderSheet, setReminderSheet] = useState(false);
   const [reminderDefaults, setReminderDefaults] = useState({ text: '', categoryId: '' });
-  const viewCurrent = searchParams.get('view') === 'current';
   const [activeTab, setActiveTab] = useState(viewCurrent ? 'current' : 'journey');
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
