@@ -11,6 +11,7 @@ import Onboarding from "./pages/Onboarding";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import ComingSoon from "./pages/ComingSoon";
+import Community from "./pages/Community";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
 const queryClient = new QueryClient();
 
@@ -52,7 +53,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<Snapshot />} />
         <Route path="/hub" element={<Hub />} />
-        <Route path="/community" element={<ComingSoon title="Community" />} />
+        <Route path="/community" element={<Community />} />
         <Route path="/leadership" element={<ComingSoon title="Leadership" />} />
         <Route path="/events" element={<ComingSoon title="Events" />} />
         <Route path="*" element={<NotFound />} />
