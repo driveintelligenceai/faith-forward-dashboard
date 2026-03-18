@@ -703,6 +703,90 @@ export default function Snapshot() {
 }
 
 /* ═══════════════════════════════════════════════════════════ */
+/* Category-specific prompts — questions James asks the user  */
+/* ═══════════════════════════════════════════════════════════ */
+
+const CATEGORY_PROMPTS: Record<string, [string, string]> = {
+  intimacyWithJesus: [
+    "What\u2019s drawn you closer to God this month?",
+    "Has anything pulled you away from the Word lately?",
+  ],
+  marriageSelf: [
+    "How present have you been for your wife?",
+    "What would she say you could do better?",
+  ],
+  marriageSpouse: [
+    "What would she say if I asked her right now?",
+    "When did you last ask how she\u2019s really doing?",
+  ],
+  parentingSelf: [
+    "What moment with your kids are you most proud of?",
+    "Are they getting your best hours or your leftovers?",
+  ],
+  parentingChild: [
+    "What would your kids say about your presence?",
+    "When did you last get on their level and just listen?",
+  ],
+  staff: [
+    "How well do you know what your team actually needs?",
+    "Is anyone on your team struggling that you\u2019re missing?",
+  ],
+  sales: [
+    "Are you chasing numbers or genuinely serving clients?",
+    "What\u2019s the biggest opportunity you\u2019re leaving on the table?",
+  ],
+  marketing: [
+    "Where are you showing up consistently right now?",
+    "What story is your brand telling without you?",
+  ],
+  operations: [
+    "What system keeps breaking that you haven\u2019t fixed?",
+    "What falls through the cracks most often?",
+  ],
+  finances: [
+    "Are you being a faithful steward of what God gave you?",
+    "What\u2019s keeping you up at night financially?",
+  ],
+  leadership: [
+    "Who are you actively developing right now?",
+    "Are you leading with vision or just putting out fires?",
+  ],
+  mentalHealth: [
+    "What\u2019s weighing on you that you haven\u2019t said out loud?",
+    "How are you really sleeping these days?",
+  ],
+  physicalHealth: [
+    "What is your body telling you that you\u2019re ignoring?",
+    "Are you honoring the temple God gave you?",
+  ],
+  mentoring: [
+    "Who are you pouring into right now?",
+    "What wisdom did you pass along this month?",
+  ],
+  lifeLessons: [
+    "What did failure teach you recently?",
+    "What would you tell your younger self right now?",
+  ],
+  progressGoals: [
+    "Are you closer to your biggest goal than last month?",
+    "What\u2019s the one thing blocking your top priority?",
+  ],
+  lessonsScripture: [
+    "What is God teaching you through His Word right now?",
+    "Which verse has been speaking directly to your situation?",
+  ],
+  teamManagement: [
+    "How is your team really doing beneath the surface?",
+    "Who on your team needs your attention the most?",
+  ],
+};
+
+const DEFAULT_PROMPTS: [string, string] = [
+  "What\u2019s behind that number for you?",
+  "What changed this month in this area?",
+];
+
+/* ═══════════════════════════════════════════════════════════ */
 /* CategoryScoringCard — the focused, one-at-a-time card      */
 /* ═══════════════════════════════════════════════════════════ */
 
@@ -905,36 +989,39 @@ function CategoryScoringCard({
             </div>
           )}
 
-          {!isStreaming && mentorMsg && (
-            <div className="space-y-2">
-              <div className="flex gap-2 flex-wrap">
-                <Button variant="outline" size="sm" className="font-body text-sm min-h-[40px]" onClick={() => sendReply('Tell me more about what you see')}>
-                  Tell me more
-                </Button>
-                <Button variant="outline" size="sm" className="font-body text-sm min-h-[40px]" onClick={() => sendReply('Something happened this month I want to share')}>
-                  Something happened
-                </Button>
+          {!isStreaming && mentorMsg && (() => {
+            const [prompt1, prompt2] = CATEGORY_PROMPTS[category.id] ?? DEFAULT_PROMPTS;
+            return (
+              <div className="space-y-2">
+                <div className="flex gap-2 flex-wrap">
+                  <Button variant="outline" size="sm" className="font-body text-sm min-h-[40px] text-left whitespace-normal" onClick={() => sendReply(prompt1)}>
+                    {prompt1}
+                  </Button>
+                  <Button variant="outline" size="sm" className="font-body text-sm min-h-[40px] text-left whitespace-normal" onClick={() => sendReply(prompt2)}>
+                    {prompt2}
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Textarea
+                    value={mentorInput}
+                    onChange={(e) => setMentorInput(e.target.value)}
+                    placeholder="Tell James what's on your heart..."
+                    className="text-sm font-body min-h-[44px] resize-none"
+                    rows={1}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(mentorInput); } }}
+                  />
+                  <Button
+                    size="sm"
+                    className="shrink-0 min-h-[44px] bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                    onClick={() => sendReply(mentorInput)}
+                    disabled={!mentorInput.trim() || isStreaming}
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <Textarea
-                  value={mentorInput}
-                  onChange={(e) => setMentorInput(e.target.value)}
-                  placeholder="Reply to James..."
-                  className="text-sm font-body min-h-[44px] resize-none"
-                  rows={1}
-                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(mentorInput); } }}
-                />
-                <Button
-                  size="sm"
-                  className="shrink-0 min-h-[44px]"
-                  onClick={() => sendReply(mentorInput)}
-                  disabled={!mentorInput.trim() || isStreaming}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
+            );
+          })()}
 
           {isStreaming && (
             <div className="flex gap-1.5 items-center text-xs font-body text-muted-foreground">

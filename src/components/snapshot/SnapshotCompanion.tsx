@@ -206,9 +206,30 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
     }
   };
 
+  const COMPANION_PROMPTS: Record<string, [string, string]> = {
+    intimacyWithJesus: ["What's drawn you closer to God this month?", "Has anything pulled you away from the Word lately?"],
+    marriageSelf: ["How present have you been for your wife?", "What would she say you could do better?"],
+    marriageSpouse: ["What would she say if I asked her right now?", "When did you last ask how she\u2019s really doing?"],
+    parentingSelf: ["What moment with your kids are you most proud of?", "Are they getting your best hours or your leftovers?"],
+    parentingChild: ["What would your kids say about your presence?", "When did you last get on their level and just listen?"],
+    staff: ["How well do you know what your team actually needs?", "Is anyone on your team struggling that you\u2019re missing?"],
+    sales: ["Are you chasing numbers or genuinely serving clients?", "What\u2019s the biggest opportunity you\u2019re leaving on the table?"],
+    marketing: ["Where are you showing up consistently right now?", "What story is your brand telling without you?"],
+    operations: ["What system keeps breaking that you haven\u2019t fixed?", "What falls through the cracks most often?"],
+    finances: ["Are you being a faithful steward of what God gave you?", "What\u2019s keeping you up at night financially?"],
+    leadership: ["Who are you actively developing right now?", "Are you leading with vision or just putting out fires?"],
+    mentalHealth: ["What\u2019s weighing on you that you haven\u2019t said out loud?", "How are you really sleeping these days?"],
+    physicalHealth: ["What is your body telling you that you\u2019re ignoring?", "Are you honoring the temple God gave you?"],
+    mentoring: ["Who are you pouring into right now?", "What wisdom did you pass along this month?"],
+    lifeLessons: ["What did failure teach you recently?", "What would you tell your younger self right now?"],
+    progressGoals: ["Are you closer to your biggest goal than last month?", "What\u2019s the one thing blocking your top priority?"],
+    lessonsScripture: ["What is God teaching you through His Word right now?", "Which verse has been speaking directly to your situation?"],
+    teamManagement: ["How is your team really doing beneath the surface?", "Who on your team needs your attention the most?"],
+  };
+
   const quickPrompts = currentCategory
-    ? ['Tell me more', 'Something happened this month']
-    : ['Help me get started', 'Where should I focus?'];
+    ? (COMPANION_PROMPTS[currentCategory.id] ?? ["What\u2019s behind that number for you?", "What changed this month in this area?"])
+    : ['What area of life feels heaviest right now?', 'Where do you feel God working?'];
 
   return (
     <div className="flex flex-col h-full bg-card rounded-xl border border-border/60 overflow-hidden">
@@ -288,7 +309,7 @@ export function SnapshotCompanion({ currentCategory, ratings, previousRatings, u
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Share what's on your mind..."
+            placeholder="Tell James what's on your heart..."
             className="resize-none pr-12 min-h-[52px] max-h-[120px] text-[15px] font-body rounded-xl border-border/60 bg-muted/20 focus:bg-background focus:border-secondary/40 placeholder:text-muted-foreground/50"
             onKeyDown={handleKeyDown}
             disabled={isStreaming}

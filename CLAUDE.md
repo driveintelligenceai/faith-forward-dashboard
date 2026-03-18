@@ -21,16 +21,21 @@ Iron Forums has two apps sharing one Supabase PostgreSQL database:
 | `profiles`, `snapshots`, `snapshot_ratings`, `chat_history` | `users`, `orgs`, `chapters`, `events`, `rsvps`, `announcements`, `conversations`, `conversation_members`, `messages`, `invite_codes`, `payments`, `categories`, `posts`, `comments`, `report_cards`, `report_card_chats`, `blocks`, `reports` |
 
 ## Commands
-- Dev: `npm run dev`
+- Dev: `npm run dev` (http://localhost:8080)
 - Build: `npm run build`
 - Lint: `npm run lint`
+- Test: `npm run test`
+- Deploy: Push to `main` → auto-deploys to ironforums.vip via Vercel
 
 ## Key Paths
 - App entry: `src/App.tsx`
-- Pages: `src/pages/`
+- Pages: `src/pages/` (Snapshot, Hub, Auth, Onboarding, Community, Events, Leadership)
 - Components: `src/components/`
+- Snapshot components: `src/components/snapshot/` (12 files — playback, chat, trends, narrative cards)
 - Supabase client: `src/integrations/supabase/client.ts`
 - Snapshot categories: `src/data/snapshot-categories.ts` (aligned with Iron-Forum source of truth)
+- Mock/demo data: `src/data/mock-data.ts`
+- AI streaming: `src/lib/ai-stream.ts` → Supabase edge function `ai-chat`
 - Types: `src/types/`
 - Supabase config: `supabase/config.toml`
 - Migrations: `supabase/migrations/`
@@ -55,3 +60,10 @@ Iron Forums has two apps sharing one Supabase PostgreSQL database:
   - `VITE_SUPABASE_URL` — Supabase project URL
   - `VITE_SUPABASE_PUBLISHABLE_KEY` — Supabase anon/publishable key
   - Never commit `.env` files — use `.env.tpl` with `op://` references
+
+## Architecture Details
+- **Snapshot page** has two modes: `score` (fill-out flow) and `review` (4 tabs: Current, Journey, Insights, History)
+- **Demo mode**: `sessionStorage['iron-forums-demo']` flag, loads DEMO_PROFILE (Jonathan Almanzar)
+- **AI mentor "James"**: Streams via `ai-stream.ts` → Supabase edge function → OpenRouter → Anthropic
+- **Auth**: Supabase Auth (Google OAuth + magic link) + demo mode bypass
+- **Deployment**: Vercel auto-deploy from `main` branch to ironforums.vip
