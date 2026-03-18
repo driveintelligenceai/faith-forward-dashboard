@@ -15,7 +15,7 @@ import { useSnapshots } from '@/hooks/use-snapshots';
 import { useReminders } from '@/hooks/use-reminders';
 import { getRoleSnapshotType, SNAPSHOT_TYPE_LABELS } from '@/types';
 import type { SnapshotRating, SnapshotType, SnapshotCategory, UserRole } from '@/types';
-import { Save, History, Activity, Eye, Pencil, ArrowLeft, ArrowRight, Bell, BookOpen, MessageSquare, Compass, ChevronRight, Send } from 'lucide-react';
+import { Save, History, Activity, Eye, Pencil, ArrowLeft, ArrowRight, Bell, BookOpen, MessageSquare, Compass, ChevronRight, Send, Sparkles } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,7 +59,7 @@ function getScoreBorder(score: number) {
 
 export default function Snapshot() {
   const { toast } = useToast();
-  const { profile } = useAuth();
+  const { profile, enterDemoMode, isDemo } = useAuth();
   const { snapshots: dbSnapshots, isLoading, isSaving, saveSnapshot } = useSnapshots();
   const [searchParams, setSearchParams] = useSearchParams();
   const { addReminder } = useReminders();
@@ -126,17 +126,23 @@ export default function Snapshot() {
   };
 
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [showDemoOffer, setShowDemoOffer] = useState(false);
 
   const handleSave = async () => {
     setShowConfirmSubmit(false);
+    const wasFirstSnapshot = dbSnapshots.length === 0;
     const result = await saveSnapshot(snapshotType, purposeStatement, quarterlyGoal, majorIssue, ratings);
     if (result) {
       setIsFinalized(true);
       setShowSaveSuccess(true);
       setTimeout(() => {
         setShowSaveSuccess(false);
-        setMode('review');
-        setActiveTab('current');
+        if (wasFirstSnapshot && !isDemo) {
+          setShowDemoOffer(true);
+        } else {
+          setMode('review');
+          setActiveTab('current');
+        }
       }, 1600);
       // Generate mentor-suggested reminders for declining categories
       const suggestions: {text: string; categoryId: string}[] = [];
@@ -332,6 +338,54 @@ export default function Snapshot() {
                   <p className="text-xl font-heading font-bold text-primary">Snapshot Submitted</p>
                   <p className="text-sm font-body text-muted-foreground">Well done, brother. Your lead has been notified.</p>
                 </div>
+              </div>
+            )}
+
+            {/* Demo offer for first-time users */}
+            {showDemoOffer && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-slide-up-fade">
+                <Card className="max-w-md mx-4 border-secondary/30 shadow-xl">
+                  <CardContent className="p-6 sm:p-8 space-y-5 text-center">
+                    <div className="mx-auto w-14 h-14 rounded-full bg-secondary/15 flex items-center justify-center">
+                      <Sparkles className="h-7 w-7 text-secondary" />
+                    </div>
+                    <div className="space-y-2">
+                      <h2 className="text-xl font-heading font-bold text-primary">
+                        Welcome to the dashboard, {profile?.full_name?.split(' ')[0] ?? 'Brother'}!
+                      </h2>
+                      <p className="text-sm font-body text-muted-foreground leading-relaxed">
+                        Since this is your first Snapshot, we can show you what 12 months of growth looks like with sample data from another member.
+                      </p>
+                      <p className="text-sm font-body text-muted-foreground leading-relaxed">
+                        This helps James (your AI mentor) give you richer insights by showing trends and patterns.
+                      </p>
+                    </div>
+                    <div className="space-y-3 pt-1">
+                      <Button
+                        size="lg"
+                        className="w-full h-12 text-base font-heading font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground gap-2"
+                        onClick={() => {
+                          enterDemoMode();
+                          setShowDemoOffer(false);
+                          setMode('review');
+                          setActiveTab('current');
+                        }}
+                      >
+                        <Sparkles className="h-4 w-4" /> Show Me the Demo Journey
+                      </Button>
+                      <button
+                        className="text-sm font-body text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+                        onClick={() => {
+                          setShowDemoOffer(false);
+                          setMode('review');
+                          setActiveTab('current');
+                        }}
+                      >
+                        No thanks, show my baseline only
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
 
@@ -813,14 +867,18 @@ function CategoryScoringCard({
   const [mentorInput, setMentorInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const hasTriggered = useRef(false);
+  const lastAiScore = useRef(score);
+  const isStreamingRef = useRef(false);
 
-  // Auto-trigger mentor on card mount
+  // Reset mentor state on category change
   useEffect(() => {
     hasTriggered.current = false;
+    lastAiScore.current = rating?.score ?? 5;
     setMentorMsg('');
     setMentorInput('');
   }, [category.id]);
 
+  // Auto-trigger mentor on card mount — references previous score BEFORE slider moves
   useEffect(() => {
     if (hasTriggered.current || isStreaming) return;
     hasTriggered.current = true;
@@ -828,32 +886,69 @@ function CategoryScoringCard({
     const prevScore = previousRating?.score;
     let prompt: string;
     if (prevScore !== undefined) {
-      const delta = score - prevScore;
-      if (delta > 0) {
-        prompt = `The user "${firstName}" is scoring "${category.name}" at ${score}/10 (up from ${prevScore}). Ask ONE warm question about what improved. 2 sentences max. Be personal.`;
-      } else if (delta < 0) {
-        prompt = `The user "${firstName}" is scoring "${category.name}" at ${score}/10 (down from ${prevScore}). Ask ONE gentle question about what happened. 2 sentences max. Be caring, not clinical.`;
-      } else {
-        prompt = `The user "${firstName}" is scoring "${category.name}" at ${score}/10 (same as last month ${prevScore}). Give a brief reflection prompt. 1-2 sentences.`;
-      }
+      prompt = `You are James, a warm accountability partner. The user "${firstName}" just landed on "${category.name}". Their score last month was ${prevScore}/10. Before they move the slider, ask them ONE contextual question that references their previous score and invites them to reflect on whether things have changed. Example tone: "You were a ${prevScore} last month in ${category.name}. Are you feeling more optimistic this time around?" Be personal, 2 sentences max. Don't mention the current score — they haven't scored yet.`;
     } else {
-      prompt = `The user "${firstName}" is scoring "${category.name}" at ${score}/10. Ask "What's behind that number for you this month?" in a warm, personal way. 2 sentences max.`;
+      prompt = `You are James, a warm accountability partner. The user "${firstName}" is scoring "${category.name}" for the first time ever — this is their baseline. Encourage them to take a moment to think honestly about where they stand. Example tone: "This is your first time rating ${category.name}. Take a moment to think about where you honestly stand." Be warm, 2 sentences max.`;
     }
 
+    isStreamingRef.current = true;
     setIsStreaming(true);
     let content = '';
     streamChat({
       messages: [{ role: 'user', content: prompt }],
       mode: 'consultant',
       onDelta: (chunk) => { content += chunk; setMentorMsg(content); },
-      onDone: () => setIsStreaming(false),
-      onError: () => { setIsStreaming(false); setMentorMsg(`${firstName}, what's behind that number for you this month?`); },
+      onDone: () => { isStreamingRef.current = false; setIsStreaming(false); },
+      onError: () => { isStreamingRef.current = false; setIsStreaming(false); setMentorMsg(`${firstName}, what's behind that number for you this month?`); },
     });
   }, [category.id, firstName]);
+
+  // Debounced follow-up when user changes score via slider
+  useEffect(() => {
+    // Don't trigger on mount or if AI hasn't done the initial prompt yet
+    if (!hasTriggered.current) return;
+    // Only trigger when score differs from the last score that triggered AI
+    if (score === lastAiScore.current) return;
+
+    const timer = setTimeout(() => {
+      // Guard against triggering while already streaming (use ref for current value)
+      if (isStreamingRef.current) return;
+
+      const oldScore = lastAiScore.current;
+      lastAiScore.current = score;
+
+      const prevMonthScore = previousRating?.score;
+      let prompt: string;
+
+      if (score > oldScore) {
+        prompt = `You are James, a warm accountability partner. The user "${firstName}" just moved their "${category.name}" score from ${oldScore} to ${score}/10. That's an increase. Ask ONE brief, warm follow-up about what changed that makes them feel more confident. ${prevMonthScore !== undefined ? `Their score last month was ${prevMonthScore}.` : ''} 2 sentences max.`;
+      } else if (score < oldScore) {
+        prompt = `You are James, a warm accountability partner. The user "${firstName}" just moved their "${category.name}" score from ${oldScore} down to ${score}/10. That's a drop. Ask ONE gentle question about what happened — be caring, not clinical. ${prevMonthScore !== undefined ? `Their score last month was ${prevMonthScore}.` : ''} 2 sentences max.`;
+      } else if (prevMonthScore !== undefined && score === prevMonthScore) {
+        prompt = `You are James, a warm accountability partner. The user "${firstName}" set their "${category.name}" score to ${score}/10 — same as last month (${prevMonthScore}). Ask briefly whether that sameness reflects stability or stagnation. Be warm. 2 sentences max.`;
+      } else {
+        return; // No meaningful change to comment on
+      }
+
+      isStreamingRef.current = true;
+      setIsStreaming(true);
+      let content = '';
+      streamChat({
+        messages: [{ role: 'user', content: prompt }],
+        mode: 'consultant',
+        onDelta: (chunk) => { content += chunk; setMentorMsg(content); },
+        onDone: () => { isStreamingRef.current = false; setIsStreaming(false); },
+        onError: () => { isStreamingRef.current = false; setIsStreaming(false); },
+      });
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [score, category.id, category.name, firstName, previousRating?.score]);
 
   const sendReply = (text: string) => {
     if (!text.trim() || isStreaming) return;
     setMentorInput('');
+    isStreamingRef.current = true;
     setIsStreaming(true);
 
     const context = `User "${firstName}" is on "${category.name}" (score ${score}/10). They said: "${text}". Respond briefly with empathy and maybe one follow-up. 2-3 sentences max. Be a wise friend, not a therapist.`;
@@ -863,8 +958,8 @@ function CategoryScoringCard({
       messages: [{ role: 'user', content: context }],
       mode: 'consultant',
       onDelta: (chunk) => { content += chunk; setMentorMsg(content); },
-      onDone: () => setIsStreaming(false),
-      onError: () => setIsStreaming(false),
+      onDone: () => { isStreamingRef.current = false; setIsStreaming(false); },
+      onError: () => { isStreamingRef.current = false; setIsStreaming(false); },
     });
   };
 

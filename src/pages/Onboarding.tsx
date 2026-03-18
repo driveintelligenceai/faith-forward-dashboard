@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { SNAPSHOT_TYPE_LABELS, getRoleSnapshotType, ROLE_LABELS } from '@/types';
 import type { UserRole, SnapshotType } from '@/types';
-import { ArrowRight, ArrowLeft, User, Briefcase, BookOpen, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, ArrowLeft, User, Briefcase, BookOpen, CheckCircle2, ClipboardCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import ironForumsLogo from '@/assets/iron-forums-logo.svg';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -211,49 +212,47 @@ export default function Onboarding() {
           </Card>
         )}
 
-        {/* Step 2: Baseline Snapshot Intro */}
+        {/* Step 2: CEO Welcome Message */}
         {step === 2 && (
           <Card className="border-secondary/20 animate-slide-up-fade">
             <CardContent className="p-6 sm:p-8 space-y-6">
-              <div className="text-center space-y-3">
-                <div className="mx-auto w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center mb-2">
-                  <CheckCircle2 className="h-9 w-9 text-secondary" />
+              {/* CEO Header */}
+              <div className="flex flex-col items-center text-center space-y-3">
+                <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-secondary/30 flex items-center justify-center overflow-hidden">
+                  <img src={ironForumsLogo} alt="Jonathan Almanzar" className="h-12 w-auto" />
                 </div>
-                <h2 className="text-2xl font-heading font-bold text-primary">
-                  One more step, {fullName.split(' ')[0]}
-                </h2>
-                <p className="text-base font-body text-muted-foreground leading-relaxed">
-                  Before you dive in, let{'\u2019'}s complete your first <span className="font-semibold text-foreground">{SNAPSHOT_TYPE_LABELS[snapshotType]}</span> — your baseline. This is an honest 10-minute check-in across every area of life that matters.
+                <div>
+                  <h2 className="text-xl font-heading font-bold text-primary">Jonathan Almanzar</h2>
+                  <p className="text-sm font-body text-muted-foreground">CEO & Founder, Iron Forums</p>
+                </div>
+              </div>
+
+              {/* Personal Message */}
+              <div className="bg-muted/50 rounded-xl p-5 space-y-4">
+                <p className="text-base font-body text-foreground leading-relaxed">
+                  Welcome to the brotherhood, <span className="font-semibold">{fullName.split(' ')[0] || 'brother'}</span>.
+                </p>
+                <p className="text-sm font-body text-muted-foreground leading-relaxed">
+                  Iron Forums exists because no man should lead alone. What you{'\u2019'}re about to do
+                  {'\u2009'}{'\u2014'}{'\u2009'}filling out your first Snapshot{'\u2009'}{'\u2014'}{'\u2009'}takes courage.
+                  It{'\u2019'}s an honest look at every area of your life. No judgment. Just truth.
+                  And from that truth, growth begins.
+                </p>
+                <p className="text-sm font-body text-muted-foreground leading-relaxed">
+                  I{'\u2019'}m proud you{'\u2019'}re here.
+                </p>
+                <p className="text-sm font-heading font-semibold text-primary">
+                  {'\u2014'} Jonathan
                 </p>
               </div>
 
-              <div className="bg-muted/50 rounded-xl p-5 space-y-3">
-                <h3 className="text-base font-heading font-bold">What to expect:</h3>
-                <ul className="space-y-2 text-sm font-body text-muted-foreground">
-                  <li className="flex gap-2">
-                    <span className="text-secondary font-bold">1.</span>
-                    Share your purpose, quarterly goal, and a prayer request.
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="text-secondary font-bold">2.</span>
-                    Rate each area of your life honestly on a 1-10 scale.
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="text-secondary font-bold">3.</span>
-                    James, your AI accountability partner, will walk alongside you with encouragement.
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="text-secondary font-bold">4.</span>
-                    Submit to your facilitator — this becomes your starting point for growth.
-                  </li>
-                </ul>
-              </div>
-
+              {/* Scripture */}
               <blockquote className="text-base font-body italic text-muted-foreground border-l-2 border-secondary/40 pl-4">
                 {'\u201C'}As iron sharpens iron, so one man sharpens another.{'\u201D'}
                 <span className="block text-xs mt-1 not-italic">{'\u2014'} Proverbs 27:17 (NIV)</span>
               </blockquote>
 
+              {/* Actions */}
               <div className="flex gap-3">
                 <Button variant="outline" size="lg" className="h-14 font-heading font-bold gap-1.5" onClick={() => setStep(1)}>
                   <ArrowLeft className="h-5 w-5" />
@@ -265,8 +264,13 @@ export default function Onboarding() {
                   onClick={isDemo ? handleDemoComplete : handleComplete}
                   disabled={isSaving}
                 >
-                  {isSaving ? 'Saving...' : 'Begin My Baseline Snapshot'}
-                  <ArrowRight className="h-5 w-5" />
+                  {isSaving ? 'Saving...' : (
+                    <>
+                      <ClipboardCheck className="h-5 w-5" />
+                      Fill Out My Baseline Report Card
+                      <ArrowRight className="h-5 w-5" />
+                    </>
+                  )}
                 </Button>
               </div>
             </CardContent>
